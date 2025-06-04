@@ -1,41 +1,39 @@
-import { useSignIn } from '@clerk/clerk-expo'
-import { Link, useRouter } from 'expo-router'
-import React from 'react'
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { useSignIn } from '@clerk/clerk-expo';
+import { Link, useRouter } from 'expo-router';
+import React from 'react';
+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function Page() {
-  const { signIn, setActive, isLoaded } = useSignIn()
-  const router = useRouter()
+  const { signIn, setActive, isLoaded } = useSignIn();
+  const router = useRouter();
 
-  const [identifier, setIdentifier] = React.useState('') // can be username or email
-  const [password, setPassword] = React.useState('')
-  const [error, setError] = React.useState<string | null>(null)
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState<string | null>(null);
 
   const onSignInPress = async () => {
-    if (!isLoaded) return
-
-    setError(null)
+    if (!isLoaded) return;
+    setError(null);
 
     try {
       const signInAttempt = await signIn.create({
-        identifier,
+        identifier: email, // now explicitly email
         password,
-      })
+      });
 
       if (signInAttempt.status === 'complete') {
-        await setActive({ session: signInAttempt.createdSessionId })
-        router.replace('/(tabs)')
+        await setActive({ session: signInAttempt.createdSessionId });
+        router.replace('/(tabs)');
       } else {
-        console.warn('Further steps required:', signInAttempt)
+        console.warn('Further steps required:', signInAttempt);
       }
     } catch (err: any) {
-      const message = err?.errors?.[0]?.message || 'Sign-in failed. Try again.'
-      setError(message)
-
-      Alert.alert('Sign-in error', message)
-      console.error(JSON.stringify(err, null, 2))
+      const message = err?.errors?.[0]?.message || 'Sign-in failed. Try again.';
+      setError(message);
+      Alert.alert('Sign-in error', message);
+      console.error(JSON.stringify(err, null, 2));
     }
-  }
+  };
 
   return (
     <View style={{ padding: 16 }}>
@@ -43,14 +41,14 @@ export default function Page() {
 
       <TextInput
         autoCapitalize="none"
-        value={identifier}
-        placeholder="Enter email or username"
-        onChangeText={setIdentifier}
+        value={email}
+        placeholder="Enter email"
+        onChangeText={setEmail}
       />
       <TextInput
         value={password}
         placeholder="Enter password"
-        secureTextEntry={true}
+        secureTextEntry
         onChangeText={setPassword}
       />
       <TouchableOpacity onPress={onSignInPress}>
@@ -66,5 +64,5 @@ export default function Page() {
         </Link>
       </View>
     </View>
-  )
+  );
 }

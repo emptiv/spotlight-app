@@ -14,11 +14,12 @@
     "@clerk/clerk-expo": "^2.12.0",
     "@clerk/clerk-react": "^5.31.8",
     "@clerk/types": "^4.59.3",
+    "@convex-dev/auth": "^0.0.87",
     "@expo/vector-icons": "^14.1.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
-    "convex": "^1.24.3",
+    "convex": "^1.24.8",
     "expo": "~53.0.9",
     "expo-blur": "~14.1.4",
     "expo-constants": "~17.1.6",
@@ -41,7 +42,8 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
     "react-native-web": "~0.20.0",
-    "react-native-webview": "13.13.5"
+    "react-native-webview": "13.13.5",
+    "svix": "^1.66.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
