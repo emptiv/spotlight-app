@@ -1,7 +1,8 @@
 import { useSignUp } from '@clerk/clerk-expo';
 import { Link, useRouter } from 'expo-router';
 import * as React from 'react';
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Colors from '../../constants/Colors';
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -81,49 +82,131 @@ export default function SignUpScreen() {
   if (pendingVerification) {
     return (
       <View style={{ padding: 16 }}>
-        <Text>Verify your email</Text>
+        <Text style={{ fontSize: 24, fontFamily: 'outfit-bold', marginBottom: 20 }}>
+          Verify your email
+        </Text>
+
         <TextInput
+          style={{
+            borderWidth: 1,
+            borderColor: '#ddd',
+            borderRadius: 8,
+            padding: 14,
+            fontSize: 16,
+            marginBottom: 16,
+            fontFamily: 'outfit',
+          }}
           value={code}
           placeholder="Enter your verification code"
           onChangeText={setCode}
+          placeholderTextColor="#aaa"
         />
-        <TouchableOpacity onPress={onVerifyPress}>
-          <Text>Verify</Text>
+
+        <TouchableOpacity
+          style={{
+            backgroundColor: Colors.PRIMARY,
+            padding: 16,
+            borderRadius: 10,
+            alignItems: 'center',
+          }}
+          onPress={onVerifyPress}
+        >
+          <Text style={{ color: Colors.WHITE, fontSize: 18, fontFamily: 'outfit-bold' }}>
+            Verify
+          </Text>
         </TouchableOpacity>
-        {error && <Text style={{ color: 'red' }}>{error}</Text>}
-      </View>
-    );
-  }
+
+      {error && <Text style={{ color: 'red', marginTop: 12 }}>{error}</Text>}
+    </View>
+  )
+}
 
   return (
-    <View style={{ padding: 16 }}>
-      <Text>Sign up</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Sign up</Text>
 
       <TextInput
+        style={styles.input}
         autoCapitalize="none"
         keyboardType="email-address"
-        value={emailAddress}
         placeholder="Enter email"
+        value={emailAddress}
         onChangeText={setEmailAddress}
+        placeholderTextColor="#aaa"
       />
+
       <TextInput
-        value={password}
+        style={styles.input}
         placeholder="Enter password"
         secureTextEntry
+        value={password}
         onChangeText={setPassword}
+        placeholderTextColor="#aaa"
       />
-      <TouchableOpacity onPress={onSignUpPress}>
-        <Text>Continue</Text>
+
+      <TouchableOpacity 
+        style={[styles.button, { backgroundColor: Colors.PRIMARY }]}
+        onPress={onSignUpPress}
+      >
+        <Text style={[styles.buttonText, { color: Colors.WHITE }]}>Continue</Text>
       </TouchableOpacity>
 
-      {error && <Text style={{ color: 'red' }}>{error}</Text>}
+      {error && <Text style={styles.errorText}>{error}</Text>}
 
-      <View style={{ flexDirection: 'row', marginTop: 10 }}>
-        <Text>Already have an account?</Text>
+      <View style={styles.linkRow}>
+        <Text style={{ color: Colors.BLACK }}>Already have an account?</Text>
         <Link href="/(auth)/sign-in">
-          <Text> Sign in</Text>
+          <Text style={{ color: Colors.PRIMARY, fontWeight: 'bold' }}> Sign in</Text>
         </Link>
       </View>
     </View>
-  );
+  )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 24,
+    flex: 1,
+    backgroundColor: Colors.WHITE,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 28,
+    fontFamily: 'outfit-bold',
+    marginBottom: 24,
+    color: Colors.PRIMARY,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 14,
+    fontSize: 16,
+    marginBottom: 16,
+    color: Colors.BLACK,
+    fontFamily: 'outfit',
+  },
+  button: {
+    backgroundColor: Colors.WHITE,
+    padding: 16,
+    borderRadius: 10,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
+    fontFamily: 'outfit-bold',
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 12,
+    textAlign: 'center',
+    fontFamily: 'outfit',
+  },
+  linkRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 24,
+  },
+})

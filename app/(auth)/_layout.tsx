@@ -8,5 +8,5 @@ export default function AuthRoutesLayout() {
     return <Redirect href={'./(tabs)/index'} />
   }
 
-  return <Stack />
+  return <Stack screenOptions={{headerShown: false}}/>
 }
