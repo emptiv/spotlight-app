@@ -5,7 +5,9 @@ export default defineSchema({
   users: defineTable({
     email: v.string(),
     clerkId: v.string()
-  }).index("by_email", ["email"]),
+  })
+  .index("by_email", ["email"])
+  .index("by_clerkId", ["clerkId"]),
 
   
   // Lessons table
@@ -38,6 +40,15 @@ export default defineSchema({
     totalQuestions: v.number(),
     correctAnswers: v.number(),
     lastAttempt: v.string(),
+  }).index("by_user_lesson", ["userId", "lessonId"]),
+
+  userAttempts: defineTable({
+    userId: v.id("users"),
+    lessonId: v.id("lessons"),
+    answers: v.record(v.string(), v.number()), // questionId => selectedIndex
+    totalQuestions: v.number(),
+    correctAnswers: v.number(),
+    createdAt: v.string(), // ISO date string
   }).index("by_user_lesson", ["userId", "lessonId"]),
 
 });

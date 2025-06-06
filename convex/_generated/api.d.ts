@@ -15,7 +15,9 @@ import type {
 } from "convex/server";
 import type * as http from "../http.js";
 import type * as lessons from "../lessons.js";
+import type * as queries_getConvexUserIdByClerkId from "../queries/getConvexUserIdByClerkId.js";
 import type * as questions from "../questions.js";
+import type * as userAttempts from "../userAttempts.js";
 import type * as users from "../users.js";
 
 /**
@@ -29,7 +31,9 @@ import type * as users from "../users.js";
 declare const fullApi: ApiFromModules<{
   http: typeof http;
   lessons: typeof lessons;
+  "queries/getConvexUserIdByClerkId": typeof queries_getConvexUserIdByClerkId;
   questions: typeof questions;
+  userAttempts: typeof userAttempts;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

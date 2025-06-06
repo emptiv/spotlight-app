@@ -1,5 +1,7 @@
 // components/Quiz.tsx
-import { useQuery } from "convex/react";
+import { useAuth } from "@clerk/clerk-expo";
+import { useMutation, useQuery } from "convex/react";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as Progress from "react-native-progress";
@@ -11,6 +13,11 @@ type QuizProps = {
 };
 
 export default function Quiz({ lessonId }: QuizProps) {
+  const { userId } = useAuth();
+  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
+    clerkId: userId ?? "",
+  });
+
   const questions = useQuery(api.questions.getRandomQuestionsByLesson, {
     lessonId: lessonId as any,
   });
@@ -20,10 +27,13 @@ export default function Quiz({ lessonId }: QuizProps) {
   const [answers, setAnswers] = useState<{ [key: string]: number }>({});
   const [showFeedback, setShowFeedback] = useState(false);
 
-  if (!questions) {
+  const router = useRouter();
+  const saveAttempt = useMutation(api.userAttempts.saveAttempt);
+
+  if (!convexUserId || !questions || questions.length === 0 || !questions[currentIndex]) {
     return (
       <View style={styles.center}>
-        <Text>Loading...</Text>
+        <Text>Loading quiz...</Text>
       </View>
     );
   }
@@ -40,28 +50,58 @@ export default function Quiz({ lessonId }: QuizProps) {
   };
 
   const handleNext = () => {
-    const nextIndex = currentIndex + 1;
-    setCurrentIndex(nextIndex);
+    if (currentIndex < questions.length - 1) {
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
 
-    const nextQuestion = questions[nextIndex];
-    const savedAnswer = answers[nextQuestion._id];
+      const nextQuestion = questions[nextIndex];
+      const savedAnswer = answers[nextQuestion._id];
 
-    setSelected(savedAnswer ?? null);
-    setShowFeedback(savedAnswer !== undefined);
+      setSelected(savedAnswer ?? null);
+      setShowFeedback(savedAnswer !== undefined);
+    }
   };
 
   const handleBack = () => {
-    const prevIndex = currentIndex - 1;
-    setCurrentIndex(prevIndex);
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1;
+      setCurrentIndex(prevIndex);
 
-    const prevQuestion = questions[prevIndex];
-    const savedAnswer = answers[prevQuestion._id];
+      const prevQuestion = questions[prevIndex];
+      const savedAnswer = answers[prevQuestion._id];
 
-    setSelected(savedAnswer ?? null);
-    setShowFeedback(savedAnswer !== undefined);
+      setSelected(savedAnswer ?? null);
+      setShowFeedback(savedAnswer !== undefined);
+    }
   };
 
   const progress = (currentIndex + 1) / questions.length;
+
+  const handleFinishQuiz = async () => {
+    const correct = Object.entries(answers).filter(([questionId, selectedIndex]) => {
+      const q = questions.find((q) => q._id === questionId);
+      return q?.correctAnswerIndex === selectedIndex;
+    }).length;
+
+    const total = questions.length;
+
+    await saveAttempt({
+      userId: convexUserId,
+      lessonId: lessonId as any,
+      answers,
+      totalQuestions: total,
+      correctAnswers: correct,
+      createdAt: new Date().toISOString(),
+    });
+
+    router.push({
+      pathname: "/quiz/results",
+      params: {
+        correct: correct.toString(),
+        total: total.toString(),
+      },
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -126,7 +166,7 @@ export default function Quiz({ lessonId }: QuizProps) {
 
           <TouchableOpacity
             style={styles.nextButton}
-            onPress={handleNext}
+            onPress={isLast ? handleFinishQuiz : handleNext}
             disabled={!showFeedback}
           >
             <Text style={styles.navText}>{isLast ? "Finish" : "Next"}</Text>
