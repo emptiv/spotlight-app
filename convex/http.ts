@@ -1,31 +1,47 @@
 import { httpRouter } from "convex/server";
+import { Webhook } from "svix";
 import { api } from "./_generated/api";
 import { httpAction } from "./_generated/server";
 
 const http = httpRouter();
 
 http.route({
-  path: "/clerk-webhook",
-  method: "POST",
-  handler: httpAction(async (ctx, request) => {
+    path: "/clerk-webhook",
+    method: "POST",
+    handler: httpAction(async (ctx, request) => {
+        const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+        if (!webhookSecret) {
+            throw new Error("Missing CLERK_WEBHOOK_SECRET environment variable");
+        }
 
-    // Log all incoming headers for debugging
-    console.log("Incoming headers:");
-    request.headers.forEach((value, key) => {
-      console.log(`${key}: ${value}`);
-    });
+        // Check headers
+        const svix_id = request.headers.get("svix-id");
+        const svix_signature = request.headers.get("svix-signature");
+        const svix_timestamp = request.headers.get("svix-timestamp");
 
-    // Just get the raw body as text
-    const body = await request.text();
+        if (!svix_id || !svix_signature || !svix_timestamp) {
+            return new Response("Error occurred -- no svix headers", {
+                status: 400,
+            });
+        }
 
-    // Parse event directly without verification
-    let evt: any;
-    try {
-      evt = JSON.parse(body);
-    } catch (err) {
-      console.error("Invalid JSON payload:", err);
-      return new Response("Invalid JSON", { status: 400 });
-    }
+        const payload = await request.json();
+        const body = JSON.stringify(payload);
+
+        const wh = new Webhook(webhookSecret);
+        let evt: any;
+
+        // Verify webhook
+        try {
+            evt = wh.verify(body, {
+                "svix-id": svix_id,
+                "svix-timestamp": svix_timestamp,
+                "svix-signature": svix_signature,
+            }) as any;
+        } catch (err) {
+            console.error("Error Verifying webhook", err);
+            return new Response("Error occurred", { status: 400 });
+        }
 
     const eventType = evt.type;
 
