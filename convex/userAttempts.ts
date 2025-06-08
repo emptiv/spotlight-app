@@ -10,6 +10,7 @@ export const saveAttempt = mutation({
     totalQuestions: v.number(),
     correctAnswers: v.number(),
     createdAt: v.string(),
+    score: v.number(),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("userAttempts", args);

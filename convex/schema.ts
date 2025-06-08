@@ -23,6 +23,7 @@ export default defineSchema({
     questionText: v.string(),
     options: v.array(v.string()),     // e.g., ["ᜀ", "ᜁ", "ᜂ"]
     correctAnswerIndex: v.number(),   // e.g., 0
+    difficulty: v.string(), // "basic", "kudlit", "word", "sentence"
   }).index("by_lessonId", ["lessonId"]),
 
   //  User answers
@@ -40,6 +41,7 @@ export default defineSchema({
     totalQuestions: v.number(),
     correctAnswers: v.number(),
     lastAttempt: v.string(),
+    score: v.optional(v.number()), // add this
   }).index("by_user_lesson", ["userId", "lessonId"]),
 
   userAttempts: defineTable({
@@ -48,6 +50,7 @@ export default defineSchema({
     answers: v.record(v.string(), v.number()), // questionId => selectedIndex
     totalQuestions: v.number(),
     correctAnswers: v.number(),
+    score: v.number(), 
     createdAt: v.string(), // ISO date string
   }).index("by_user_lesson", ["userId", "lessonId"]),
 

@@ -1,13 +1,20 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { AnimatedCircularProgress } from "react-native-circular-progress";
 import Colors from "../../constants/Colors";
 
+
 export default function QuizResults() {
-  const { total, correct } = useLocalSearchParams<{ total: string; correct: string }>();
+  const { total, correct, lessonRoute } = useLocalSearchParams<{
+    total: string;
+    correct: string;
+    lessonRoute?: string;
+  }>();
   const router = useRouter();
 
   const score = Number(correct);
   const totalQuestions = Number(total);
+  const percentage = totalQuestions > 0 ? ((score / totalQuestions) * 100).toFixed(1) : "0.0";
   const passed = score / totalQuestions >= 0.7;
 
   const message = passed
@@ -17,6 +24,19 @@ export default function QuizResults() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Quiz Results</Text>
+
+      <AnimatedCircularProgress
+        size={160}
+        width={16}
+        fill={parseFloat(percentage)}
+        tintColor={Colors.PRIMARY}
+        backgroundColor={Colors.LIGHT_GRAY}
+        rotation={0}
+        lineCap="round"
+      >
+        {() => <Text style={styles.percentageInside}>{percentage}%</Text>}
+      </AnimatedCircularProgress>
+
       <Text style={styles.score}>
         You got {score} out of {totalQuestions} correct
       </Text>
@@ -30,12 +50,14 @@ export default function QuizResults() {
           <Text style={styles.buttonText}>Back to Home</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: Colors.GRAY }]}
-          onPress={() => router.replace(`/quiz/q-lesson-1`)}
-        >
-          <Text style={styles.buttonText}>Retake Quiz</Text>
-        </TouchableOpacity>
+        {lessonRoute && (
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: Colors.GRAY }]}
+            onPress={() => router.replace(`/quiz/${lessonRoute}` as any)}
+          >
+            <Text style={styles.buttonText}>Retake Quiz</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -58,7 +80,14 @@ const styles = StyleSheet.create({
   score: {
     fontSize: 20,
     fontFamily: "outfit",
-    marginBottom: 12,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  percentageInside: {
+    fontSize: 22,
+    fontFamily: "outfit-bold",
+    color: Colors.PRIMARY,
+    textAlign: "center",
   },
   message: {
     fontSize: 16,

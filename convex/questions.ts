@@ -8,6 +8,7 @@ export const createQuestion = mutation({
     questionText: v.string(),
     options: v.array(v.string()),
     correctAnswerIndex: v.number(),
+    difficulty: v.string(), // "basic", "kudlit", "word", "sentence"
   },
   handler: async (ctx, args) => {
     const questionId = await ctx.db.insert("questions", {
@@ -15,6 +16,7 @@ export const createQuestion = mutation({
       questionText: args.questionText,
       options: args.options,
       correctAnswerIndex: args.correctAnswerIndex,
+      difficulty: args.difficulty,
     });
     return questionId;
   },

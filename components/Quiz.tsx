@@ -1,12 +1,25 @@
 // components/Quiz.tsx
 import { useAuth } from "@clerk/clerk-expo";
+import { useFocusEffect } from "@react-navigation/native";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as Progress from "react-native-progress";
 import Colors from "../constants/Colors";
+import { lessonRoutes } from "../constants/LessonRoutes";
 import { api } from "../convex/_generated/api";
+
+
+// Define allowed difficulty levels
+type Difficulty = "basic" | "kudlit" | "word" | "sentence";
+
+const difficultyScoreMap: Record<Difficulty, number> = {
+  basic: 10,
+  kudlit: 15,
+  word: 20,
+  sentence: 25,
+};
 
 type QuizProps = {
   lessonId: string;
@@ -26,6 +39,17 @@ export default function Quiz({ lessonId }: QuizProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const [answers, setAnswers] = useState<{ [key: string]: number }>({});
   const [showFeedback, setShowFeedback] = useState(false);
+
+    useFocusEffect(
+    useCallback(() => {
+      // Reset all state on focus
+      setCurrentIndex(0);
+      setSelected(null);
+      setAnswers({});
+      setShowFeedback(false);
+    }, [])
+  );
+
 
   const router = useRouter();
   const saveAttempt = useMutation(api.userAttempts.saveAttempt);
@@ -78,6 +102,22 @@ export default function Quiz({ lessonId }: QuizProps) {
   const progress = (currentIndex + 1) / questions.length;
 
   const handleFinishQuiz = async () => {
+    let score = 0;
+
+    Object.entries(answers).forEach(([questionId, selectedIndex]) => {
+      const q = questions.find((q) => q._id === questionId);
+      const isCorrect = q?.correctAnswerIndex === selectedIndex;
+      const rawDifficulty = q?.difficulty ?? "basic";
+
+      const difficulty: Difficulty = ["basic", "kudlit", "word", "sentence"].includes(rawDifficulty)
+        ? (rawDifficulty as Difficulty)
+        : "basic";
+
+      if (isCorrect) {
+        score += difficultyScoreMap[difficulty];
+      }
+    });
+
     const correct = Object.entries(answers).filter(([questionId, selectedIndex]) => {
       const q = questions.find((q) => q._id === questionId);
       return q?.correctAnswerIndex === selectedIndex;
@@ -85,20 +125,27 @@ export default function Quiz({ lessonId }: QuizProps) {
 
     const total = questions.length;
 
+    const routeName = lessonRoutes[lessonId];
+
     await saveAttempt({
       userId: convexUserId,
-      lessonId: lessonId as any,
+      lessonId: lessonId as any, // Cast to any if you are sure lessonId is valid, or use the actual Id<"lessons"> type if available
       answers,
       totalQuestions: total,
       correctAnswers: correct,
+      score,
       createdAt: new Date().toISOString(),
     });
+
+    const lessonRoute = lessonRoutes[lessonId];
 
     router.push({
       pathname: "/quiz/results",
       params: {
         correct: correct.toString(),
         total: total.toString(),
+        score: score.toString(),
+        lessonRoute: lessonRoute,
       },
     });
   };
@@ -112,7 +159,7 @@ export default function Quiz({ lessonId }: QuizProps) {
         unfilledColor="#eee"
         borderWidth={0}
         height={8}
-        animated={true}
+        animated
         animationType="timing"
         animationConfig={{ duration: 300 }}
         style={{ marginBottom: 16 }}
