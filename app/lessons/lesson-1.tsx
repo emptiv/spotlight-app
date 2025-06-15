@@ -1,7 +1,7 @@
 import HandwritingCanvas from "@/components/HandwritingCanvas";
 import Colors from "@/constants/Colors";
 import { Link, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,88 +10,182 @@ import {
   View,
 } from "react-native";
 
-// Example: You can import a custom canvas component here if needed
-// import MyCanvasComponent from "@/components/MyCanvasComponent";
 export default function Lesson1() {
   const [step, setStep] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<string | null>(null);
+  const [isCorrect, setIsCorrect] = useState(false);
   const router = useRouter();
+  useEffect(() => {
+  setPrediction(null);
+  setIsCorrect(false);
+  }, [step]);
+
+  const handwritingStepIndex = 5;
+
   const steps = [
-  {
-    type: "custom",
-    render: () => (
-      <Text style={styles.paragraph}>
-        Welcome!{"\n\n"}You're about to learn{" "}
-        <Text style={styles.bold}>Baybayin</Text>, the ancient script of the Philippines.{"\n\n"}
-        <Text style={styles.italic}>Baybayin</Text> is a pre-colonial writing system once used to write Tagalog and other Philippine languages.{"\n\n"}
-        Press <Text style={styles.bold}>Continue</Text> if you're ready to begin your journey into Baybayin.
-      </Text>
-    ),
-  },
-  {
-    type: "custom",
-    render: () => (
-      <View>
+    {
+      type: "custom",
+      render: () => (
         <Text style={styles.paragraph}>
-          Baybayin has three vowel characters.{"\n\n"}
-          They each represent simple sounds — let's go through them one by one.
+          Welcome!{"\n\n"}You're about to learn{" "}
+          <Text style={styles.bold}>Baybayin</Text>, the ancient script of the Philippines.{"\n\n"}
+          <Text style={styles.italic}>Baybayin</Text> is a pre-colonial writing system once used to write Tagalog and other Philippine languages.{"\n\n"}
+          Press <Text style={styles.bold}>Continue</Text> if you're ready to begin your journey into Baybayin.
         </Text>
-      </View>
-  ),
-  },
-
-  {
-    type: "custom",
-    render: () => (
-      <View>
-        <Text style={styles.character}>ᜀ</Text>
-        <Text style={styles.paragraph}>
-          This is the sound "A" — like the a in{" "}
-          <Text style={styles.italic}>anak</Text> (child).{"\n\n"}
-          Say it out loud:
-        </Text>
-
-        <TouchableOpacity style={styles.audioButton} onPress={() => console.log("Play audio")}>
-          <Text style={styles.audioButtonText}>🔊</Text>
-        </TouchableOpacity>
-      </View>
-    ),
-  },
-
-  {
-    type: "custom",
-    render: () => (
-      <View>
-        <HandwritingCanvas onPrediction={setPrediction} />
-        {prediction && (
+      ),
+    },
+    {
+      type: "custom",
+      render: () => (
+        <View>
           <Text style={styles.paragraph}>
-            Prediction:{" "}
-            <Text style={{ fontWeight: "bold" }}>{prediction}</Text>
+            Baybayin has three vowel characters.{"\n\n"}
+            They each represent simple sounds — let's go through them one by one.
           </Text>
-        )}
-      </View>
-    ),
-  },
+        </View>
+      ),
+    },
+    {
+      type: "custom",
+      render: () => (
+        <View>
+          <Text style={styles.character}>ᜀ</Text>
+          <Text style={styles.paragraph}>
+            This is the sound "A" — like the a in{" "}
+            <Text style={styles.italic}>anak</Text> (child).{"\n\n"}
+            Say it out loud:
+          </Text>
+          <TouchableOpacity style={styles.audioButton} onPress={() => console.log("Play audio")}>
+            <Text style={styles.audioButtonText}>🔊</Text>
+          </TouchableOpacity>
+        </View>
+      ),
+    },
+    {
+      type: "custom",
+      render: () => (
+        <View>
+          <Text style={styles.title}>Let's try writing ᜀ!</Text>
+          <HandwritingCanvas
+            onPrediction={(result) => {
+              setPrediction(result);
+              setIsCorrect(result.toLowerCase() === "a");
+            }}
+            onClear={() => {
+              setPrediction(null);
+              setIsCorrect(false);
+            }}
+          />
+          {prediction && (
+            <Text style={styles.feedback}>
+              {isCorrect ? "Correct!" : "Try again"}
+            </Text>
+          )}
+        </View>
+      ),
+    },
+    {
+      type: "custom",
+      render: () => (
+        <View>
+          <Text style={styles.character}>ᜁ</Text>
+          <Text style={styles.paragraph}>
+            This one is for the "E" and "I" sounds.{"\n\n"}
+            Like the i in <Text style={styles.italic}>ibig</Text> (love), or the e in <Text style={styles.italic}>bebe</Text> (baby).{"\n\n"}
+            Say it out loud:
+          </Text>
+          <TouchableOpacity style={styles.audioButton} onPress={() => console.log("Play audio")}>
+            <Text style={styles.audioButtonText}>🔊</Text>
+          </TouchableOpacity>
+        </View>
+      ),
+    },
+    {
+      type: "custom",
+      render: () => (
+        <View>
+          <Text style={styles.title}>Let's try writing ᜁ!</Text>
+          <HandwritingCanvas
+            onPrediction={(result) => {
+              setPrediction(result);
+              setIsCorrect(result.toLowerCase() === "e_i");
+            }}
+            onClear={() => {
+              setPrediction(null);
+              setIsCorrect(false);
+            }}
+          />
+          {prediction && (
+            <Text style={styles.paragraph}>
+              {isCorrect ? "Correct!" : "Try again"}
+            </Text>
+          )}
+        </View>
+      ),
+    },
+    {
+      type: "custom",
+      render: () => (
+        <View>
+          <Text style={styles.character}>ᜂ</Text>
+          <Text style={styles.paragraph}>
+            This character is used for both "U" and "O" sounds.{"\n\n"}
+            Like the u in <Text style={styles.italic}>ulo</Text> (head), or the o in <Text style={styles.italic}>aso</Text> (dog).{"\n\n"}
+            Say it out loud:
+          </Text>
+          <TouchableOpacity style={styles.audioButton} onPress={() => console.log("Play audio")}>
+            <Text style={styles.audioButtonText}>🔊</Text>
+          </TouchableOpacity>
+        </View>
+      ),
+    },
+    {
+      type: "custom",
+      render: () => (
+        <View>
+          <Text style={styles.title}>Let's try writing ᜂ!</Text>
+          <HandwritingCanvas
+            onPrediction={(result) => {
+              setPrediction(result);
+              setIsCorrect(result.toLowerCase() === "o_u");
+            }}
+            onClear={() => {
+              setPrediction(null);
+              setIsCorrect(false);
+            }}
+          />
+          {prediction && (
+            <Text style={styles.paragraph}>
+              {isCorrect ? "Correct!" : "Try again"}
+            </Text>
+          )}
+        </View>
+      ),
+    },
 
     {
-    type: "exercise",
-    question: "How many hours do cats sleep daily?",
-    options: ["8", "12", "16"],
-    answer: "16",
-  },
-  {
-    type: "custom",
-    render: () => (
-      <Text style={styles.paragraph}>
-        <Text style={styles.bold}>Correct!</Text> Cats sleep 16 hours a day on average.
-      </Text>
-    ),
-  },
-  {
-    type: "quiz-link",
-  },
-];
+      type: "custom",
+      render: () => (
+        <Text style={styles.paragraph}>
+          <Text style={styles.bold}>Good job!</Text> {"\n\n"}
+          You've just written all three Baybayin vowels: ᜀ (A), ᜁ (E/I), and ᜂ (U/O). {"\n\n"}
+          Take a moment to remember their shapes and sounds.{"\n\n"}
+          <Text style={styles.bold}>When you're ready, let's move on to a quick quiz!</Text>
+        </Text>
+      ),
+    },
+    {
+      type: "quiz-link",
+    },
+    //type: "exercise for ungraded quizzes"
+        {
+      type: "exercise",
+      question: "How many hours do cats sleep daily?",
+      options: ["8", "12", "16"],
+      answer: "16",
+    },
+  ];
 
   const handleContinue = () => {
     setSelected(null);
@@ -109,7 +203,6 @@ export default function Lesson1() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.headerButton}>Quit</Text>
@@ -120,7 +213,6 @@ export default function Lesson1() {
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
       <View style={styles.content}>
         {current.render && current.render()}
 
@@ -158,10 +250,18 @@ export default function Lesson1() {
         )}
       </View>
 
-      {/* Continue Button */}
       {current.type !== "quiz-link" && current.type !== "exercise" && (
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.button} onPress={handleContinue}>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              [3, 5, 7].includes(step) && !isCorrect
+                ? { backgroundColor: "#ccc" }
+                : {},
+            ]}
+            onPress={handleContinue}
+            disabled={step === handwritingStepIndex && !isCorrect}
+          >
             <Text style={styles.buttonText}>Continue</Text>
           </TouchableOpacity>
         </View>
@@ -210,6 +310,13 @@ const styles = StyleSheet.create({
     fontFamily: "outfit-bold",
     marginBottom: 24,
     color: Colors.PRIMARY,
+  },
+  feedback: {
+    fontSize: 22,
+    fontFamily: "outfit-bold",
+    marginBottom: 24,
+    color: Colors.PRIMARY,
+    textAlign: "center",
   },
   character: {
     fontSize: 150,
@@ -265,12 +372,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: Colors.PRIMARY,
     borderRadius: 8,
-    alignSelf: "center", // or "center" if you want it centered
-},
-
-audioButtonText: {
-  color: Colors.WHITE,
-  fontSize: 35,
-  fontFamily: "outfit-bold",
-},
+    alignSelf: "center",
+  },
+  audioButtonText: {
+    color: Colors.WHITE,
+    fontSize: 35,
+    fontFamily: "outfit-bold",
+  },
 });
