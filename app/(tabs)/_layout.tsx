@@ -61,19 +61,67 @@ export default function TabLayout() {
     />
       <Tabs.Screen
         name="practice"
-        options={{ tabBarLabel: 'Practice', tabBarIcon: ({ size, color }) => <Ionicons name="flash" size={size} color={color} /> }}
+        options={{ 
+          headerTitle: () => (
+          <Text
+            style={{
+            fontSize: 20,
+            fontFamily: 'outfit-bold',
+            color: COLORS.primary,
+            marginLeft: 1,
+          }}>
+          Practice
+        </Text>
+        ),
+          tabBarLabel: 'Practice', tabBarIcon: ({ size, color }) => <Ionicons name="flash" size={size} color={color} /> }}
       />
       <Tabs.Screen
         name="review"
-        options={{ tabBarLabel: 'Review', tabBarIcon: ({ size, color }) => <Ionicons name="barbell" size={size} color={color} /> }}
+        options={{ 
+          headerTitle: () => (
+          <Text
+            style={{
+            fontSize: 20,
+            fontFamily: 'outfit-bold',
+            color: COLORS.primary,
+            marginLeft: 1,
+          }}>
+          Review
+        </Text>
+        ),
+          tabBarLabel: 'Review', tabBarIcon: ({ size, color }) => <Ionicons name="barbell" size={size} color={color} /> }}
       />
       <Tabs.Screen
         name="leaderboard"
-        options={{ tabBarLabel: 'Leaderboard', tabBarIcon: ({ size, color }) => <Ionicons name="trophy" size={size} color={color} /> }}
+        options={{ 
+          headerTitle: () => (
+          <Text
+            style={{
+            fontSize: 20,
+            fontFamily: 'outfit-bold',
+            color: COLORS.primary,
+            marginLeft: 1,
+          }}>
+          Leaderboard
+        </Text>
+        ),
+          tabBarLabel: 'Leaderboard', tabBarIcon: ({ size, color }) => <Ionicons name="trophy" size={size} color={color} /> }}
       />
       <Tabs.Screen
         name="profile"
-        options={{ tabBarLabel: 'Me', tabBarIcon: ({ size, color }) => <Ionicons name="person" size={size} color={color} /> }}
+        options={{ 
+          headerTitle: () => (
+          <Text
+            style={{
+            fontSize: 20,
+            fontFamily: 'outfit-bold',
+            color: COLORS.primary,
+            marginLeft: 1,
+          }}>
+          Profile
+        </Text>
+        ),
+          tabBarLabel: 'Me', tabBarIcon: ({ size, color }) => <Ionicons name="person" size={size} color={color} /> }}
       />
     </Tabs>
   )
