@@ -12,27 +12,28 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
-
-
 const CANVAS_SIZE = 280;
+const DRAWING_SIZE = 280;
 
+type HandwritingCanvasProps = {
+  onPrediction?: (prediction: string) => void;
+};
 
-export default function HandwritingPracticeScreen() {
-  const [previewUri, setPreviewUri] = useState<string | null>(null);
-  const canvasRef = useCanvasRef();
+export default function HandwritingCanvas({ onPrediction }: HandwritingCanvasProps) {
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState<string>("");
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<string | null>(null);
+  const canvasRef = useCanvasRef();
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderGrant: (evt) => {
       const { locationX, locationY } = evt.nativeEvent;
-      const path = `M${locationX} ${locationY}`;
-      setCurrentPath(path);
+      setCurrentPath(`M${locationX} ${locationY}`);
     },
     onPanResponderMove: (evt) => {
       const { locationX, locationY } = evt.nativeEvent;
@@ -49,62 +50,58 @@ export default function HandwritingPracticeScreen() {
   const handleClear = () => {
     setPaths([]);
     setCurrentPath("");
+    setPrediction(null);
+    setPreviewUri(null);
   };
 
-const DRAWING_SIZE = 280;
-
-const handleSubmit = async () => {
-  const surface = Skia.Surface.MakeOffscreen(DRAWING_SIZE, DRAWING_SIZE);
-  if (!surface) {
-    Alert.alert("Error", "Failed to create Skia surface.");
-    return;
-  }
-
-  const canvas = surface.getCanvas();
-  canvas.clear(Skia.Color("white"));
-
-  const paint = Skia.Paint();
-  paint.setColor(Skia.Color("black"));
-  paint.setStyle(1);
-  paint.setStrokeWidth(2);
-
-  [...paths, currentPath]
-    .map((svg) => Skia.Path.MakeFromSVGString(svg))
-    .filter((path): path is NonNullable<typeof path> => path !== null)
-    .forEach((path) => {
-      canvas.drawPath(path, paint);
-    });
-
-  const image = surface.makeImageSnapshot();
-  const base64 = image.encodeToBase64();
-
-  setPreviewUri(`data:image/png;base64,${base64}`);
-
-  try {
-    const response = await fetch("http://192.168.68.64:8000/predict", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: base64 }),
-    });
-
-    const data = await response.json();
-    console.log("Prediction Response:", data);
-    if (data.prediction) {
-      setPrediction(data.prediction);
-    } else {
-      setPrediction("No prediction returned.");
+  const handleSubmit = async () => {
+    const surface = Skia.Surface.MakeOffscreen(DRAWING_SIZE, DRAWING_SIZE);
+    if (!surface) {
+      Alert.alert("Error", "Failed to create Skia surface.");
+      return;
     }
-  } catch (error) {
-  console.error("Submission error:", error);
-  Alert.alert("Error", "Failed to submit handwriting.");
-  setPrediction("Error during prediction.");
-}}
+
+    const canvas = surface.getCanvas();
+    canvas.clear(Skia.Color("white"));
+
+    const paint = Skia.Paint();
+    paint.setColor(Skia.Color("black"));
+    paint.setStyle(1);
+    paint.setStrokeWidth(2);
+
+    [...paths, currentPath]
+      .map((svg) => Skia.Path.MakeFromSVGString(svg))
+      .filter((path): path is NonNullable<typeof path> => path !== null)
+      .forEach((path) => {
+        canvas.drawPath(path, paint);
+      });
+
+    const image = surface.makeImageSnapshot();
+    const base64 = image.encodeToBase64();
+
+    setPreviewUri(`data:image/png;base64,${base64}`);
+
+    try {
+      const response = await fetch("http://192.168.68.64:8000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64 }),
+      });
+
+      const data = await response.json();
+      const result = data?.prediction || "No prediction returned.";
+      setPrediction(result);
+      onPrediction?.(result);
+    } catch (err) {
+      console.error("Submission error:", err);
+      Alert.alert("Error", "Failed to submit handwriting.");
+      setPrediction("Error during prediction.");
+      onPrediction?.("Error during prediction.");
+    }
+  };
 
   return (
-    <View style={styles.wrapper}>
-      <Text style={styles.character}>ᜀ</Text>
-      <Text style={styles.latin}>A</Text>
-
+    <View style={styles.container}>
       <View style={styles.canvasContainer} {...panResponder.panHandlers}>
         <Canvas ref={canvasRef} style={styles.canvas}>
           {[...paths, currentPath]
@@ -126,17 +123,19 @@ const handleSubmit = async () => {
         <CustomButton label="Clear" onPress={handleClear} theme="danger" />
         <CustomButton label="Submit" onPress={handleSubmit} theme="success" />
       </View>
+
       {previewUri && (
-      <Image
-        source={{ uri: previewUri }}
-        style={{ width: 100, height: 100, borderWidth: 1, borderColor: '#333', marginTop: 16 }}
-      />)}
-      <Text style={styles.instruction}>Write the character</Text>
+        <Image
+          source={{ uri: previewUri }}
+          style={styles.previewImage}
+        />
+      )}
+
       {prediction && (
-      <Text style={styles.prediction}>
-      Prediction: <Text style={{ fontWeight: "bold" }}>{prediction}</Text>
-      </Text>
-)}
+        <Text style={styles.prediction}>
+          Prediction: <Text style={{ fontWeight: "bold" }}>{prediction}</Text>
+        </Text>
+      )}
     </View>
   );
 }
@@ -169,26 +168,13 @@ const CustomButton = ({
 };
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    padding: 20,
+  container: {
     alignItems: "center",
-    backgroundColor: "#fdfdfd",
-  },
-  character: {
-    fontSize: 80,
-    fontWeight: "700",
-    color: "#222",
-    marginBottom: 4,
-  },
-  latin: {
-    fontSize: 26,
-    color: "#666",
-    marginBottom: 16,
+    paddingVertical: 16,
   },
   canvasContainer: {
-    width: 280,
-    height: 280,
+    width: CANVAS_SIZE,
+    height: CANVAS_SIZE,
     borderRadius: 12,
     overflow: "hidden",
     backgroundColor: "#fff",
@@ -202,9 +188,8 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "center",
     columnGap: 12,
-    marginTop: 12,
+    marginBottom: 16,
   },
   button: {
     paddingVertical: 10,
@@ -217,15 +202,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
   },
-  instruction: {
-    fontSize: 16,
-    color: "#444",
-    marginTop: 24,
+  previewImage: {
+    width: 100,
+    height: 100,
+    borderWidth: 1,
+    borderColor: "#333",
+    marginBottom: 12,
   },
   prediction: {
-  marginTop: 16,
-  fontSize: 18,
-  color: "#222",
+    fontSize: 18,
+    color: "#222",
+    textAlign: "center",
   },
-
 });

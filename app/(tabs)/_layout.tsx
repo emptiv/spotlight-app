@@ -1,46 +1,80 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Tabs } from 'expo-router'
-import React from 'react'
+import { Text, View } from 'react-native'
 import { COLORS } from '../../constants/theme'
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{ 
-        tabBarShowLabel: false, 
-        headerShown: false, 
+        tabBarShowLabel: true, 
+        headerShown: true,
         tabBarActiveTintColor: COLORS.primary, 
         tabBarInactiveTintColor: COLORS.grey,
         tabBarStyle: {
           backgroundColor: 'white',
-          borderTopWidth: 0,
+          borderTopWidth: 1,
           position: 'absolute',
           elevation: 0,
-          height: 40,
+          height: 55,
           paddingBottom: 8,
         },
-        }}
+      }}
     >
-        <Tabs.Screen
-          name = 'index'
-          options= {{ tabBarIcon: ({size,color}) => <Ionicons name="home" size={size} color={color} />}}
-        />
-        <Tabs.Screen
-          name = 'bookmarks'
-          options= {{ tabBarIcon: ({size,color}) => <Ionicons name="bookmark" size={size} color={color} />}}
-        />
-        <Tabs.Screen
-          name = 'create'
-          options= {{ tabBarIcon: ({size}) => <Ionicons name="add-circle" size={size} color={COLORS.primary} />}}
-        />
-        <Tabs.Screen
-          name = 'notifications'
-          options= {{ tabBarIcon: ({size,color}) => <Ionicons name="heart" size={size} color={color} />}}
-        />
-        <Tabs.Screen
-          name = 'profile'
-          options= {{ tabBarIcon: ({size,color}) => <Ionicons name="person" size={size} color={color} />}}
-        />
+    <Tabs.Screen
+      name="index"
+      options={{
+        headerTitle: () => (
+          <Text
+            style={{
+            fontSize: 20,
+            fontFamily: 'outfit-bold',
+            color: COLORS.primary,
+            marginLeft: 1,
+          }}
+          >
+        Plumatika
+      </Text>
+    ),
+    headerRight: () => (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginRight: 16 }}>
+        {/* 🔥 Streak */} {/* just a placeholder for now */}
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Ionicons name="flame" size={20} color="orange" />
+          <Text style={{ fontFamily: 'outfit', fontSize: 14, marginLeft: 4 }}>5</Text>
+        </View>
+        {/* ❤️ Hearts */} {/* just a placeholder for now */}
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Ionicons name="heart" size={20} color="red" />
+          <Text style={{ fontFamily: 'outfit', fontSize: 14, marginLeft: 4 }}>3</Text>
+        </View>
+      </View>
+    ),
+      headerStyle: {
+      height: 90,
+      backgroundColor: 'white',
+      borderBottomWidth:1,
+      borderBottomColor: '#eee',
+      },
+      tabBarLabel: 'Lessons', tabBarIcon: ({ size, color }) => <Ionicons name="school" size={size} color={color} /> 
+      }}
+    />
+      <Tabs.Screen
+        name="bookmarks"
+        options={{ tabBarLabel: 'Practice', tabBarIcon: ({ size, color }) => <Ionicons name="flash" size={size} color={color} /> }}
+      />
+      <Tabs.Screen
+        name="create"
+        options={{ tabBarLabel: 'Review', tabBarIcon: ({ size, color }) => <Ionicons name="barbell" size={size} color={color} /> }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{ tabBarLabel: 'Leaderboards', tabBarIcon: ({ size, color }) => <Ionicons name="trophy" size={size} color={color} /> }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{ tabBarLabel: 'Me', tabBarIcon: ({ size, color }) => <Ionicons name="person" size={size} color={color} /> }}
+      />
     </Tabs>
   )
 }
