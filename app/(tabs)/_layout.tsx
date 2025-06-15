@@ -38,15 +38,15 @@ export default function TabLayout() {
     ),
     headerRight: () => (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginRight: 16 }}>
-        {/* 🔥 Streak */} {/* just a placeholder for now */}
+        {/* Streak */} {/* just a placeholder for now */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name="flame" size={20} color="orange" />
-          <Text style={{ fontFamily: 'outfit', fontSize: 14, marginLeft: 4 }}>5</Text>
+          <Text style={{ fontFamily: 'outfit', fontSize: 14, marginLeft: 4 }}>{5}</Text>
         </View>
-        {/* ❤️ Hearts */} {/* just a placeholder for now */}
+        {/* Hearts */} {/* just a placeholder for now */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name="heart" size={20} color="red" />
-          <Text style={{ fontFamily: 'outfit', fontSize: 14, marginLeft: 4 }}>3</Text>
+          <Text style={{ fontFamily: 'outfit', fontSize: 14, marginLeft: 4 }}>{3}</Text>
         </View>
       </View>
     ),
@@ -60,16 +60,16 @@ export default function TabLayout() {
       }}
     />
       <Tabs.Screen
-        name="bookmarks"
+        name="practice"
         options={{ tabBarLabel: 'Practice', tabBarIcon: ({ size, color }) => <Ionicons name="flash" size={size} color={color} /> }}
       />
       <Tabs.Screen
-        name="create"
+        name="review"
         options={{ tabBarLabel: 'Review', tabBarIcon: ({ size, color }) => <Ionicons name="barbell" size={size} color={color} /> }}
       />
       <Tabs.Screen
-        name="notifications"
-        options={{ tabBarLabel: 'Leaderboards', tabBarIcon: ({ size, color }) => <Ionicons name="trophy" size={size} color={color} /> }}
+        name="leaderboard"
+        options={{ tabBarLabel: 'Leaderboard', tabBarIcon: ({ size, color }) => <Ionicons name="trophy" size={size} color={color} /> }}
       />
       <Tabs.Screen
         name="profile"

@@ -18,7 +18,7 @@ export default function RootLayout() {
     
     <ClerkAndConvexProvider>
     <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+      <SafeAreaView style={{ flex: 1 }}>
         <Stack screenOptions={{headerShown: false}}/>
       </SafeAreaView>
     </SafeAreaProvider>
