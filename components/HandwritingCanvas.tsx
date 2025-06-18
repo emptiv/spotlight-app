@@ -84,7 +84,7 @@ export default function HandwritingCanvas({ onPrediction, onClear }: Handwriting
     // setPreviewUri(`data:image/png;base64,${base64}`);
 
     try {
-      const response = await fetch("http://192.168.68.63:8000/predict", {
+      const response = await fetch("http://192.168.68.66:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: base64 }),
