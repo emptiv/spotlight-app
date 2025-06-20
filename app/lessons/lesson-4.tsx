@@ -10,70 +10,30 @@ import {
   View,
 } from "react-native";
 
-export default function Lesson1() {
+export default function Lesson4() {
   const [step, setStep] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState(false);
   const router = useRouter();
+
   useEffect(() => {
-  setPrediction(null);
-  setIsCorrect(false);
+    setPrediction(null);
+    setIsCorrect(false);
   }, [step]);
 
-
-
   const steps = [
-
-    {
-      type: "custom",
-      render: () => (
-        <Text style={styles.paragraph}>
-          Welcome!{"\n\n"}You're about to learn{" "}
-          <Text style={styles.bold}>Baybayin</Text>, the ancient script of the Philippines.{"\n\n"}
-          <Text style={styles.italic}>Baybayin</Text> is a pre-colonial writing system once used to write Tagalog and other Philippine languages.{"\n\n"}
-          Press <Text style={styles.bold}>Continue</Text> if you're ready to begin your journey into Baybayin.
-        </Text>
-      ),
-    },
     {
       type: "custom",
       render: () => (
         <View>
-          <Text style={styles.paragraph}>
-            Baybayin has three vowel characters.{"\n\n"}
-            They each represent simple sounds — let's go through them one by one.
-          </Text>
-        </View>
-      ),
-    },
-    {
-      type: "custom",
-      render: () => (
-        <View>
-          <Text style={styles.character}>ᜀ</Text>
-          <Text style={styles.paragraph}>
-            This is the sound "A" — like the a in{" "}
-            <Text style={styles.italic}>anak</Text> (child).{"\n\n"}
-            Say it out loud:
-          </Text>
-          <TouchableOpacity style={styles.audioButton} onPress={() => console.log("Play audio")}>
-            <Text style={styles.audioButtonText}>🔊</Text>
-          </TouchableOpacity>
-        </View>
-      ),
-    },
-    {
-      type: "handwrite",
-      render: () => (
-        <View>
-          <Text style={styles.title}>Let's try writing ᜀ!</Text>
+          <Text style={styles.title}>Let's try writing ᜐ!</Text>
           <HandwritingCanvas
             key={`canvas-${step}`}
-            lesson="lesson1"
+            lesson="lesson4"
             onPrediction={(result) => {
               setPrediction(result);
-              setIsCorrect(result.toLowerCase() === "a");
+              setIsCorrect(result.toLowerCase() === "sa");
             }}
             onClear={() => {
               setPrediction(null);
@@ -92,29 +52,13 @@ export default function Lesson1() {
       type: "custom",
       render: () => (
         <View>
-          <Text style={styles.character}>ᜁ</Text>
-          <Text style={styles.paragraph}>
-            This one is for the "E" and "I" sounds.{"\n\n"}
-            Like the i in <Text style={styles.italic}>ibig</Text> (love), or the e in <Text style={styles.italic}>bebe</Text> (baby).{"\n\n"}
-            Say it out loud:
-          </Text>
-          <TouchableOpacity style={styles.audioButton} onPress={() => console.log("Play audio")}>
-            <Text style={styles.audioButtonText}>🔊</Text>
-          </TouchableOpacity>
-        </View>
-      ),
-    },
-    {
-      type: "handwrite",
-      render: () => (
-        <View>
-          <Text style={styles.title}>Let's try writing ᜁ!</Text>
+          <Text style={styles.title}>Let's try writing ᜇ!</Text>
           <HandwritingCanvas
             key={`canvas-${step}`}
-            lesson="lesson1"
+            lesson="lesson4"
             onPrediction={(result) => {
               setPrediction(result);
-              setIsCorrect(result.toLowerCase() === "e_i");
+              setIsCorrect(result.toLowerCase() === "da_ra");
             }}
             onClear={() => {
               setPrediction(null);
@@ -133,29 +77,13 @@ export default function Lesson1() {
       type: "custom",
       render: () => (
         <View>
-          <Text style={styles.character}>ᜂ</Text>
-          <Text style={styles.paragraph}>
-            This character is used for both "U" and "O" sounds.{"\n\n"}
-            Like the u in <Text style={styles.italic}>ulo</Text> (head), or the o in <Text style={styles.italic}>aso</Text> (dog).{"\n\n"}
-            Say it out loud:
-          </Text>
-          <TouchableOpacity style={styles.audioButton} onPress={() => console.log("Play audio")}>
-            <Text style={styles.audioButtonText}>🔊</Text>
-          </TouchableOpacity>
-        </View>
-      ),
-    },
-    {
-      type: "handwrite",
-      render: () => (
-        <View>
-          <Text style={styles.title}>Let's try writing ᜂ!</Text>
+          <Text style={styles.title}>Let's try writing ᜆ!</Text>
           <HandwritingCanvas
             key={`canvas-${step}`}
-            lesson="lesson1"
+            lesson="lesson4"
             onPrediction={(result) => {
               setPrediction(result);
-              setIsCorrect(result.toLowerCase() === "o_u");
+              setIsCorrect(result.toLowerCase() === "ta");
             }}
             onClear={() => {
               setPrediction(null);
@@ -168,25 +96,12 @@ export default function Lesson1() {
             </Text>
           )}
         </View>
-      ),
-    },
-
-    {
-      type: "custom",
-      render: () => (
-        <Text style={styles.paragraph}>
-          <Text style={styles.bold}>Good job!</Text> {"\n\n"}
-          You've just written all three Baybayin vowels: ᜀ (A), ᜁ (E/I), and ᜂ (U/O). {"\n\n"}
-          Take a moment to remember their shapes and sounds.{"\n\n"}
-          <Text style={styles.bold}>When you're ready, let's move on to a quick quiz!</Text>
-        </Text>
       ),
     },
     {
       type: "quiz-link",
     },
-    //type: "exercise for ungraded quizzes"
-        {
+    {
       type: "exercise",
       question: "How many hours do cats sleep daily?",
       options: ["8", "12", "16"],
@@ -195,8 +110,8 @@ export default function Lesson1() {
   ];
 
   const handwritingSteps = steps
-    .map((step, index) => (step.type === "handwrite" ? index : -1))
-    .filter(index => index !== -1);
+    .map((step, index) => (step.type === "custom" ? index : -1))
+    .filter((index) => index !== -1);
 
   const handleContinue = () => {
     setSelected(null);
@@ -231,8 +146,8 @@ export default function Lesson1() {
           <View>
             <Text style={styles.question}>{current.question}</Text>
             {current.options?.map((option) => {
-              const isCorrect = option === current.answer;
-              const isSelected = selected === option;
+              const isCorrectOption = option === current.answer;
+              const isSelectedOption = selected === option;
               return (
                 <TouchableOpacity
                   key={option}
@@ -240,8 +155,8 @@ export default function Lesson1() {
                   disabled={!!selected}
                   style={[
                     styles.option,
-                    isSelected && {
-                      backgroundColor: isCorrect ? Colors.SUCCESS : "#f88",
+                    isSelectedOption && {
+                      backgroundColor: isCorrectOption ? Colors.SUCCESS : "#f88",
                     },
                   ]}
                 >
@@ -266,7 +181,7 @@ export default function Lesson1() {
           <TouchableOpacity
             style={[
               styles.button,
-              [3, 5, 7].includes(step) && !isCorrect
+              handwritingSteps.includes(step) && !isCorrect
                 ? { backgroundColor: "#ccc" }
                 : {},
             ]}

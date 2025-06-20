@@ -21,9 +21,10 @@ const DRAWING_SIZE = 280;
 type HandwritingCanvasProps = {
   onPrediction?: (prediction: string) => void;
   onClear?: () => void;
+  lesson?: string;
 };
 
-export default function HandwritingCanvas({ onPrediction, onClear }: HandwritingCanvasProps) {
+export default function HandwritingCanvas({ onPrediction, onClear, lesson }: HandwritingCanvasProps) {
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState<string>("");
   const [previewUri, setPreviewUri] = useState<string | null>(null);
@@ -84,10 +85,10 @@ export default function HandwritingCanvas({ onPrediction, onClear }: Handwriting
     // setPreviewUri(`data:image/png;base64,${base64}`);
 
     try {
-      const response = await fetch("http://192.168.68.66:8000/predict", {
+      const response = await fetch("http://192.168.68.53:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64 }),
+        body: JSON.stringify({ lesson, image: base64 }),
       });
 
       const data = await response.json();

@@ -1,7 +1,9 @@
+import HandwritingCanvas from "@/components/HandwritingCanvas";
 import Colors from "@/constants/Colors";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  ScrollView,
+  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -9,65 +11,271 @@ import {
 } from "react-native";
 
 export default function Lesson2() {
+  const [step, setStep] = useState(0);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [prediction, setPrediction] = useState<string | null>(null);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    setPrediction(null);
+    setIsCorrect(false);
+  }, [step]);
+
+  const steps = [
+    {
+      type: "custom",
+      render: () => (
+        <View>
+          <Text style={styles.title}>Let's try writing ᜉ!</Text>
+          <HandwritingCanvas
+            key={`canvas-${step}`}
+            lesson="lessonx"
+            onPrediction={(result) => {
+              setPrediction(result);
+              setIsCorrect(result.toLowerCase() === "pa");
+            }}
+            onClear={() => {
+              setPrediction(null);
+              setIsCorrect(false);
+            }}
+          />
+          {prediction && (
+            <Text style={styles.feedback}>
+              {isCorrect ? "Correct!" : "Try again"}
+            </Text>
+          )}
+        </View>
+      ),
+    },
+    {
+      type: "custom",
+      render: () => (
+        <View>
+          <Text style={styles.title}>Let's try writing ᜃ!</Text>
+          <HandwritingCanvas
+            key={`canvas-${step}`}
+            lesson="lesson2"
+            onPrediction={(result) => {
+              setPrediction(result);
+              setIsCorrect(result.toLowerCase() === "ka");
+            }}
+            onClear={() => {
+              setPrediction(null);
+              setIsCorrect(false);
+            }}
+          />
+          {prediction && (
+            <Text style={styles.feedback}>
+              {isCorrect ? "Correct!" : "Try again"}
+            </Text>
+          )}
+        </View>
+      ),
+    },
+    {
+      type: "custom",
+      render: () => (
+        <View>
+          <Text style={styles.title}>Let's try writing ᜈ!</Text>
+          <HandwritingCanvas
+            key={`canvas-${step}`}
+            lesson="lesson2"
+            onPrediction={(result) => {
+              setPrediction(result);
+              setIsCorrect(result.toLowerCase() === "na");
+            }}
+            onClear={() => {
+              setPrediction(null);
+              setIsCorrect(false);
+            }}
+          />
+          {prediction && (
+            <Text style={styles.feedback}>
+              {isCorrect ? "Correct!" : "Try again"}
+            </Text>
+          )}
+        </View>
+      ),
+    },
+    {
+      type: "quiz-link",
+    },
+    {
+      type: "exercise",
+      question: "How many hours do cats sleep daily?",
+      options: ["8", "12", "16"],
+      answer: "16",
+    },
+  ];
+
+  const handwritingSteps = steps
+    .map((step, index) => (step.type === "custom" ? index : -1))
+    .filter((index) => index !== -1);
+
+  const handleContinue = () => {
+    setSelected(null);
+    setStep((prev) => Math.min(prev + 1, steps.length - 1));
+  };
+
+  const handleAnswer = (option: string) => {
+    setSelected(option);
+    setTimeout(() => {
+      handleContinue();
+    }, 600);
+  };
+
+  const current = steps[step];
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Lesson 1: Introduction to Cats</Text>
-
-      <Text style={styles.paragraph}>
-        Welcome to Lesson 2. In this lesson, you’ll learn about cats — their
-        behavior, their quirks, and why they love boxes so much.
-      </Text>
-
-      {[...Array(8)].map((_, i) => (
-        <Text style={styles.paragraph} key={i}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-          fermentum, ligula at iaculis tempor, nisl ex malesuada neque, a
-          placerat ligula augue in nisi. Praesent volutpat, lorem eu suscipit
-          rhoncus, est arcu fermentum enim, in viverra erat justo in orci.
-        </Text>
-      ))}
-
-      <View style={styles.buttonContainer}>
-        <Link href="/quiz/q-lesson-2" asChild>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Start Quiz</Text>
-          </TouchableOpacity>
-        </Link>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.headerButton}>Quit</Text>
+        </TouchableOpacity>
+        <Text style={styles.hearts}>❤️ x 3</Text>
+        <TouchableOpacity>
+          <Text style={styles.headerButton}>⚠️</Text>
+        </TouchableOpacity>
       </View>
-    </ScrollView>
+
+      <View style={styles.content}>
+        {current.render && current.render()}
+
+        {current.type === "exercise" && (
+          <View>
+            <Text style={styles.question}>{current.question}</Text>
+            {current.options?.map((option) => {
+              const isCorrectOption = option === current.answer;
+              const isSelectedOption = selected === option;
+              return (
+                <TouchableOpacity
+                  key={option}
+                  onPress={() => handleAnswer(option)}
+                  disabled={!!selected}
+                  style={[
+                    styles.option,
+                    isSelectedOption && {
+                      backgroundColor: isCorrectOption ? Colors.SUCCESS : "#f88",
+                    },
+                  ]}
+                >
+                  <Text style={styles.optionText}>{option}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
+        {current.type === "quiz-link" && (
+          <Link href="/quiz/q-lesson-1" asChild>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>Start Quiz</Text>
+            </TouchableOpacity>
+          </Link>
+        )}
+      </View>
+
+      {current.type !== "quiz-link" && current.type !== "exercise" && (
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              handwritingSteps.includes(step) && !isCorrect
+                ? { backgroundColor: "#ccc" }
+                : {},
+            ]}
+            onPress={handleContinue}
+            disabled={handwritingSteps.includes(step) && !isCorrect}
+          >
+            <Text style={styles.buttonText}>Continue</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: Colors.WHITE,
   },
-  content: {
-    padding: 24,
-    paddingBottom: 60,
+  header: {
+    height: 50,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
-  title: {
-    fontSize: 28,
+  headerButton: {
+    fontSize: 16,
     fontFamily: "outfit-bold",
-    marginBottom: 16,
+    color: Colors.PRIMARY,
+  },
+  hearts: {
+    fontSize: 16,
+    fontFamily: "outfit-bold",
     color: Colors.BLACK,
   },
+  content: {
+    flex: 1,
+    padding: 24,
+    justifyContent: "flex-start",
+  },
   paragraph: {
+    fontSize: 20,
+    fontFamily: "outfit",
+    marginBottom: 24,
+    color: Colors.BLACK,
+  },
+  title: {
+    fontSize: 22,
+    fontFamily: "outfit-bold",
+    marginBottom: 24,
+    color: Colors.PRIMARY,
+  },
+  feedback: {
+    fontSize: 22,
+    fontFamily: "outfit-bold",
+    marginBottom: 24,
+    color: Colors.PRIMARY,
+    textAlign: "center",
+  },
+  character: {
+    fontSize: 150,
+    fontFamily: "outfit-bold",
+    color: Colors.PRIMARY,
+    textAlign: "center",
+  },
+  question: {
+    fontSize: 20,
+    fontFamily: "outfit-bold",
+    marginBottom: 16,
+    color: Colors.PRIMARY,
+  },
+  option: {
+    backgroundColor: "#eee",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  optionText: {
     fontSize: 16,
     fontFamily: "outfit",
-    lineHeight: 24,
-    marginBottom: 12,
-    color: Colors.GRAY,
+    color: Colors.BLACK,
   },
-  buttonContainer: {
-    marginTop: 32,
-    alignItems: "center",
+  footer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+    backgroundColor: Colors.WHITE,
   },
   button: {
     backgroundColor: Colors.PRIMARY,
     paddingVertical: 16,
-    paddingHorizontal: 32,
     borderRadius: 10,
     alignItems: "center",
     width: "100%",
@@ -75,6 +283,26 @@ const styles = StyleSheet.create({
   buttonText: {
     color: Colors.WHITE,
     fontSize: 16,
+    fontFamily: "outfit-bold",
+  },
+  bold: {
+    fontFamily: "outfit-bold",
+  },
+  italic: {
+    fontStyle: "italic",
+    fontFamily: "outfit",
+  },
+  audioButton: {
+    marginTop: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.PRIMARY,
+    borderRadius: 8,
+    alignSelf: "center",
+  },
+  audioButtonText: {
+    color: Colors.WHITE,
+    fontSize: 35,
     fontFamily: "outfit-bold",
   },
 });
