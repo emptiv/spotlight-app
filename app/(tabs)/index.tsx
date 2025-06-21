@@ -144,7 +144,7 @@ export default function LessonMap() {
 const styles = StyleSheet.create({
   container: {
     paddingTop: 48,
-    paddingBottom: 500,
+    paddingBottom: 100,
     backgroundColor: Colors.WHITE,
     alignItems: "center",
   },

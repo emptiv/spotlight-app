@@ -1,3 +1,4 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   Canvas,
   Path,
@@ -58,6 +59,10 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson }: Han
   };
 
   const handleSubmit = async () => {
+    if (paths.length === 0 && currentPath.trim() === "") {
+    Alert.alert("No Drawing", "Please write something before submitting.");
+    return;
+  }
     const surface = Skia.Surface.MakeOffscreen(DRAWING_SIZE, DRAWING_SIZE);
     if (!surface) {
       Alert.alert("Error", "Failed to create Skia surface.");
@@ -93,7 +98,7 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson }: Han
 
       const data = await response.json();
       const result = data?.prediction || "No prediction returned.";
-      setPrediction(result);
+      //setPrediction(result);
       onPrediction?.(result);
     } catch (err) {
       console.error("Submission error:", err);
@@ -123,8 +128,8 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson }: Han
       </View>
 
       <View style={styles.buttonRow}>
-        <CustomButton label="Clear" onPress={handleClear} theme="danger" />
-        <CustomButton label="Submit" onPress={handleSubmit} theme="success" />
+        <CustomButton onPress={handleClear} theme="danger" icon={<Ionicons name="trash" size={30} color="white" />} disabled={paths.length === 0 && currentPath.trim() === ""} />
+        <CustomButton onPress={handleSubmit} theme="success" icon={<Ionicons name="checkmark-sharp" size={30} color="white" />} disabled={paths.length === 0 && currentPath.trim() === ""}/>
       </View>
 
       {previewUri && (
@@ -144,28 +149,39 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson }: Han
 }
 
 const CustomButton = ({
-  label,
+  icon,
   onPress,
   theme = "default",
+  disabled = false,
 }: {
-  label: string;
+  icon: React.ReactNode;
   onPress: () => void;
   theme?: "default" | "danger" | "success";
+  disabled?: boolean;
 }) => {
-  const backgroundColor =
-    theme === "danger"
-      ? "#ff6666"
-      : theme === "success"
-      ? "#4CAF50"
-      : "#E0E0E0";
-  const textColor = theme === "default" ? "#333" : "#fff";
+  const backgroundColor = disabled
+    ? "#bbb"
+    : theme === "danger"
+    ? "#ff6666"
+    : theme === "success"
+    ? "#4CAF50"
+    : "#E0E0E0";
 
   return (
     <TouchableOpacity
-      onPress={onPress}
-      style={[styles.button, { backgroundColor }]}
+      onPress={disabled ? undefined : onPress}
+      style={[
+        styles.button,
+        {
+          backgroundColor,
+          justifyContent: "center",
+          alignItems: "center",
+          opacity: disabled ? 0.6 : 1,
+        },
+      ]}
+      disabled={disabled}
     >
-      <Text style={[styles.buttonText, { color: textColor }]}>{label}</Text>
+      {icon}
     </TouchableOpacity>
   );
 };

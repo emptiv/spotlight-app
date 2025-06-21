@@ -38,18 +38,16 @@ export default function TabLayout() {
     ),
     headerRight: () => (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginRight: 16 }}>
-        {/* Streak */} {/* just a placeholder for now */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name="flame" size={20} color="orange" />
           <Text style={{ fontFamily: 'outfit', fontSize: 14, marginLeft: 4 }}>{5}</Text>
         </View>
-        {/* Hearts */} {/* just a placeholder for now */}
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Ionicons name="heart" size={20} color="red" />
-          <Text style={{ fontFamily: 'outfit', fontSize: 14, marginLeft: 4 }}>{3}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Ionicons name="heart" size={20} color="red" />
+        <Text style={{ fontFamily: 'outfit', fontSize: 14, marginLeft: 4 }}>{3}</Text>
         </View>
       </View>
-    ),
+),
       headerStyle: {
       height: 90,
       backgroundColor: 'white',

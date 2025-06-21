@@ -1,5 +1,6 @@
 import HandwritingCanvas from "@/components/HandwritingCanvas";
 import Colors from "@/constants/Colors";
+import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -213,16 +214,21 @@ export default function Lesson1() {
   const current = steps[step];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.headerButton}>Quit</Text>
+          <Ionicons name="exit" size={30} color={Colors.PRIMARY} />
         </TouchableOpacity>
-        <Text style={styles.hearts}>❤️ x 3</Text>
-        <TouchableOpacity>
-          <Text style={styles.headerButton}>⚠️</Text>
-        </TouchableOpacity>
-      </View>
+
+      {/* <View style={styles.hearts}>
+        <Ionicons name="heart" size={30} color={Colors.PRIMARY} />
+        <Text style={styles.heartCount}>x 3</Text>
+      </View> */}
+
+      <TouchableOpacity>
+        <Ionicons name="warning" size={30} color={Colors.PRIMARY} />
+      </TouchableOpacity>
+    </View>
 
       <View style={styles.content}>
         {current.render && current.render()}
@@ -301,9 +307,14 @@ const styles = StyleSheet.create({
     color: Colors.PRIMARY,
   },
   hearts: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  heartCount: {
     fontSize: 16,
     fontFamily: "outfit-bold",
     color: Colors.BLACK,
+    marginLeft: 4,
   },
   content: {
     flex: 1,
