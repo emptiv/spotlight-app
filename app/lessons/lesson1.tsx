@@ -45,7 +45,7 @@ export default function Lesson1() {
       bestStars={0}
       characters={characters.map(({ symbol, label }) => ({ symbol, label }))}
       onStudyPress={() => setScreen("study")}
-      onQuizPress={() => router.replace("/quiz/lesson1" as any)} // 🔁 Now uses router
+      onQuizPress={() => router.replace("/quiz/lesson1" as any)}
     />
   );
 }

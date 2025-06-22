@@ -19,6 +19,7 @@ type CharacterData = {
   symbol: string;
   expected: string;
   label: string;
+  modelName?: string;
 };
 
 type QuestionType = "mcq" | "writing";
@@ -47,7 +48,7 @@ export default function Quiz({
 }: {
   characters: CharacterData[];
   lessonId: string;
-  modelName: string;
+  modelName?: string;
 }) {
   const router = useRouter();
   const { user } = useUser();
@@ -199,7 +200,7 @@ export default function Quiz({
       return (
         <View>
           <Text style={styles.question}>
-            What is the syllabic for {current.character.symbol}?
+            {current.character.symbol}
           </Text>
           {current.options!.map((option, idx) => (
             <TouchableOpacity
@@ -218,11 +219,11 @@ export default function Quiz({
       return (
         <View>
           <Text style={styles.question}>
-            Write {current.character.symbol} ({current.character.label})
+            Write {current.character.label}
           </Text>
           <HandwritingCanvas
             key={`${currentIndex}-${answerLog.length}`}
-            lesson={modelName}
+            lesson={current.character.modelName || modelName}
             showGuide={false}
             onPrediction={(prediction) => {
               const isCorrect =
@@ -299,26 +300,29 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   question: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: "outfit-bold",
+    fontSize: 40,
     marginBottom: 20,
     textAlign: "center",
     color: Colors.PRIMARY,
   },
   option: {
-    backgroundColor: "#eee",
+    fontFamily: "outfit",
+    backgroundColor: Colors.PRIMARY,
     padding: 16,
     borderRadius: 10,
     marginVertical: 6,
   },
   optionText: {
+    fontFamily: "outfit",
     fontSize: 18,
     textAlign: "center",
+    color: "white"
   },
   points: {
+    fontFamily: "outfit-bold",
     textAlign: "center",
     fontSize: 18,
-    fontWeight: "bold",
     color: "#333",
     marginBottom: 12,
   },

@@ -16,6 +16,7 @@ type CharacterData = {
   expected: string;
   label: string;
   guideImage?: any;
+  modelName?: string;
 };
 
 export default function StudyScreen({
@@ -125,12 +126,12 @@ export default function StudyScreen({
 
       <View style={styles.content}>
         <Text style={styles.title}>
-          Write {char.symbol} ({char.label})
+          Write {char.label}
         </Text>
 
         <HandwritingCanvas
           key={`${clearCanvasKey}`}
-          lesson={lessonId}
+          lesson={char.modelName || lessonId}
           showGuide={showGuide}
           guideImage={char.guideImage}
           onPrediction={handlePrediction}
@@ -174,6 +175,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   feedback: {
+    fontFamily: "outfit-bold",
     fontSize: 20,
     textAlign: "center",
     color: Colors.PRIMARY,
