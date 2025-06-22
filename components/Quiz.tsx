@@ -1,13 +1,19 @@
 import HandwritingCanvas from "@/components/HandwritingCanvas";
 import Colors from "@/constants/Colors";
-import React, { useEffect, useState } from "react";
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/clerk-expo";
+import { useMutation, useQuery } from "convex/react";
+import { useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import Svg, { Rect } from "react-native-svg";
 
 type CharacterData = {
   symbol: string;
@@ -25,23 +31,44 @@ type Question = {
   attempted: boolean;
 };
 
+type AnswerSummary = {
+  symbol: string;
+  label: string;
+  type: QuestionType;
+  expected: string;
+  result: "correct" | "wrong";
+  pointsEarned: number;
+};
+
 export default function Quiz({
   characters,
   lessonId,
   modelName,
-  onComplete,
 }: {
   characters: CharacterData[];
   lessonId: string;
   modelName: string;
-  onComplete: (stars: number, score: number) => void;
 }) {
+  const router = useRouter();
+  const { user } = useUser();
+  const startTime = useRef(Date.now());
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [correctAnswered, setCorrectAnswered] = useState(0);
-  const [totalPoints, setTotalPoints] = useState(0);
+  const [answerLog, setAnswerLog] = useState<AnswerSummary[]>([]);
 
-  const current = questions[currentIndex];
+  const recordAttempt = useMutation(api.quiz.recordQuizAttempt);
+  const recordSingleAnswer = useMutation(api.quiz.recordSingleAnswer);
+  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
+    clerkId: user?.id || "",
+  });
+
+  const pastAttempts = useQuery(
+    api.quiz.getAttemptsForLesson,
+    convexUserId
+      ? { userId: convexUserId, lessonId }
+      : "skip"
+  );
 
   useEffect(() => {
     const generated = characters.flatMap((char) => {
@@ -74,29 +101,41 @@ export default function Quiz({
     return shuffleArray([answer, ...distractors]);
   };
 
-  const handleAnswer = (isCorrect: boolean) => {
+  const handleAnswer = async (isCorrect: boolean) => {
     const q = questions[currentIndex];
     const updated = [...questions];
+    const gained = isCorrect ? q.pointsLeft : 0;
+
+    const answer: AnswerSummary = {
+      symbol: q.character.symbol,
+      label: q.character.label,
+      type: q.type,
+      expected: q.character.expected,
+      result: isCorrect ? "correct" : "wrong",
+      pointsEarned: gained,
+    };
+
+    if (user && convexUserId) {
+      await recordSingleAnswer({
+        userId: convexUserId,
+        lessonId,
+        ...answer,
+        createdAt: Date.now(),
+      });
+    }
+
+    const newLog = [...answerLog, answer];
 
     if (isCorrect) {
-      // Award points only on first correct
-      if (!q.attempted) {
-        const gain = q.type === "mcq" ? 10 : 15;
-        setTotalPoints((p) => p + gain);
-      }
-
-      setCorrectAnswered((c) => c + 1);
-      updated.splice(currentIndex, 1); // Remove question
+      updated.splice(currentIndex, 1);
     } else {
-      // Deduct points
       const penalty = q.type === "mcq" ? 2 : 3;
-      q.pointsLeft -= penalty;
+      q.pointsLeft = Math.max(0, q.pointsLeft - penalty);
       q.attempted = true;
 
       if (q.pointsLeft <= 0) {
-        updated.splice(currentIndex, 1); // Remove completely
+        updated.splice(currentIndex, 1);
       } else {
-        // Reinsert elsewhere to retry later
         updated.splice(currentIndex, 1);
         const insertAt = getRandomInt(currentIndex + 1, updated.length + 1);
         updated.splice(insertAt, 0, q);
@@ -104,27 +143,56 @@ export default function Quiz({
     }
 
     setQuestions(updated);
+    setAnswerLog(newLog);
 
     if (updated.length === 0) {
-      finishQuiz();
+      await finishQuiz(newLog);
     } else {
       setCurrentIndex(Math.min(currentIndex, updated.length - 1));
     }
   };
 
-  const finishQuiz = () => {
-    const maxPoints = characters.length * (10 + 15) * 2; // each character: 2 MCQ + 2 Writing
-    const stars =
-      totalPoints >= maxPoints
-        ? 3
-        : totalPoints >= maxPoints * 0.75
-        ? 2
-        : 1;
+  const finishQuiz = async (finalLog: AnswerSummary[]) => {
+    const totalPoints = finalLog.reduce((sum, a) => sum + a.pointsEarned, 0);
+    const correctAnswers = finalLog.filter((a) => a.result === "correct").length;
+    const maxPoints = characters.length * (10 + 15) * 2;
 
-    onComplete(stars, totalPoints);
+    const stars =
+      totalPoints >= maxPoints ? 3 :
+      totalPoints >= maxPoints * 0.75 ? 2 : 1;
+
+    if (!user || !convexUserId || pastAttempts === undefined) return;
+
+    const isRetake = pastAttempts.length > 0;
+    const attemptNumber = pastAttempts.length + 1;
+
+    await recordAttempt({
+      userId: convexUserId,
+      lessonId,
+      score: totalPoints,
+      totalQuestions: finalLog.length,
+      correctAnswers,
+      earnedStars: stars,
+      answers: finalLog,
+      createdAt: Date.now(),
+      timeSpent: Date.now() - startTime.current,
+      isRetake,
+      attemptNumber,
+    });
+
+    router.replace({
+      pathname: "/quiz/results",
+      params: {
+        stars: stars.toString(),
+        score: totalPoints.toString(),
+        lessonRoute: modelName,
+        answers: encodeURIComponent(JSON.stringify(finalLog)),
+      },
+    });
   };
 
   const renderQuestion = () => {
+    const current = questions[currentIndex];
     if (!current) return null;
 
     if (current.type === "mcq") {
@@ -153,7 +221,7 @@ export default function Quiz({
             Write {current.character.symbol} ({current.character.label})
           </Text>
           <HandwritingCanvas
-            key={`${currentIndex}-${correctAnswered}`}
+            key={`${currentIndex}-${answerLog.length}`}
             lesson={modelName}
             showGuide={false}
             onPrediction={(prediction) => {
@@ -168,18 +236,52 @@ export default function Quiz({
     }
   };
 
+  const progress = answerLog.length / (characters.length * 4);
+
+  if (!user || !convexUserId) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+        <Text>Loading user...</Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.progress}>
-        Question {correctAnswered + 1}
+      {/* SVG Progress Bar */}
+      <View style={styles.progressBarContainer}>
+        <Svg height="10" width="100%">
+          <Rect
+            x="0"
+            y="0"
+            width="100%"
+            height="10"
+            fill="#eee"
+            rx="5"
+            ry="5"
+          />
+          <Rect
+            x="0"
+            y="0"
+            width={`${progress * 100}%`}
+            height="10"
+            fill={Colors.PRIMARY}
+            rx="5"
+            ry="5"
+          />
+        </Svg>
+      </View>
+
+      <Text style={styles.points}>
+        Points: {answerLog.reduce((sum, a) => sum + a.pointsEarned, 0)}
       </Text>
-      <Text style={styles.points}>Points: {totalPoints}</Text>
+
       {renderQuestion()}
     </SafeAreaView>
   );
 }
 
-// Helpers
 function shuffleArray<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }
@@ -192,6 +294,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  progressBarContainer: {
+    marginBottom: 12,
   },
   question: {
     fontSize: 22,
@@ -210,16 +315,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
   },
-  progress: {
-    textAlign: "center",
-    marginBottom: 8,
-    fontSize: 16,
-  },
   points: {
     textAlign: "center",
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
     marginBottom: 12,
+  },
+  centered: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

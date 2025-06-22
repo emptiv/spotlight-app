@@ -1,6 +1,6 @@
-import QuizLesson1 from "@/app/quiz/q-lesson-1"; // Import your quiz screen directly
 import LessonOverviewScreen from "@/components/LessonOverview";
 import LessonScreen from "@/components/StudyScreen";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 
 const characters = [
@@ -25,20 +25,17 @@ const characters = [
 ];
 
 export default function Lesson1() {
-  const [screen, setScreen] = useState<"overview" | "study" | "quiz">("overview");
+  const [screen, setScreen] = useState<"overview" | "study">("overview");
+  const router = useRouter();
 
   if (screen === "study") {
     return (
       <LessonScreen
         lessonId="lesson1"
-        nextScreen="/quiz/q-lesson-1"
+        nextScreen="/quiz/lesson1"
         characters={characters}
       />
     );
-  }
-
-  if (screen === "quiz") {
-    return <QuizLesson1 />;
   }
 
   return (
@@ -48,7 +45,7 @@ export default function Lesson1() {
       bestStars={0}
       characters={characters.map(({ symbol, label }) => ({ symbol, label }))}
       onStudyPress={() => setScreen("study")}
-      onQuizPress={() => setScreen("quiz")} // 🔓 Bypassing lock here
+      onQuizPress={() => router.replace("/quiz/lesson1" as any)} // 🔁 Now uses router
     />
   );
 }

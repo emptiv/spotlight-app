@@ -1,20 +1,38 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Colors from "../../constants/Colors";
 
+type AnswerSummary = {
+  symbol: string;
+  label: string;
+  type: string;
+  expected: string;
+  result: "correct" | "wrong";
+  pointsEarned: number;
+};
+
 export default function QuizResults() {
-  const { stars, score, lessonRoute } = useLocalSearchParams<{
+  const { stars, score, lessonRoute, answers } = useLocalSearchParams<{
     stars: string;
-    score: string; // <-- raw points earned
+    score: string;
     lessonRoute?: string;
+    answers?: string;
   }>();
 
   const router = useRouter();
+  const [showAnswers, setShowAnswers] = useState(false);
 
   const numericStars = Math.max(0, Math.min(3, Number(stars)));
   const totalPoints = Number(score);
 
-  const starDisplay = "⭐".repeat(numericStars) + "☆".repeat(3 - numericStars);
+  const parsedAnswers: AnswerSummary[] = answers
+    ? JSON.parse(decodeURIComponent(answers))
+    : [];
+
+  console.log("✅ Raw 'answers' param:", answers);
+  console.log("✅ Parsed Answers:", parsedAnswers);
 
   const message =
     numericStars === 3
@@ -24,12 +42,47 @@ export default function QuizResults() {
       : "Keep practicing! Try again for a better score.";
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Quiz Results</Text>
 
-      <Text style={styles.stars}>{starDisplay}</Text>
+      <View style={styles.starsContainer}>
+        {[...Array(3)].map((_, i) => (
+          <Ionicons
+            key={i}
+            name={i < numericStars ? "star" : "star-outline"}
+            size={32}
+            color={Colors.PRIMARY}
+          />
+        ))}
+      </View>
+
       <Text style={styles.score}>You earned {totalPoints} points</Text>
       <Text style={styles.message}>{message}</Text>
+
+      <TouchableOpacity
+        onPress={() => setShowAnswers((prev) => !prev)}
+        style={styles.toggleButton}
+      >
+        <Text style={styles.toggleButtonText}>
+          {showAnswers ? "Hide Answers" : "Show Answers"}
+        </Text>
+      </TouchableOpacity>
+
+      {showAnswers && (
+        <View style={styles.answersBox}>
+          {parsedAnswers.length === 0 ? (
+            <Text style={styles.answerText}>No answers available.</Text>
+          ) : (
+            parsedAnswers.map((ans, i) => (
+              <View key={i} style={styles.answerRow}>
+                <Text style={styles.answerText}>
+                  [{ans.type}] {ans.symbol} ({ans.label}) → {ans.result.toUpperCase()} +{ans.pointsEarned}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
+      )}
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -48,46 +101,64 @@ export default function QuizResults() {
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: Colors.WHITE,
-    justifyContent: "center",
-    alignItems: "center",
     padding: 24,
+    backgroundColor: Colors.WHITE,
+    alignItems: "center",
   },
   title: {
     fontSize: 28,
     fontFamily: "outfit-bold",
     marginBottom: 16,
-    textAlign: "center",
   },
-  stars: {
-    fontSize: 32,
-    fontFamily: "outfit-bold",
-    color: Colors.PRIMARY,
+  starsContainer: {
+    flexDirection: "row",
     marginBottom: 12,
   },
   score: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: "outfit",
     marginBottom: 12,
   },
   message: {
     fontSize: 16,
     fontFamily: "outfit",
+    color: Colors.GRAY,
     marginBottom: 24,
     textAlign: "center",
-    color: Colors.GRAY,
+  },
+  toggleButton: {
+    marginBottom: 16,
+    backgroundColor: Colors.GRAY,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  toggleButtonText: {
+    fontFamily: "outfit-bold",
+    fontSize: 16,
+    color: Colors.WHITE,
+  },
+  answersBox: {
+    width: "100%",
+    marginBottom: 24,
+  },
+  answerRow: {
+    paddingVertical: 6,
+  },
+  answerText: {
+    fontFamily: "outfit",
+    fontSize: 16,
+    textAlign: "center",
   },
   buttonContainer: {
-    flexDirection: "column",
-    gap: 12,
     width: "100%",
+    gap: 12,
   },
   button: {
     padding: 16,
