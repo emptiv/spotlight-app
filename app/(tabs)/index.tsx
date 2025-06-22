@@ -12,12 +12,12 @@ import Svg, { Circle, Path } from "react-native-svg";
 
 // Custom layout with (x, y) positions
 const LESSONS = [ // static for now, must update real-time depending on user progress
-  { id: 1, title: "Lesson 1", status: "unlocked", path: "/lessons/lesson-1", x: 160, y: 5 },
-  { id: 2, title: "Lesson 2", status: "unlocked", path: "/lessons/lesson-2", x: 260, y: 140 },
-  { id: 3, title: "Lesson 3", status: "unlocked", path: "/lessons/lesson-3", x: 60, y: 240 },
-  { id: 4, title: "Lesson 4", status: "unlocked", path: "/lessons/lesson-4", x: 60, y: 400 },
-  { id: 5, title: "Lesson 5", status: "unlocked", path: "/lessons/lesson-5", x: 260, y: 480 },
-  { id: 6, title: "Lesson 6", status: "unlocked", path: "/lessons/lesson-6", x: 260, y: 630 },
+  { id: 1, title: "Lesson 1", status: "unlocked", path: "/lessons/lesson1", x: 160, y: 5 },
+  { id: 2, title: "Lesson 2", status: "unlocked", path: "/lessons/lesson2", x: 260, y: 140 },
+  { id: 3, title: "Lesson 3", status: "unlocked", path: "/lessons/lesson3", x: 60, y: 240 },
+  { id: 4, title: "Lesson 4", status: "unlocked", path: "/lessons/lesson4", x: 60, y: 400 },
+  { id: 5, title: "Lesson 5", status: "unlocked", path: "/lessons/lesson5", x: 260, y: 480 },
+  { id: 6, title: "Lesson 6", status: "unlocked", path: "/lessons/lesson6", x: 260, y: 630 },
 ];
 
 const TILE_SIZE = 80;

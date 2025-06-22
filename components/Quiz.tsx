@@ -1,295 +1,225 @@
-// components/Quiz.tsx
-import { useAuth } from "@clerk/clerk-expo";
-import { useFocusEffect } from "@react-navigation/native";
-import { useMutation, useQuery } from "convex/react";
-import { useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import * as Progress from "react-native-progress";
-import Colors from "../constants/Colors";
-import { lessonRoutes } from "../constants/LessonRoutes";
-import { api } from "../convex/_generated/api";
+import HandwritingCanvas from "@/components/HandwritingCanvas";
+import Colors from "@/constants/Colors";
+import React, { useEffect, useState } from "react";
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-
-// Define allowed difficulty levels
-type Difficulty = "basic" | "kudlit" | "word" | "sentence";
-
-const difficultyScoreMap: Record<Difficulty, number> = {
-  basic: 10,
-  kudlit: 15,
-  word: 20,
-  sentence: 25,
+type CharacterData = {
+  symbol: string;
+  expected: string;
+  label: string;
 };
 
-type QuizProps = {
+type QuestionType = "mcq" | "writing";
+
+type Question = {
+  type: QuestionType;
+  character: CharacterData;
+  options?: string[];
+  pointsLeft: number;
+  attempted: boolean;
+};
+
+export default function Quiz({
+  characters,
+  lessonId,
+  modelName,
+  onComplete,
+}: {
+  characters: CharacterData[];
   lessonId: string;
-};
-
-export default function Quiz({ lessonId }: QuizProps) {
-  const { userId } = useAuth();
-  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
-    clerkId: userId ?? "",
-  });
-
-  const questions = useQuery(api.questions.getRandomQuestionsByLesson, {
-    lessonId: lessonId as any,
-  });
-
+  modelName: string;
+  onComplete: (stars: number, score: number) => void;
+}) {
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [answers, setAnswers] = useState<{ [key: string]: number }>({});
-  const [showFeedback, setShowFeedback] = useState(false);
+  const [correctAnswered, setCorrectAnswered] = useState(0);
+  const [totalPoints, setTotalPoints] = useState(0);
 
-    useFocusEffect(
-    useCallback(() => {
-      // Reset all state on focus
-      setCurrentIndex(0);
-      setSelected(null);
-      setAnswers({});
-      setShowFeedback(false);
-    }, [])
-  );
+  const current = questions[currentIndex];
 
+  useEffect(() => {
+    const generated = characters.flatMap((char) => {
+      const mcq: Question = {
+        type: "mcq",
+        character: char,
+        options: generateMCQOptions(char.expected),
+        pointsLeft: 10,
+        attempted: false,
+      };
 
-  const router = useRouter();
-  const saveAttempt = useMutation(api.userAttempts.saveAttempt);
+      const writing: Question = {
+        type: "writing",
+        character: char,
+        pointsLeft: 15,
+        attempted: false,
+      };
 
-  if (!convexUserId || !questions || questions.length === 0 || !questions[currentIndex]) {
-    return (
-      <View style={styles.center}>
-        <Text>Loading quiz...</Text>
-      </View>
-    );
-  }
+      return [mcq, writing, { ...mcq }, { ...writing }];
+    });
 
-  const currentQuestion = questions[currentIndex];
-  const correctAnswer = currentQuestion.correctAnswerIndex;
-  const isLast = currentIndex === questions.length - 1;
-  const isFirst = currentIndex === 0;
+    setQuestions(shuffleArray(generated));
+  }, []);
 
-  const handleOptionSelect = (index: number) => {
-    setSelected(index);
-    setShowFeedback(true);
-    setAnswers((prev) => ({ ...prev, [currentQuestion._id]: index }));
+  const normalize = (s: string) => s.toLowerCase().replace(/[_\s\/]/g, "");
+
+  const generateMCQOptions = (answer: string): string[] => {
+    const all = characters.map((c) => c.expected);
+    const distractors = shuffleArray(all.filter((o) => o !== answer)).slice(0, 3);
+    return shuffleArray([answer, ...distractors]);
   };
 
-  const handleNext = () => {
-    if (currentIndex < questions.length - 1) {
-      const nextIndex = currentIndex + 1;
-      setCurrentIndex(nextIndex);
+  const handleAnswer = (isCorrect: boolean) => {
+    const q = questions[currentIndex];
+    const updated = [...questions];
 
-      const nextQuestion = questions[nextIndex];
-      const savedAnswer = answers[nextQuestion._id];
-
-      setSelected(savedAnswer ?? null);
-      setShowFeedback(savedAnswer !== undefined);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentIndex > 0) {
-      const prevIndex = currentIndex - 1;
-      setCurrentIndex(prevIndex);
-
-      const prevQuestion = questions[prevIndex];
-      const savedAnswer = answers[prevQuestion._id];
-
-      setSelected(savedAnswer ?? null);
-      setShowFeedback(savedAnswer !== undefined);
-    }
-  };
-
-  const progress = (currentIndex + 1) / questions.length;
-
-  const handleFinishQuiz = async () => {
-    let score = 0;
-
-    Object.entries(answers).forEach(([questionId, selectedIndex]) => {
-      const q = questions.find((q) => q._id === questionId);
-      const isCorrect = q?.correctAnswerIndex === selectedIndex;
-      const rawDifficulty = q?.difficulty ?? "basic";
-
-      const difficulty: Difficulty = ["basic", "kudlit", "word", "sentence"].includes(rawDifficulty)
-        ? (rawDifficulty as Difficulty)
-        : "basic";
-
-      if (isCorrect) {
-        score += difficultyScoreMap[difficulty];
+    if (isCorrect) {
+      // Award points only on first correct
+      if (!q.attempted) {
+        const gain = q.type === "mcq" ? 10 : 15;
+        setTotalPoints((p) => p + gain);
       }
-    });
 
-    const correct = Object.entries(answers).filter(([questionId, selectedIndex]) => {
-      const q = questions.find((q) => q._id === questionId);
-      return q?.correctAnswerIndex === selectedIndex;
-    }).length;
+      setCorrectAnswered((c) => c + 1);
+      updated.splice(currentIndex, 1); // Remove question
+    } else {
+      // Deduct points
+      const penalty = q.type === "mcq" ? 2 : 3;
+      q.pointsLeft -= penalty;
+      q.attempted = true;
 
-    const total = questions.length;
+      if (q.pointsLeft <= 0) {
+        updated.splice(currentIndex, 1); // Remove completely
+      } else {
+        // Reinsert elsewhere to retry later
+        updated.splice(currentIndex, 1);
+        const insertAt = getRandomInt(currentIndex + 1, updated.length + 1);
+        updated.splice(insertAt, 0, q);
+      }
+    }
 
-    const routeName = lessonRoutes[lessonId];
+    setQuestions(updated);
 
-    await saveAttempt({
-      userId: convexUserId,
-      lessonId: lessonId as any, // Cast to any if you are sure lessonId is valid, or use the actual Id<"lessons"> type if available
-      answers,
-      totalQuestions: total,
-      correctAnswers: correct,
-      score,
-      createdAt: new Date().toISOString(),
-    });
+    if (updated.length === 0) {
+      finishQuiz();
+    } else {
+      setCurrentIndex(Math.min(currentIndex, updated.length - 1));
+    }
+  };
 
-    const lessonRoute = lessonRoutes[lessonId];
+  const finishQuiz = () => {
+    const maxPoints = characters.length * (10 + 15) * 2; // each character: 2 MCQ + 2 Writing
+    const stars =
+      totalPoints >= maxPoints
+        ? 3
+        : totalPoints >= maxPoints * 0.75
+        ? 2
+        : 1;
 
-    router.push({
-      pathname: "/quiz/results",
-      params: {
-        correct: correct.toString(),
-        total: total.toString(),
-        score: score.toString(),
-        lessonRoute: lessonRoute,
-      },
-    });
+    onComplete(stars, totalPoints);
+  };
+
+  const renderQuestion = () => {
+    if (!current) return null;
+
+    if (current.type === "mcq") {
+      return (
+        <View>
+          <Text style={styles.question}>
+            What is the syllabic for {current.character.symbol}?
+          </Text>
+          {current.options!.map((option, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.option}
+              onPress={() =>
+                handleAnswer(option === current.character.expected)
+              }
+            >
+              <Text style={styles.optionText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      );
+    } else {
+      return (
+        <View>
+          <Text style={styles.question}>
+            Write {current.character.symbol} ({current.character.label})
+          </Text>
+          <HandwritingCanvas
+            key={`${currentIndex}-${correctAnswered}`}
+            lesson={modelName}
+            showGuide={false}
+            onPrediction={(prediction) => {
+              const isCorrect =
+                normalize(prediction) === normalize(current.character.expected);
+              handleAnswer(isCorrect);
+            }}
+            onClear={() => {}}
+          />
+        </View>
+      );
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Progress.Bar
-        progress={progress}
-        width={null}
-        color={Colors.PRIMARY}
-        unfilledColor="#eee"
-        borderWidth={0}
-        height={8}
-        animated
-        animationType="timing"
-        animationConfig={{ duration: 300 }}
-        style={{ marginBottom: 16 }}
-      />
-
-      <Text style={styles.progressText}>
-        Question {currentIndex + 1} of {questions.length}
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.progress}>
+        Question {correctAnswered + 1}
       </Text>
-
-      <Text style={styles.questionText}>
-        {currentIndex + 1}. {currentQuestion.questionText}
-      </Text>
-
-      {currentQuestion.options.map((option, i) => {
-        const isSelected = selected === i;
-        const isCorrect = i === correctAnswer;
-        const showColor = showFeedback && isSelected;
-
-        return (
-          <TouchableOpacity
-            key={i}
-            onPress={() => handleOptionSelect(i)}
-            style={[
-              styles.optionButton,
-              showColor && isCorrect && styles.correctOption,
-              showColor && !isCorrect && styles.wrongOption,
-            ]}
-            disabled={showFeedback}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                showColor && styles.optionTextSelected,
-              ]}
-            >
-              {option}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-
-      {showFeedback && (
-        <View style={styles.navigation}>
-          <TouchableOpacity
-            style={[styles.backButton, isFirst && { opacity: 0.3 }]}
-            disabled={isFirst}
-            onPress={handleBack}
-          >
-            <Text style={styles.navText}>Back</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.nextButton}
-            onPress={isLast ? handleFinishQuiz : handleNext}
-            disabled={!showFeedback}
-          >
-            <Text style={styles.navText}>{isLast ? "Finish" : "Next"}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
+      <Text style={styles.points}>Points: {totalPoints}</Text>
+      {renderQuestion()}
+    </SafeAreaView>
   );
+}
+
+// Helpers
+function shuffleArray<T>(arr: T[]): T[] {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function getRandomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min) + min);
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.WHITE,
-    padding: 24,
+    padding: 20,
   },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  progressText: {
-    fontSize: 14,
-    fontFamily: "outfit",
-    color: Colors.GRAY,
-    marginBottom: 10,
-  },
-  questionText: {
-    fontSize: 20,
-    fontFamily: "outfit-bold",
-    color: Colors.BLACK,
+  question: {
+    fontSize: 22,
+    fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
+    color: Colors.PRIMARY,
   },
-  optionButton: {
-    padding: 14,
-    backgroundColor: "#EFEFEF",
-    borderRadius: 8,
-    marginBottom: 12,
+  option: {
+    backgroundColor: "#eee",
+    padding: 16,
+    borderRadius: 10,
+    marginVertical: 6,
   },
   optionText: {
+    fontSize: 18,
+    textAlign: "center",
+  },
+  progress: {
+    textAlign: "center",
+    marginBottom: 8,
     fontSize: 16,
-    fontFamily: "outfit",
-    color: Colors.BLACK,
   },
-  optionTextSelected: {
-    fontFamily: "outfit-bold",
-    color: Colors.WHITE,
-  },
-  correctOption: {
-    backgroundColor: "#28a745",
-  },
-  wrongOption: {
-    backgroundColor: "#dc3545",
-  },
-  navigation: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 30,
-  },
-  backButton: {
-    padding: 14,
-    borderRadius: 10,
-    backgroundColor: Colors.GRAY,
-    minWidth: 100,
-    alignItems: "center",
-  },
-  nextButton: {
-    padding: 14,
-    borderRadius: 10,
-    backgroundColor: Colors.PRIMARY,
-    minWidth: 100,
-    alignItems: "center",
-  },
-  navText: {
-    color: Colors.WHITE,
-    fontFamily: "outfit-bold",
-    fontSize: 16,
+  points: {
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 12,
   },
 });

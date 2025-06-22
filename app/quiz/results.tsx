@@ -1,45 +1,34 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { AnimatedCircularProgress } from "react-native-circular-progress";
 import Colors from "../../constants/Colors";
 
-
 export default function QuizResults() {
-  const { total, correct, lessonRoute } = useLocalSearchParams<{
-    total: string;
-    correct: string;
+  const { stars, score, lessonRoute } = useLocalSearchParams<{
+    stars: string;
+    score: string; // <-- raw points earned
     lessonRoute?: string;
   }>();
+
   const router = useRouter();
 
-  const score = Number(correct);
-  const totalQuestions = Number(total);
-  const percentage = totalQuestions > 0 ? ((score / totalQuestions) * 100).toFixed(1) : "0.0";
-  const passed = score / totalQuestions >= 0.7;
+  const numericStars = Math.max(0, Math.min(3, Number(stars)));
+  const totalPoints = Number(score);
 
-  const message = passed
-    ? "Great job! You passed the quiz."
-    : "Keep practicing! You can try again.";
+  const starDisplay = "⭐".repeat(numericStars) + "☆".repeat(3 - numericStars);
+
+  const message =
+    numericStars === 3
+      ? "Excellent! Perfect score!"
+      : numericStars === 2
+      ? "Great work! You're almost there."
+      : "Keep practicing! Try again for a better score.";
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Quiz Results</Text>
 
-      <AnimatedCircularProgress
-        size={160}
-        width={16}
-        fill={parseFloat(percentage)}
-        tintColor={Colors.PRIMARY}
-        backgroundColor={Colors.LIGHT_GRAY}
-        rotation={0}
-        lineCap="round"
-      >
-        {() => <Text style={styles.percentageInside}>{percentage}%</Text>}
-      </AnimatedCircularProgress>
-
-      <Text style={styles.score}>
-        You got {score} out of {totalQuestions} correct
-      </Text>
+      <Text style={styles.stars}>{starDisplay}</Text>
+      <Text style={styles.score}>You earned {totalPoints} points</Text>
       <Text style={styles.message}>{message}</Text>
 
       <View style={styles.buttonContainer}>
@@ -77,17 +66,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: "center",
   },
-  score: {
-    fontSize: 20,
-    fontFamily: "outfit",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  percentageInside: {
-    fontSize: 22,
+  stars: {
+    fontSize: 32,
     fontFamily: "outfit-bold",
     color: Colors.PRIMARY,
-    textAlign: "center",
+    marginBottom: 12,
+  },
+  score: {
+    fontSize: 22,
+    fontFamily: "outfit",
+    marginBottom: 12,
   },
   message: {
     fontSize: 16,

@@ -7,8 +7,7 @@ export const createQuestion = mutation({
     lessonId: v.id("lessons"),
     questionText: v.string(),
     options: v.array(v.string()),
-    correctAnswerIndex: v.number(),
-    difficulty: v.string(), // "basic", "kudlit", "word", "sentence"
+    correctAnswerIndex: v.number()
   },
   handler: async (ctx, args) => {
     const questionId = await ctx.db.insert("questions", {
@@ -16,7 +15,6 @@ export const createQuestion = mutation({
       questionText: args.questionText,
       options: args.options,
       correctAnswerIndex: args.correctAnswerIndex,
-      difficulty: args.difficulty,
     });
     return questionId;
   },
@@ -55,17 +53,19 @@ export const submitAnswer = mutation({
 
     const isCorrect = args.selectedAnswerIndex === question.correctAnswerIndex;
 
-    // Save the answer result
     await ctx.db.insert("answers", {
       userId: args.userId,
       questionId: args.questionId,
+      answer: args.selectedAnswerIndex.toString(), // stored as string
       isCorrect,
+      type: "mcq", // assuming MCQ here
       timestamp: Date.now(),
     });
 
     return { isCorrect };
   },
 });
+
 
 export const getUserLessonStats = query({
   args: {

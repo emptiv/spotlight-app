@@ -23,9 +23,11 @@ type HandwritingCanvasProps = {
   onPrediction?: (prediction: string) => void;
   onClear?: () => void;
   lesson?: string;
+  showGuide?: boolean;
+  guideImage?: any;
 };
 
-export default function HandwritingCanvas({ onPrediction, onClear, lesson }: HandwritingCanvasProps) {
+export default function HandwritingCanvas({ onPrediction, onClear, lesson, showGuide, guideImage }: HandwritingCanvasProps) {
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState<string>("");
   const [previewUri, setPreviewUri] = useState<string | null>(null);
@@ -90,15 +92,23 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson }: Han
     // setPreviewUri(`data:image/png;base64,${base64}`);
 
     try {
-      const response = await fetch("http://192.168.68.53:8000/predict", {
+      const response = await fetch("http://192.168.68.51:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lesson, image: base64 }),
       });
 
       const data = await response.json();
+      console.log("Raw API response:", data);
+
       const result = data?.prediction || "No prediction returned.";
-      //setPrediction(result);
+      if (!result) {
+        Alert.alert("Prediction error", "API did not return a valid prediction.");
+        onPrediction?.("No prediction");
+        return;
+        }
+
+      setPrediction(result);
       onPrediction?.(result);
     } catch (err) {
       console.error("Submission error:", err);
@@ -111,6 +121,13 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson }: Han
   return (
     <View style={styles.container}>
       <View style={styles.canvasContainer} {...panResponder.panHandlers}>
+        {showGuide && guideImage && (
+          <Image
+          source={guideImage} // or { uri: ... } for remote
+            style={styles.guideOverlay}
+            resizeMode="contain"
+          />
+  )}
         <Canvas ref={canvasRef} style={styles.canvas}>
           {[...paths, currentPath]
             .map((p) => Skia.Path.MakeFromSVGString(p))
@@ -232,5 +249,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#222",
     textAlign: "center",
+  },
+  guideOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: CANVAS_SIZE,
+    height: CANVAS_SIZE,
+    zIndex: 1,
+    opacity: 0.3, // adjust as needed
   },
 });
