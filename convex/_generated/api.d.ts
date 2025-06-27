@@ -17,6 +17,7 @@ import type * as http from "../http.js";
 import type * as lessons from "../lessons.js";
 import type * as queries_getConvexUserIdByClerkId from "../queries/getConvexUserIdByClerkId.js";
 import type * as quiz from "../quiz.js";
+import type * as user_lesson_progress from "../user_lesson_progress.js";
 import type * as users from "../users.js";
 
 /**
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   lessons: typeof lessons;
   "queries/getConvexUserIdByClerkId": typeof queries_getConvexUserIdByClerkId;
   quiz: typeof quiz;
+  user_lesson_progress: typeof user_lesson_progress;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

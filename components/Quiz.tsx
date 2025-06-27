@@ -2,7 +2,7 @@ import HandwritingCanvas from "@/components/HandwritingCanvas";
 import Colors from "@/constants/Colors";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
-import { useMutation, useQuery } from "convex/react";
+import { useConvex, useMutation, useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -60,6 +60,9 @@ export default function Quiz({
 
   const recordAttempt = useMutation(api.quiz.recordQuizAttempt);
   const recordSingleAnswer = useMutation(api.quiz.recordSingleAnswer);
+  const convex = useConvex();
+  const saveProgress = useMutation(api.user_lesson_progress.saveProgress);
+
   const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
     clerkId: user?.id || "",
   });
@@ -180,6 +183,15 @@ export default function Quiz({
       isRetake,
       attemptNumber,
     });
+
+    // ✅ Update user lesson progress
+    await saveProgress({
+      userId: convexUserId,
+      lessonId,
+      score: totalPoints,
+      stars,
+    });
+
 
     router.replace({
       pathname: "/quiz/results",

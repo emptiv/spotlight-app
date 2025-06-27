@@ -54,7 +54,7 @@ export default function LessonOverviewScreen({
               <Ionicons
                 key={i}
                 name={i < bestStars ? "star" : "star-outline"}
-                size={24}
+                size={55}
                 color={Colors.PRIMARY}
               />
             ))}
@@ -109,8 +109,10 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   scoreText: {
-    fontSize: 16,
+    marginTop: 15,
+    fontSize: 20,
     color: "#444",
+    fontFamily: "outfit-bold",
   },
   charList: {
     paddingVertical: 16,

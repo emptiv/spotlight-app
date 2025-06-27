@@ -73,5 +73,5 @@ export default defineSchema({
     bestStars: v.number(),
     firstAttemptAt: v.number(),
     completedAt: v.optional(v.number()),
-  }).index("by_user", ["userId"]),
+  }).index("by_user_lesson", ["userId", "lessonId"]),
 });
