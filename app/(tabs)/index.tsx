@@ -16,12 +16,12 @@ import {
 import Svg, { Circle, Path } from "react-native-svg";
 
 const LESSONS = [
-  { id: "jx72aewjef2n2jzw5ajht6b32s7jb6bm", title: "Lesson 1", path: "/lessons/lesson1", x: 160, y: 5 },
-  { id: "jx73gf6kgan5zd49zfjza2hyss7jamra", title: "Lesson 2", path: "/lessons/lesson2", x: 260, y: 140 },
+  { id: "jx72aewjef2n2jzw5ajht6b32s7jb6bm", title: "Lesson 1", path: "/lessons/lesson1", x: 150, y: 4 },
+  { id: "jx73gf6kgan5zd49zfjza2hyss7jamra", title: "Lesson 2", path: "/lessons/lesson2", x: 240, y: 140 },
   { id: "jx7fgkbfxajnghpcgf9ebjhjdd7jb9s1", title: "Lesson 3", path: "/lessons/lesson3", x: 60, y: 240 },
   { id: "jx75w094cp3g52bw137thd7fy57jbrn3", title: "Lesson 4", path: "/lessons/lesson4", x: 60, y: 400 },
-  { id: "jx7aznjdjmag8g7v2v7w7mavtn7jbf9p", title: "Lesson 5", path: "/lessons/lesson5", x: 260, y: 480 },
-  { id: "jx755h0x70cmbc38y6h4wjzss97jaae7", title: "Lesson 6", path: "/lessons/lesson6", x: 260, y: 630 },
+  { id: "jx7aznjdjmag8g7v2v7w7mavtn7jbf9p", title: "Lesson 5", path: "/lessons/lesson5", x: 240, y: 400 },
+  { id: "jx755h0x70cmbc38y6h4wjzss97jaae7", title: "Lesson 6", path: "/lessons/lesson6", x: 240, y: 580 },
 ];
 
 const TILE_SIZE = 80;
@@ -132,6 +132,24 @@ export default function LessonMap() {
       {/* Map */}
       <View style={styles.pathContainer}>
         <Svg height={MAP_HEIGHT} width="100%" style={StyleSheet.absoluteFill}>
+          {/* Background dots - fixed grid */}
+          {Array.from({ length: Math.ceil(MAP_HEIGHT / 60) }).flatMap((_, row) =>
+            Array.from({ length: 6 }).map((_, col) => {
+              const x = 40 + col * 60;
+              const y = 40 + row * 60;
+              return (
+                <Circle
+                  key={`bg-${row}-${col}`}
+                  cx={x}
+                  cy={y}
+                  r={4}
+                  fill="rgba(0,0,0,0.05)"
+                />
+              );
+            })
+          )}
+
+          {/* Paths between lessons */}
           {lessonsWithStatus.map((_, index) => {
             if (index === lessonsWithStatus.length - 1) return null;
 
@@ -143,11 +161,14 @@ export default function LessonMap() {
             const endX = next.x + TILE_SIZE / 2;
             const endY = next.y + TILE_SIZE / 2;
 
+            const isCompletedConnection =
+              curr.status === "completed" && next.status === "completed";
+
             return (
               <Path
-                key={index}
+                key={`path-${index}`}
                 d={`M${startX},${startY} L${startX},${endY} L${endX},${endY}`}
-                stroke="#ccc"
+                stroke={isCompletedConnection ? "#83c985" : "#e3e3e3"}
                 strokeWidth={17}
                 fill="none"
               />
@@ -155,6 +176,7 @@ export default function LessonMap() {
           })}
         </Svg>
 
+        {/* Lesson nodes */}
         {lessonsWithStatus.map((lesson) => (
           <View
             key={lesson.id}
@@ -202,7 +224,7 @@ export default function LessonMap() {
 const styles = StyleSheet.create({
   container: {
     paddingTop: 48,
-    paddingBottom: 100,
+    paddingBottom: 90,
     backgroundColor: Colors.WHITE,
     alignItems: "center",
   },
