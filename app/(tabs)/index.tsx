@@ -1,37 +1,100 @@
 import Colors from "@/constants/Colors";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@clerk/clerk-expo";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
+import { useConvex, useQuery } from "convex/react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
-// Custom layout with (x, y) positions
-const LESSONS = [ // static for now, must update real-time depending on user progress
-  { id: 1, title: "Lesson 1", status: "unlocked", path: "/lessons/lesson1", x: 160, y: 5 },
-  { id: 2, title: "Lesson 2", status: "unlocked", path: "/lessons/lesson2", x: 260, y: 140 },
-  { id: 3, title: "Lesson 3", status: "unlocked", path: "/lessons/lesson3", x: 60, y: 240 },
-  { id: 4, title: "Lesson 4", status: "unlocked", path: "/lessons/lesson4", x: 60, y: 400 },
-  { id: 5, title: "Lesson 5", status: "unlocked", path: "/lessons/lesson5", x: 260, y: 480 },
-  { id: 6, title: "Lesson 6", status: "unlocked", path: "/lessons/lesson6", x: 260, y: 630 },
+const LESSONS = [
+  { id: "jx72aewjef2n2jzw5ajht6b32s7jb6bm", title: "Lesson 1", path: "/lessons/lesson1", x: 160, y: 5 },
+  { id: "jx73gf6kgan5zd49zfjza2hyss7jamra", title: "Lesson 2", path: "/lessons/lesson2", x: 260, y: 140 },
+  { id: "jx7fgkbfxajnghpcgf9ebjhjdd7jb9s1", title: "Lesson 3", path: "/lessons/lesson3", x: 60, y: 240 },
+  { id: "jx75w094cp3g52bw137thd7fy57jbrn3", title: "Lesson 4", path: "/lessons/lesson4", x: 60, y: 400 },
+  { id: "jx7aznjdjmag8g7v2v7w7mavtn7jbf9p", title: "Lesson 5", path: "/lessons/lesson5", x: 260, y: 480 },
+  { id: "jx755h0x70cmbc38y6h4wjzss97jaae7", title: "Lesson 6", path: "/lessons/lesson6", x: 260, y: 630 },
 ];
 
 const TILE_SIZE = 80;
 const MAP_HEIGHT = LESSONS[LESSONS.length - 1].y + TILE_SIZE + 50;
 const PROGRESS_SIZE = 60;
-const STROKE_WIDTH = 6;
+const STROKE_WIDTH = 8;
 const RADIUS = (PROGRESS_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export default function LessonMap() {
   const router = useRouter();
+  const { userId: clerkUserId } = useAuth();
+  const convex = useConvex();
 
-  const completedCount = LESSONS.filter((l) => l.status === "completed").length;
-  const progress = completedCount / LESSONS.length;
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
+    clerkId: clerkUserId ?? "",
+  });
+
+  const fetchCompletedLessons = useCallback(async () => {
+    if (!convexUserId) return;
+    try {
+      setLoading(true);
+      const result = await convex.query(api.user_lesson_progress.getCompletedLessons, {
+        userId: convexUserId,
+      });
+      const completedIds = Array.isArray(result) ? result : [];
+      setCompletedLessons(completedIds);
+    } catch (err) {
+      console.error("Failed to fetch completed lessons:", err);
+      setCompletedLessons([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [convexUserId, convex]);
+
+  useEffect(() => {
+    fetchCompletedLessons();
+  }, [fetchCompletedLessons]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCompletedLessons();
+    }, [fetchCompletedLessons])
+  );
+
+  if (!convexUserId || loading) {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <ActivityIndicator size="large" />
+        <Text>Loading map...</Text>
+      </ScrollView>
+    );
+  }
+
+  const lessonsWithStatus = LESSONS.map((lesson, index) => {
+    const isCompleted = completedLessons.includes(lesson.id);
+    const previousLesson = LESSONS[index - 1];
+    const previousCompleted = index === 0 || (previousLesson && completedLessons.includes(previousLesson.id));
+
+    const status = isCompleted
+      ? "completed"
+      : previousCompleted
+      ? "unlocked"
+      : "locked";
+
+    return { ...lesson, status };
+  });
+
+  const completedCount = lessonsWithStatus.filter((l) => l.status === "completed").length;
+  const progress = completedCount / lessonsWithStatus.length;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -66,18 +129,17 @@ export default function LessonMap() {
         </View>
       </View>
 
-      {/* Path and Tiles */}
+      {/* Map */}
       <View style={styles.pathContainer}>
         <Svg height={MAP_HEIGHT} width="100%" style={StyleSheet.absoluteFill}>
-          {LESSONS.map((_, index) => {
-            if (index === LESSONS.length - 1) return null;
+          {lessonsWithStatus.map((_, index) => {
+            if (index === lessonsWithStatus.length - 1) return null;
 
-            const curr = LESSONS[index];
-            const next = LESSONS[index + 1];
+            const curr = lessonsWithStatus[index];
+            const next = lessonsWithStatus[index + 1];
 
             const startX = curr.x + TILE_SIZE / 2;
             const startY = curr.y + TILE_SIZE / 2;
-
             const endX = next.x + TILE_SIZE / 2;
             const endY = next.y + TILE_SIZE / 2;
 
@@ -86,29 +148,25 @@ export default function LessonMap() {
                 key={index}
                 d={`M${startX},${startY} L${startX},${endY} L${endX},${endY}`}
                 stroke="#ccc"
-                strokeWidth={3}
+                strokeWidth={17}
                 fill="none"
               />
             );
           })}
         </Svg>
 
-        {LESSONS.map((lesson) => (
+        {lessonsWithStatus.map((lesson) => (
           <View
             key={lesson.id}
-            style={[
-              styles.nodeWrapper,
-              {
-                top: lesson.y,
-                left: lesson.x,
-              },
-            ]}
+            style={[styles.nodeWrapper, { top: lesson.y, left: lesson.x }]}
           >
             <TouchableOpacity
-              activeOpacity={lesson.status === "unlocked" ? 0.7 : 1}
-              onPress={() =>
-                lesson.status === "unlocked" ? router.push(lesson.path as any) : null
-              }
+              activeOpacity={lesson.status !== "locked" ? 0.7 : 1}
+              onPress={() => {
+                if (lesson.status !== "locked") {
+                  router.push(lesson.path as any);
+                }
+              }}
               style={[
                 styles.tile,
                 {

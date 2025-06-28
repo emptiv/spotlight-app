@@ -38,6 +38,7 @@ export default function CharacterPractice() {
   const character = CHAR_MAP[char as keyof typeof CHAR_MAP];
   const [prediction, setPrediction] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [canvasKey, setCanvasKey] = useState(0);
 
   if (!character) return <Text>Invalid character</Text>;
 
@@ -52,11 +53,20 @@ export default function CharacterPractice() {
       </View>
 
       <HandwritingCanvas
-        key={Array.isArray(char) ? char.join(",") : char}
+        key={canvasKey}
         lesson={character.lesson}
         onPrediction={(result) => {
+          const isMatch = result.toLowerCase() === character.answer;
           setPrediction(result);
-          setIsCorrect(result.toLowerCase() === character.answer);
+          setIsCorrect(isMatch);
+
+          if (isMatch) {
+            setTimeout(() => {
+              setPrediction(null);
+              setIsCorrect(false);
+              setCanvasKey((prev) => prev + 1); // force reset
+            }, 1000);
+          }
         }}
         onClear={() => {
           setPrediction(null);
@@ -86,7 +96,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   title: {
-    fontSize: 20,
+    marginTop: 8,
+    fontSize: 24,
     fontFamily: "outfit-bold",
     color: Colors.PRIMARY,
   },

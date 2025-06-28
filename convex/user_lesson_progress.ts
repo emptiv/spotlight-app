@@ -64,3 +64,17 @@ export const saveProgress = mutation({
     }
   },
 });
+
+export const getCompletedLessons = query({
+  args: { userId: v.string() },
+  handler: async (ctx, { userId }) => {
+    const all = await ctx.db
+      .query("user_lesson_progress")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    return all
+      .filter((entry) => entry.isCompleted)
+      .map((entry) => entry.lessonId); // ["lesson1", "lesson2"]
+  },
+});
