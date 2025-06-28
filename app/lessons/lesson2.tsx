@@ -22,12 +22,14 @@ const characters = [
     expected: "ka",
     label: "KA",
     guideImage: require("@/assets/guides/ka.png"),
+    modelName: "lesson2",
   },
   {
     symbol: "ᜈ",
     expected: "na",
     label: "NA",
     guideImage: require("@/assets/guides/na.png"),
+    modelName: "lesson2",
   },
 ];
 
@@ -85,6 +87,7 @@ export default function Lesson2() {
     return (
       <LessonScreen
         lessonId={LESSON_ID}
+        lessonSlug="lesson2"
         nextScreen="/quiz/lesson2"
         characters={characters}
       />

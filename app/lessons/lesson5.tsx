@@ -84,6 +84,7 @@ export default function Lesson5() {
     return (
       <LessonScreen
         lessonId={LESSON_ID}
+        lessonSlug="lesson5"
         nextScreen="/quiz/lesson5"
         characters={characters}
       />

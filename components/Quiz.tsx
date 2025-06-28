@@ -249,7 +249,10 @@ export default function Quiz({
     }
   };
 
-  const progress = answerLog.length / (characters.length * 4);
+  const correctAnswersCount = answerLog.filter(a => a.result === "correct").length;
+  const totalQuestionsCount = characters.length * 4;
+
+  const progress = correctAnswersCount / totalQuestionsCount;
 
   if (!user || !convexUserId) {
     return (

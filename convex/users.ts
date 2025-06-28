@@ -41,3 +41,38 @@ export const getConvexUserIdByClerkId = query({
     return user._id;
   },
 });
+
+export const updateUserStats = mutation({
+  args: {
+    clerkId: v.string(),
+    totalXP: v.number(),
+    lastActive: v.string(),
+  },
+  handler: async (ctx, { clerkId, totalXP, lastActive }) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", clerkId))
+      .unique();
+
+    if (!user) throw new Error("User not found");
+
+    await ctx.db.patch(user._id, {
+      totalXP: (user.totalXP ?? 0) + totalXP,
+      lastActive,
+    });
+  },
+});
+
+export const getUserById = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db.get(userId);
+  },
+});
+
+export const updateUserName = mutation({
+  args: { userId: v.id("users"), name: v.string() },
+  handler: async (ctx, { userId, name }) => {
+    await ctx.db.patch(userId, { name });
+  },
+});

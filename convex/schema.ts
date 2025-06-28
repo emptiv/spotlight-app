@@ -29,7 +29,7 @@ export default defineSchema({
     result: v.union(v.literal("correct"), v.literal("wrong")),
     pointsEarned: v.number(),
     createdAt: v.number(),
-  }),
+  }).index("by_user", ["userId"]),
   user_quiz_attempts: defineTable({
     userId: v.string(),
     lessonId: v.string(),

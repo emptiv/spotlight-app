@@ -22,11 +22,13 @@ type CharacterData = {
 export default function StudyScreen({
   characters,
   lessonId,
+  lessonSlug,
   nextScreen,
 }: {
   characters: CharacterData[];
   lessonId: string;
   nextScreen: string;
+  lessonSlug?: string; // Optional slug for future use
 }) {
   const router = useRouter();
   const [index, setIndex] = useState(0);
@@ -104,7 +106,7 @@ export default function StudyScreen({
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.replace(`/lessons/${lessonId}` as any)}
+            onPress={() => router.replace(`/lessons/${lessonSlug}` as any)}
           >
             <Text style={styles.buttonText}>Continue</Text>
           </TouchableOpacity>

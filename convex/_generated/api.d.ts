@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as get_dashboard_data from "../get_dashboard_data.js";
 import type * as http from "../http.js";
 import type * as lessons from "../lessons.js";
 import type * as queries_getConvexUserIdByClerkId from "../queries/getConvexUserIdByClerkId.js";
@@ -29,6 +30,7 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  get_dashboard_data: typeof get_dashboard_data;
   http: typeof http;
   lessons: typeof lessons;
   "queries/getConvexUserIdByClerkId": typeof queries_getConvexUserIdByClerkId;
