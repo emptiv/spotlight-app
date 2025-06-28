@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
 const LESSON_ID = "jx755h0x70cmbc38y6h4wjzss97jaae7";
+const BASE_MODEL_NAME = "lesson6";
 
 const characters = [
   {
@@ -22,7 +23,9 @@ const characters = [
     label: "YA",
     guideImage: require("@/assets/guides/ya.png"),
   },
-];
+].map((char) => ({
+  ...char,
+  modelName: BASE_MODEL_NAME,}));
 
 export default function Lesson6() {
   const [screen, setScreen] = useState<"overview" | "study">("overview");

@@ -5,6 +5,7 @@ import {
   Skia,
   useCanvasRef,
 } from "@shopify/react-native-skia";
+import { Audio } from "expo-av";
 import React, { useState } from "react";
 import {
   Alert,
@@ -25,14 +26,40 @@ type HandwritingCanvasProps = {
   lesson?: string;
   showGuide?: boolean;
   guideImage?: any;
+  character?: string;
+  hideAudioButton?: boolean;
 };
 
-export default function HandwritingCanvas({ onPrediction, onClear, lesson, showGuide, guideImage }: HandwritingCanvasProps) {
+export default function HandwritingCanvas({ onPrediction, onClear, lesson, showGuide, guideImage, character, hideAudioButton }: HandwritingCanvasProps) {
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState<string>("");
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<string | null>(null);
   const canvasRef = useCanvasRef();
+
+  const playCharacterAudio = async () => {
+  if (!character) {
+    Alert.alert("Audio Error", "Character not set.");
+    return;
+  }
+
+  try {
+    const { sound } = await Audio.Sound.createAsync(
+      // Use dynamic path based on character prop
+      // You must use a static require for bundling
+      getAudioFile(character)
+    );
+    await sound.playAsync();
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.isLoaded && status.didJustFinish) {
+        sound.unloadAsync();
+      }
+    });
+  } catch (err) {
+    console.error("Audio error:", err);
+    Alert.alert("Audio Error", "Unable to play character audio.");
+  }
+};
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -89,7 +116,7 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson, showG
     const image = surface.makeImageSnapshot();
     const base64 = image.encodeToBase64();
 
-    // setPreviewUri(`data:image/png;base64,${base64}`);
+    // setPreviewUri(data:image/png;base64,${base64});
 
     try {
       const response = await fetch("http://192.168.68.60:8000/predict", {
@@ -146,6 +173,15 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson, showG
 
       <View style={styles.buttonRow}>
         <CustomButton onPress={handleClear} theme="danger" icon={<Ionicons name="trash" size={30} color="white" />} disabled={paths.length === 0 && currentPath.trim() === ""} />
+        
+        {!hideAudioButton && ( // 👈 Hides audio button when prop is true
+          <CustomButton
+            onPress={playCharacterAudio}
+            theme="default"
+            icon={<Ionicons name="volume-high" size={30} color="black" />}
+          />
+        )}
+    
         <CustomButton onPress={handleSubmit} theme="success" icon={<Ionicons name="checkmark-sharp" size={30} color="white" />} disabled={paths.length === 0 && currentPath.trim() === ""}/>
       </View>
 
@@ -201,6 +237,32 @@ const CustomButton = ({
       {icon}
     </TouchableOpacity>
   );
+};
+
+
+
+const getAudioFile = (character: string) => {
+  switch (character) {
+    case "a": return require("../assets/audio/a.wav");
+    case "e_i": return require("../assets/audio/e_i.wav");
+    case "o_u": return require("../assets/audio/o_u.wav");
+    case "pa": return require("../assets/audio/pa.wav");
+    case "ka": return require("../assets/audio/ka.wav");
+    case "na": return require("../assets/audio/na.wav");
+    case "ha": return require("../assets/audio/ha.wav");
+    case "ba": return require("../assets/audio/ba.wav");
+    case "ga": return require("../assets/audio/ga.wav");
+    case "sa": return require("../assets/audio/sa.wav");
+    case "da_ra": return require("../assets/audio/da_ra.wav");
+    case "ta": return require("../assets/audio/ta.wav");
+    case "nga": return require("../assets/audio/nga.wav");
+    case "wa": return require("../assets/audio/wa.wav");
+    case "la": return require("../assets/audio/la.wav");
+    case "ma": return require("../assets/audio/ma.wav");
+    case "ya": return require("../assets/audio/ya.wav");
+    default:
+      throw new Error("Audio file not found for character: " + character);
+  }
 };
 
 const styles = StyleSheet.create({

@@ -8,7 +8,7 @@ export default defineSchema({
     clerkId: v.string(),
     name: v.optional(v.string()),
     totalXP: v.optional(v.number()),
-    lastActive: v.optional(v.string()), // ISO string
+    lastActive: v.optional(v.number()), // ISO string
   })
     .index("by_email", ["email"])
     .index("by_clerkId", ["clerkId"]),

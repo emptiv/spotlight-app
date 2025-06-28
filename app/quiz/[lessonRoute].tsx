@@ -39,7 +39,7 @@ const lessons: Record<
   lesson4: {
     modelName: "lesson4",
     characters: [
-      { symbol: "ᜐ", expected: "sa", label: "PA", modelName: "lesson4" },
+      { symbol: "ᜐ", expected: "sa", label: "SA", modelName: "lesson4" },
       { symbol: "ᜇ", expected: "da_ra", label: "DA/RA", modelName: "lesson4" },
       { symbol: "ᜆ", expected: "ta", label: "TA", modelName: "lesson4" },
     ],

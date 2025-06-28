@@ -55,6 +55,7 @@ export default function CharacterPractice() {
       <HandwritingCanvas
         key={canvasKey}
         lesson={character.lesson}
+        character={character.answer}
         onPrediction={(result) => {
           const isMatch = result.toLowerCase() === character.answer;
           setPrediction(result);

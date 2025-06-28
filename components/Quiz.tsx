@@ -58,10 +58,13 @@ export default function Quiz({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerLog, setAnswerLog] = useState<AnswerSummary[]>([]);
 
+  const convex = useConvex();
+
+  // ✅ All mutations declared at top-level
   const recordAttempt = useMutation(api.quiz.recordQuizAttempt);
   const recordSingleAnswer = useMutation(api.quiz.recordSingleAnswer);
-  const convex = useConvex();
   const saveProgress = useMutation(api.user_lesson_progress.saveProgress);
+  const updateXp = useMutation(api.users.updateUserStats);
 
   const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
     clerkId: user?.id || "",
@@ -69,9 +72,7 @@ export default function Quiz({
 
   const pastAttempts = useQuery(
     api.quiz.getAttemptsForLesson,
-    convexUserId
-      ? { userId: convexUserId, lessonId }
-      : "skip"
+    convexUserId ? { userId: convexUserId, lessonId } : "skip"
   );
 
   useEffect(() => {
@@ -184,7 +185,6 @@ export default function Quiz({
       attemptNumber,
     });
 
-    // ✅ Update user lesson progress
     await saveProgress({
       userId: convexUserId,
       lessonId,
@@ -192,6 +192,11 @@ export default function Quiz({
       stars,
     });
 
+    await updateXp({
+      clerkId: user.id,
+      totalXP: totalPoints,
+      lastActive: Date.now(),
+    });
 
     router.replace({
       pathname: "/quiz/results",
@@ -236,6 +241,7 @@ export default function Quiz({
           <HandwritingCanvas
             key={`${currentIndex}-${answerLog.length}`}
             lesson={current.character.modelName || modelName}
+            hideAudioButton={true}
             showGuide={false}
             onPrediction={(prediction) => {
               const isCorrect =

@@ -46,7 +46,7 @@ export const updateUserStats = mutation({
   args: {
     clerkId: v.string(),
     totalXP: v.number(),
-    lastActive: v.string(),
+    lastActive: v.number(),
   },
   handler: async (ctx, { clerkId, totalXP, lastActive }) => {
     const user = await ctx.db

@@ -134,6 +134,7 @@ export default function StudyScreen({
         <HandwritingCanvas
           key={`${clearCanvasKey}`}
           lesson={char.modelName || lessonId}
+          character={char.expected}
           showGuide={showGuide}
           guideImage={char.guideImage}
           onPrediction={handlePrediction}
