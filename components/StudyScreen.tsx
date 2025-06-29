@@ -17,6 +17,8 @@ type CharacterData = {
   label: string;
   guideImage?: any;
   modelName?: string;
+  guideGIF?: any;
+  gifDuration?: number;
 };
 
 export default function StudyScreen({
@@ -137,6 +139,8 @@ export default function StudyScreen({
           character={char.expected}
           showGuide={showGuide}
           guideImage={char.guideImage}
+          guideGIF={char.guideGIF}
+          gifDuration={char.gifDuration}
           onPrediction={handlePrediction}
           onClear={() => setIsCorrect(false)}
         />

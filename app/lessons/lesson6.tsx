@@ -15,13 +15,17 @@ const characters = [
     symbol: "ᜋ",
     expected: "ma",
     label: "MA",
+    guideGIF: require("@/assets/guides/ma.gif"),
     guideImage: require("@/assets/guides/ma.png"),
+    gifDuration: 4100,
   },
   {
     symbol: "ᜌ",
     expected: "ya",
     label: "YA",
+    guideGIF: require("@/assets/guides/ya.gif"),
     guideImage: require("@/assets/guides/ya.png"),
+    gifDuration: 3800,
   },
 ].map((char) => ({
   ...char,

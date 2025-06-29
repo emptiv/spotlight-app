@@ -6,7 +6,7 @@ import {
   useCanvasRef,
 } from "@shopify/react-native-skia";
 import { Audio } from "expo-av";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { WebView } from "react-native-webview";
 
 const CANVAS_SIZE = 280;
 const DRAWING_SIZE = 280;
@@ -25,41 +26,54 @@ type HandwritingCanvasProps = {
   onClear?: () => void;
   lesson?: string;
   showGuide?: boolean;
+  guideGIF?: any;
   guideImage?: any;
   character?: string;
   hideAudioButton?: boolean;
+  gifDuration?: number;
 };
 
-export default function HandwritingCanvas({ onPrediction, onClear, lesson, showGuide, guideImage, character, hideAudioButton }: HandwritingCanvasProps) {
+export default function HandwritingCanvas({
+  onPrediction,
+  onClear,
+  lesson,
+  showGuide,
+  guideGIF,
+  guideImage,
+  character,
+  hideAudioButton,
+  gifDuration = 2000,
+}: HandwritingCanvasProps) {
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState<string>("");
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<string | null>(null);
+  const [showGuideGIF, setShowGuideGIF] = useState(true);
   const canvasRef = useCanvasRef();
 
-  const playCharacterAudio = async () => {
-  if (!character) {
-    Alert.alert("Audio Error", "Character not set.");
-    return;
-  }
+  useEffect(() => {
+    setShowGuideGIF(true); // reset GIF on character change
+  }, [guideGIF]);
 
-  try {
-    const { sound } = await Audio.Sound.createAsync(
-      // Use dynamic path based on character prop
-      // You must use a static require for bundling
-      getAudioFile(character)
-    );
-    await sound.playAsync();
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.isLoaded && status.didJustFinish) {
-        sound.unloadAsync();
-      }
-    });
-  } catch (err) {
-    console.error("Audio error:", err);
-    Alert.alert("Audio Error", "Unable to play character audio.");
-  }
-};
+  const playCharacterAudio = async () => {
+    if (!character) {
+      Alert.alert("Audio Error", "Character not set.");
+      return;
+    }
+
+    try {
+      const { sound } = await Audio.Sound.createAsync(getAudioFile(character));
+      await sound.playAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    } catch (err) {
+      console.error("Audio error:", err);
+      Alert.alert("Audio Error", "Unable to play character audio.");
+    }
+  };
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -89,9 +103,10 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson, showG
 
   const handleSubmit = async () => {
     if (paths.length === 0 && currentPath.trim() === "") {
-    Alert.alert("No Drawing", "Please write something before submitting.");
-    return;
-  }
+      Alert.alert("No Drawing", "Please write something before submitting.");
+      return;
+    }
+
     const surface = Skia.Surface.MakeOffscreen(DRAWING_SIZE, DRAWING_SIZE);
     if (!surface) {
       Alert.alert("Error", "Failed to create Skia surface.");
@@ -116,25 +131,15 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson, showG
     const image = surface.makeImageSnapshot();
     const base64 = image.encodeToBase64();
 
-    // setPreviewUri(data:image/png;base64,${base64});
-
     try {
-      const response = await fetch("http://192.168.68.60:8000/predict", {
+      const response = await fetch("http://192.168.68.52:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lesson, image: base64 }),
       });
 
       const data = await response.json();
-      console.log("Raw API response:", data);
-
       const result = data?.prediction || "No prediction returned.";
-      if (!result) {
-        Alert.alert("Prediction error", "API did not return a valid prediction.");
-        onPrediction?.("No prediction");
-        return;
-        }
-
       setPrediction(result);
       onPrediction?.(result);
     } catch (err) {
@@ -148,13 +153,63 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson, showG
   return (
     <View style={styles.container}>
       <View style={styles.canvasContainer} {...panResponder.panHandlers}>
-        {showGuide && guideImage && (
-          <Image
-          source={guideImage} // or { uri: ... } for remote
-            style={styles.guideOverlay}
-            resizeMode="contain"
-          />
-  )}
+        {showGuide && (
+          <>
+            {guideImage && (
+              <Image
+                source={guideImage}
+                resizeMode="contain"
+                style={styles.guideImage}
+              />
+            )}
+            {guideGIF && showGuideGIF && (
+              <WebView
+                originWhitelist={["*"]}
+                source={{
+                  html: `
+                    <!DOCTYPE html>
+                    <html>
+                      <head>
+                        <style>
+                          html, body {
+                            margin: 0;
+                            padding: 0;
+                            background: transparent;
+                          }
+                          img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: contain;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <img src="${Image.resolveAssetSource(guideGIF).uri}" />
+                        <script>
+                          setTimeout(() => {
+                            window.ReactNativeWebView.postMessage("done");
+                          }, ${gifDuration});
+                        </script>
+                      </body>
+                    </html>
+                  `,
+                }}
+                javaScriptEnabled
+                onMessage={(event) => {
+                  if (event.nativeEvent.data === "done") {
+                    setShowGuideGIF(false);
+                  }
+                }}
+                style={styles.guideOverlay}
+                scrollEnabled={false}
+                scalesPageToFit={false}
+                automaticallyAdjustContentInsets={false}
+                mixedContentMode="always"
+              />
+            )}
+          </>
+        )}
+
         <Canvas ref={canvasRef} style={styles.canvas}>
           {[...paths, currentPath]
             .map((p) => Skia.Path.MakeFromSVGString(p))
@@ -172,26 +227,37 @@ export default function HandwritingCanvas({ onPrediction, onClear, lesson, showG
       </View>
 
       <View style={styles.buttonRow}>
-        <CustomButton onPress={handleClear} theme="danger" icon={<Ionicons name="trash" size={30} color="white" />} disabled={paths.length === 0 && currentPath.trim() === ""} />
-        
-        {!hideAudioButton && ( // 👈 Hides audio button when prop is true
+        <CustomButton
+          onPress={handleClear}
+          theme="danger"
+          icon={<Ionicons name="trash" size={30} color="white" />}
+          disabled={paths.length === 0 && currentPath.trim() === ""}
+        />
+        {showGuide && (
+          <CustomButton
+            onPress={() => setShowGuideGIF(true)}
+            theme="default"
+            icon={<Ionicons name="eye" size={30} color="black" />}
+          />
+        )}
+        {!hideAudioButton && (
           <CustomButton
             onPress={playCharacterAudio}
             theme="default"
             icon={<Ionicons name="volume-high" size={30} color="black" />}
           />
         )}
-    
-        <CustomButton onPress={handleSubmit} theme="success" icon={<Ionicons name="checkmark-sharp" size={30} color="white" />} disabled={paths.length === 0 && currentPath.trim() === ""}/>
+        <CustomButton
+          onPress={handleSubmit}
+          theme="success"
+          icon={<Ionicons name="checkmark-sharp" size={30} color="white" />}
+          disabled={paths.length === 0 && currentPath.trim() === ""}
+        />
       </View>
 
       {previewUri && (
-        <Image
-          source={{ uri: previewUri }}
-          style={styles.previewImage}
-        />
+        <Image source={{ uri: previewUri }} style={styles.previewImage} />
       )}
-
       {prediction && (
         <Text style={styles.prediction}>
           Prediction: <Text style={{ fontWeight: "bold" }}>{prediction}</Text>
@@ -239,8 +305,6 @@ const CustomButton = ({
   );
 };
 
-
-
 const getAudioFile = (character: string) => {
   switch (character) {
     case "a": return require("../assets/audio/a.wav");
@@ -273,6 +337,7 @@ const styles = StyleSheet.create({
   canvasContainer: {
     width: CANVAS_SIZE,
     height: CANVAS_SIZE,
+    position: "relative",
     borderRadius: 12,
     overflow: "hidden",
     backgroundColor: "#fff",
@@ -280,9 +345,31 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   canvas: {
-    flex: 1,
+    position: "absolute",
+    top: 0,
+    left: 0,
     width: CANVAS_SIZE,
     height: CANVAS_SIZE,
+    zIndex: 3,
+  },
+  guideImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: CANVAS_SIZE,
+    height: CANVAS_SIZE,
+    zIndex: 1,
+    opacity: 0.1,
+  },
+  guideOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: CANVAS_SIZE,
+    height: CANVAS_SIZE,
+    zIndex: 2,
+    opacity: 0.2,
+    backgroundColor: "transparent",
   },
   buttonRow: {
     flexDirection: "row",
@@ -296,10 +383,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     elevation: 1,
   },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
   previewImage: {
     width: 100,
     height: 100,
@@ -311,14 +394,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#222",
     textAlign: "center",
-  },
-  guideOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: CANVAS_SIZE,
-    height: CANVAS_SIZE,
-    zIndex: 1,
-    opacity: 0.3, // adjust as needed
   },
 });

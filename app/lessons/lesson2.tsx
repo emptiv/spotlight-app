@@ -14,22 +14,28 @@ const characters = [
     symbol: "ᜉ",
     expected: "pa",
     label: "PA",
+    guideGIF: require("@/assets/guides/pa.gif"),
     guideImage: require("@/assets/guides/pa.png"),
     modelName: "lessonx",
+    gifDuration: 4170,
   },
   {
     symbol: "ᜃ",
     expected: "ka",
     label: "KA",
+    guideGIF: require("@/assets/guides/ka.gif"),
     guideImage: require("@/assets/guides/ka.png"),
     modelName: "lesson2",
+    gifDuration: 5000,
   },
   {
     symbol: "ᜈ",
     expected: "na",
     label: "NA",
+    guideGIF: require("@/assets/guides/na.gif"),
     guideImage: require("@/assets/guides/na.png"),
     modelName: "lesson2",
+    gifDuration: 4940,
   },
 ];
 
