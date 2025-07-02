@@ -132,7 +132,7 @@ export default function HandwritingCanvas({
     const base64 = image.encodeToBase64();
 
     try {
-      const response = await fetch("http://192.168.68.52:8000/predict", {
+      const response = await fetch("http://192.168.235.173:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lesson, image: base64 }),

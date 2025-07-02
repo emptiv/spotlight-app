@@ -10,11 +10,20 @@ export const createUser = mutation({
   handler: async (ctx, args) => {
     
     const existingUser = await ctx.db.query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.email))
-      .first()
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .unique()
     
     if (existingUser) {
-      console.log("User with this email already exists:", args.email);
+      console.log("User with this Clerk ID already exists:", args.clerkId);
+      return;
+    }
+
+    const existingEmail = await ctx.db.query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique()
+    
+    if (existingEmail) {
+      console.log("Email already in use:", args.email);
       return;
     }
 

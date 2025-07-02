@@ -14,7 +14,7 @@ export default function landing() {
         backgroundColor: Colors.WHITE, 
         alignItems: 'center' }}>
       <Image
-        source={require('../../assets/images/landing-1.png')}
+        source={require('../../assets/images/landing-2.png')}
         style={{ width: '80%', height: 320, marginTop: 70, marginBottom: 50}}/>
 
       <View style={{ 
@@ -35,13 +35,13 @@ export default function landing() {
 
         <Text style={{
           fontFamily: 'outfit',
-          fontSize: 18,
+          fontSize: 20,
           textAlign: 'center',
           color: Colors.WHITE,
           marginTop: 20,
           marginBottom: 20
         }}>
-          A mobile app that will teach you Baybayin. You will become very good at it. I promise.</Text>
+          Write the past, shape the future. Scribble your way to ace Baybayin!</Text>
 
         <TouchableOpacity style={styles.button} onPress={() => router.push('/(auth)/sign-up')}>
           <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>
