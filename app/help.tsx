@@ -31,7 +31,7 @@ export default function Help() {
       </View>
 
       <View style={styles.card}>
-        <IconTitle name="school" label="Lessons / Homepage" />
+        <IconTitle name="school" label="Lesson Map / Homepage" />
         <InfoItem text="Lesson Map: Visual guide for your progress" />
         <InfoItem text="Lesson Buttons:" />
         <View style={styles.lessonStatusRow}>
@@ -57,12 +57,6 @@ export default function Help() {
       </View>
 
       <View style={styles.card}>
-        <IconTitle name="flash" label="Practice Module" />
-        <InfoItem text="View all Baybayin characters" />
-        <InfoItem text="Tap and practice drawing any character" />
-      </View>
-
-      <View style={styles.card}>
         <IconTitle name="school" label="Lessons" />
         <Text style={styles.subsection}>Study Session</Text>
         <InfoItem text="Draw on canvas" />
@@ -77,6 +71,12 @@ export default function Help() {
         <Text style={styles.subsection}>Quiz</Text>
         <InfoItem text="MCQ: Match Baybayin character to Latin letter" />
         <InfoItem text="Writing: Draw the correct Baybayin character" />
+      </View>
+
+      <View style={styles.card}>
+        <IconTitle name="flash" label="Practice Module" />
+        <InfoItem text="View all Baybayin characters" />
+        <InfoItem text="Tap and practice drawing any character" />
       </View>
 
       <View style={styles.card}>
