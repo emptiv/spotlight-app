@@ -24,6 +24,7 @@
     "expo": "~53.0.9",
     "expo-audio": "~0.4.7",
     "expo-auth-session": "~6.2.0",
+    "expo-av": "~15.1.6",
     "expo-blur": "~14.1.4",
     "expo-constants": "~17.1.6",
     "expo-file-system": "~18.1.10",
@@ -46,14 +47,14 @@
     "react-native-gesture-handler": "~2.24.0",
     "react-native-progress": "^5.0.1",
     "react-native-reanimated": "~3.17.4",
+    "react-native-reanimated-dnd": "^1.1.0",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
     "react-native-signature-canvas": "^4.7.4",
     "react-native-svg": "15.11.2",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
-    "svix": "^1.66.0",
-    "expo-av": "~15.1.6"
+    "svix": "^1.66.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
