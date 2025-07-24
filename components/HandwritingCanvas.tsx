@@ -6,7 +6,7 @@ import {
   useCanvasRef,
 } from "@shopify/react-native-skia";
 import { Audio } from "expo-av";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Image,
@@ -50,6 +50,12 @@ export default function HandwritingCanvas({
   const [prediction, setPrediction] = useState<string | null>(null);
   const [showGuideGIF, setShowGuideGIF] = useState(true);
   const canvasRef = useCanvasRef();
+  const [strokeHistory, setStrokeHistory] = useState<Array<Array<{ x: number, y: number }>>>([]);
+  const [strokeTimings, setStrokeTimings] = useState<Array<{ start: number, end: number }>>([]);
+
+  const strokeStartRef = useRef<number>(0);
+
+  const currentStrokeRef = useRef<Array<{ x: number, y: number }>>([]); 
 
   useEffect(() => {
     setShowGuideGIF(true); // reset GIF on character change
@@ -79,29 +85,86 @@ export default function HandwritingCanvas({
     onStartShouldSetPanResponder: () => true,
     onPanResponderGrant: (evt) => {
       const { locationX, locationY } = evt.nativeEvent;
+      strokeStartRef.current = Date.now();
       setCurrentPath(`M${locationX} ${locationY}`);
+      currentStrokeRef.current = [{ x: locationX, y: locationY }];
     },
     onPanResponderMove: (evt) => {
       const { locationX, locationY } = evt.nativeEvent;
+      currentStrokeRef.current.push({ x: locationX, y: locationY });
       setCurrentPath((prev) => `${prev} L${locationX} ${locationY}`);
     },
     onPanResponderRelease: () => {
+      const strokeEnd = Date.now();
+      const strokeStart = strokeStartRef.current;
       if (currentPath.trim() !== "") {
         setPaths((prev) => [...prev, currentPath]);
+        setStrokeHistory((prev) => [...prev, currentStrokeRef.current]);
+        setStrokeTimings((prev) => [...prev, { start: strokeStart, end: strokeEnd }]);
       }
       setCurrentPath("");
     },
   });
+
+  const validateGesture = () => {
+    const strokeCount = strokeHistory.length;
+    const totalDuration = strokeTimings.reduce((sum, { start, end }) => sum + (end - start), 0);
+
+    console.log("Stroke count:", strokeCount);
+    console.log("Duration:", totalDuration);
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    strokeHistory.flat().forEach(({ x, y }) => {
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    });
+
+    const boxWidth = maxX - minX;
+    const boxHeight = maxY - minY;
+    const boxArea = boxWidth * boxHeight;
+    const areaRatio = boxArea / (CANVAS_SIZE * CANVAS_SIZE);
+
+    console.log("Bounding box area ratio:", areaRatio.toFixed(4));
+    console.log("Box size:", boxWidth.toFixed(2), "×", boxHeight.toFixed(2));
+
+    if (boxArea === 0 || areaRatio < 0.08) {
+      Alert.alert("Invalid input", "Try again.");
+      return false;
+    }
+
+    if (areaRatio > 0.70) {
+      Alert.alert("Invalid input", "Try again.");
+      return false;
+    }
+
+    if (strokeCount === 0) {
+      Alert.alert("Invalid input", "No strokes detected.");
+      return false;
+    }
+
+    if (totalDuration < 150) {
+      Alert.alert("Invalid input", "Drawing was too quick.");
+      return false;
+    }
+
+    return true;
+  };
 
   const handleClear = () => {
     setPaths([]);
     setCurrentPath("");
     setPrediction(null);
     setPreviewUri(null);
+    setStrokeHistory([]);
+    setStrokeTimings([]);
     onClear?.();
   };
 
   const handleSubmit = async () => {
+    if (!validateGesture()) return;
+
     if (paths.length === 0 && currentPath.trim() === "") {
       Alert.alert("No Drawing", "Please write something before submitting.");
       return;
@@ -132,7 +195,7 @@ export default function HandwritingCanvas({
     const base64 = image.encodeToBase64();
 
     try {
-      const response = await fetch("http://192.168.68.58:8000/predict", {
+      const response = await fetch("http://192.168.68.55:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lesson, image: base64 }),
