@@ -1,7 +1,8 @@
-// app/(tabs)/practice.tsx
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { useRouter } from "expo-router";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
 
 const CHARACTERS = [
   { symbol: "ᜀ", label: "A", value: "a" },
@@ -41,7 +42,10 @@ export default function Practice() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.tile}
-            onPress={() => router.push({ pathname: "/practice/[char]", params: { char: item.value } })}
+            onPress={async () => {
+              await playSound('click');
+              router.push({ pathname: "/practice/[char]", params: { char: item.value } });
+            }}
           >
             <Text style={styles.character}>{item.symbol}</Text>
             <Text style={styles.label}>{item.label}</Text>

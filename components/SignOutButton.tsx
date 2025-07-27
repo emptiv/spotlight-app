@@ -1,7 +1,9 @@
-import { COLORS } from '@/constants/theme'
-import { useClerk } from '@clerk/clerk-expo'
-import { useRouter } from 'expo-router'
-import { StyleSheet, Text, TouchableOpacity } from 'react-native'
+import { playSound } from '@/constants/playClickSound';
+import { COLORS } from '@/constants/theme';
+import { useClerk } from '@clerk/clerk-expo';
+import { useRouter } from 'expo-router';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+
 
 export const SignOutButton = () => {
   const { signOut } = useClerk()
@@ -18,7 +20,13 @@ export const SignOutButton = () => {
   }
 
   return (
-    <TouchableOpacity style={styles.button} onPress={handleSignOut}>
+    <TouchableOpacity 
+      style={styles.button} 
+      onPress={async () => {
+        await playSound('click');
+        handleSignOut();
+      }}
+    >
       <Text style={styles.text}>Sign out</Text>
     </TouchableOpacity>
   )

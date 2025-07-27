@@ -1,5 +1,6 @@
+import { playSound } from '@/constants/playClickSound';
 import { useSignUp } from '@clerk/clerk-expo';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Colors from '../../constants/Colors';
@@ -25,6 +26,8 @@ export default function SignUpScreen() {
     }
 
     try {
+      await playSound('click');
+
       await signUp.create({
         emailAddress,
         password,
@@ -48,8 +51,10 @@ export default function SignUpScreen() {
             { text: 'Cancel', style: 'cancel' },
             {
               text: 'Sign In',
-              onPress: () => router.replace('/(auth)/sign-in'),
-            },
+              onPress: async () => {
+                await playSound('click');
+                router.replace('/(auth)/sign-in');
+            }},
           ]
         );
       }
@@ -64,6 +69,7 @@ export default function SignUpScreen() {
     setError(null);
 
     try {
+      await playSound('click');
       const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
 
       if (signUpAttempt.status === 'complete') {
@@ -155,9 +161,14 @@ export default function SignUpScreen() {
 
       <View style={styles.linkRow}>
         <Text style={{ color: Colors.BLACK }}>Already have an account?</Text>
-        <Link href="/(auth)/sign-in">
+        <TouchableOpacity
+          onPress={async () => {
+            await playSound('click');
+            router.push('/(auth)/sign-in');
+          }}
+        >
           <Text style={{ color: Colors.PRIMARY, fontWeight: 'bold' }}> Sign in</Text>
-        </Link>
+        </TouchableOpacity>
       </View>
     </View>
   )

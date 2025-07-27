@@ -1,7 +1,8 @@
-import { useRouter } from 'expo-router'
-import React from 'react'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import Colors from '../../constants/Colors'
+import { playSound } from '@/constants/playClickSound';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Colors from '../../constants/Colors';
 
 
 export default function landing() {
@@ -43,7 +44,13 @@ export default function landing() {
         }}>
           Write the past, shape the future. Scribble your way to ace Baybayin!</Text>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/(auth)/sign-up')}>
+        <TouchableOpacity 
+          style={styles.button} 
+          onPress={async () => {
+            await playSound('click');
+            router.push('/(auth)/sign-up');
+          }}
+        >
           <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>
           Get Started
           </Text>
@@ -58,7 +65,11 @@ export default function landing() {
           borderColor: Colors.WHITE,
           },
           ]}
-          onPress={() => router.push('/(auth)/sign-in')}>
+          onPress={async () => {
+            await playSound('click');
+            router.push('/(auth)/sign-in');
+          }}
+        >
   
   <Text style={[styles.buttonText, { color: Colors.WHITE }]}>
     Already have an Account?

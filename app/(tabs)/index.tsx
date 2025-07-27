@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@clerk/clerk-expo";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -185,8 +186,9 @@ export default function LessonMap() {
           >
             <TouchableOpacity
               activeOpacity={lesson.status !== "locked" ? 0.7 : 1}
-              onPress={() => {
+              onPress={async () => {
                 if (lesson.status !== "locked") {
+                  await playSound('click');
                   router.push(lesson.path as any);
                 }
               }}

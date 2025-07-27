@@ -1,4 +1,5 @@
 import { SignOutButton } from '@/components/SignOutButton'
+import { playSound } from '@/constants/playClickSound'
 import { api } from '@/convex/_generated/api'
 import { useAuth } from '@clerk/clerk-expo'
 import { useMutation, useQuery } from 'convex/react'
@@ -41,6 +42,8 @@ export default function Profile() {
 
   const handleSave = async () => {
     try {
+      await playSound('click');
+
       if (!convexUserId) throw new Error('Missing Convex user ID')
       await updateName({ userId: convexUserId, name })
       Alert.alert('Name updated')
@@ -83,7 +86,12 @@ export default function Profile() {
             ) : (
               <>
                 <Text style={styles.name}>{user.name || 'Unnamed'}</Text>
-                <Text style={styles.editText} onPress={() => setEditing(true)}>
+                <Text style={styles.editText} 
+                   onPress={async () => {
+                    await playSound('click');
+                    setEditing(true);
+                   }}
+                >
                   Edit Name
                 </Text>
               </>

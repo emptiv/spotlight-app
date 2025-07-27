@@ -1,5 +1,6 @@
+import { playSound } from '@/constants/playClickSound';
 import { useSignIn } from '@clerk/clerk-expo';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Colors from '../../constants/Colors';
@@ -17,6 +18,7 @@ export default function Page() {
     setError(null);
 
     try {
+      await playSound('click');
       const signInAttempt = await signIn.create({
         identifier: email, // now explicitly email
         password,
@@ -58,7 +60,13 @@ export default function Page() {
         placeholderTextColor="#aaa"
       />
 
-      <TouchableOpacity style={styles.button} onPress={onSignInPress}>
+      <TouchableOpacity 
+        style={styles.button} 
+        onPress={async () => {
+          await playSound('click');
+          onSignInPress();
+        }}
+      >
         <Text style={[styles.buttonText, { color: Colors.WHITE }]}>Continue</Text>
       </TouchableOpacity>
 
@@ -66,9 +74,14 @@ export default function Page() {
 
       <View style={styles.linkRow}>
         <Text style={{ color: Colors.BLACK }}>Don't have an account?</Text>
-        <Link href="/(auth)/sign-up">
-          <Text style={{ color: Colors.PRIMARY, fontWeight: 'bold' }}> Sign up</Text>
-        </Link>
+        <TouchableOpacity
+        onPress={async () => {
+          await playSound('click');
+          router.push('/(auth)/sign-up');
+        }}
+      >
+        <Text style={{ color: Colors.PRIMARY, fontWeight: 'bold' }}> Sign up</Text>
+      </TouchableOpacity>
       </View>
     </View>
   )

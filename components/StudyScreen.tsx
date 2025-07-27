@@ -1,5 +1,6 @@
 import HandwritingCanvas from "@/components/HandwritingCanvas";
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -10,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 
 type CharacterData = {
   symbol: string;
@@ -103,12 +105,22 @@ export default function StudyScreen({
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
           <Text style={styles.title}>Study Session Finished!</Text>
-          <TouchableOpacity style={styles.button} onPress={resetLesson}>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={async () => {
+              await playSound('click');
+              resetLesson();
+            }}
+          >
             <Text style={styles.buttonText}>Retry</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.replace(`/lessons/${lessonSlug}` as any)}
+            onPress={async () => {
+              await playSound('click');
+              router.replace(`/lessons/${lessonSlug}` as any);
+            }}
           >
             <Text style={styles.buttonText}>Continue</Text>
           </TouchableOpacity>

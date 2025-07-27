@@ -1,6 +1,5 @@
-// components/LessonOverview.tsx
-
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
@@ -72,10 +71,23 @@ export default function LessonOverviewScreen({
         />
 
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.button} onPress={onStudyPress}>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={async () => {
+              await playSound('click');
+              onStudyPress();
+            }}
+          >
             <Text style={styles.buttonText}>Study</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={onQuizPress}>
+          
+          <TouchableOpacity 
+            style={styles.button}
+            onPress={async () => {
+              await playSound('click');
+              onQuizPress();
+            }}
+          >
             <Text style={styles.buttonText}>Quiz</Text>
           </TouchableOpacity>
         </View>

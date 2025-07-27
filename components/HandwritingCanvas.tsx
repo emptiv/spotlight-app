@@ -1,3 +1,4 @@
+import { playSound } from '@/constants/playClickSound';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   Canvas,
@@ -153,6 +154,7 @@ export default function HandwritingCanvas({
   };
 
   const handleClear = () => {
+    playSound('click');
     setPaths([]);
     setCurrentPath("");
     setPrediction(null);
@@ -205,6 +207,13 @@ export default function HandwritingCanvas({
       const result = data?.prediction || "No prediction returned.";
       setPrediction(result);
       onPrediction?.(result);
+
+      if (result === character) {
+        playSound('correct');
+      } else {
+        playSound('wrong');
+      }
+
     } catch (err) {
       console.error("Submission error:", err);
       Alert.alert("Error", "Failed to submit handwriting.");
@@ -298,7 +307,10 @@ export default function HandwritingCanvas({
         />
         {showGuide && (
           <CustomButton
-            onPress={() => setShowGuideGIF(true)}
+            onPress={() => {
+              playSound('click');
+              setShowGuideGIF(true);
+            }}
             theme="default"
             icon={<Ionicons name="eye" size={30} color="black" />}
           />
