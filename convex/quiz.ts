@@ -7,7 +7,7 @@ export const recordSingleAnswer = mutation({
     lessonId: v.string(),
     symbol: v.string(),
     label: v.string(),
-    type: v.union(v.literal("mcq"), v.literal("writing")),
+    type: v.union(v.literal("mcq"), v.literal("writing"), v.literal("drag")), 
     expected: v.string(),
     result: v.union(v.literal("correct"), v.literal("wrong")),
     pointsEarned: v.number(),
@@ -30,7 +30,7 @@ export const recordQuizAttempt = mutation({
       v.object({
         symbol: v.string(),
         label: v.string(),
-        type: v.union(v.literal("mcq"), v.literal("writing")),
+        type: v.union(v.literal("mcq"), v.literal("writing"), v.literal("drag")), 
         expected: v.string(),
         result: v.union(v.literal("correct"), v.literal("wrong")),
         pointsEarned: v.number(),
