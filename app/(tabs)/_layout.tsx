@@ -74,6 +74,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="minigames"
+        options={{
+          ...commonHeader,
+          headerTitle: () => <TabTitle label="Minigames" />,
+          tabBarLabel: 'Minigames',
+          tabBarIcon: ({ size, color }) => <Ionicons name="game-controller" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="dashboard"
         options={{
           ...commonHeader,

@@ -14,8 +14,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const gameStages = [
   { type: "text", content: "Are you ready?" },
   { type: "type", prompt: "Type 'bata'", correct: "ᜊᜆ" },
-  { type: "type", prompt: "Type 'sulat'", correct: "ᜐᜓᜎᜆ" },
-  { type: "type", prompt: "Type 'aral'", correct: "ᜀᜇᜎ" },
+  { type: "type", prompt: "Type 'sulat'", correct: "ᜐᜓᜎᜆ᜔" },
+  { type: "type", prompt: "Type 'aral'", correct: "ᜀᜇᜎ᜔" },
 ];
 
 export default function TypingChallengeScreen() {
@@ -109,7 +109,9 @@ export default function TypingChallengeScreen() {
 
           <TouchableOpacity style={styles.button} onPress={handleAction}>
             <Text style={styles.buttonText}>
-              {current.type === "type"
+              {index === 0 && current.type === "text"
+                ? "Start"
+                : current.type === "type"
                 ? isCorrect
                   ? isLast
                     ? "Finish"
