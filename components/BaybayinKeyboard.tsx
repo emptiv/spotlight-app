@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 const KEY_ROWS = [
@@ -11,18 +11,28 @@ const KEY_ROWS = [
 
 const KUDLITS = ["ᜒ", "ᜓ", "᜔"];
 const VOWELS = ["ᜀ", "ᜁ", "ᜂ"];
+
 const isKudlit = (c: string) => KUDLITS.includes(c);
 const isConsonant = (c: string) =>
   !KUDLITS.includes(c) && !["SPACE", "DEL", ...VOWELS, "᜵", "᜶"].includes(c);
 
 export default function BaybayinKeyboard({
   onKeyPress,
+  resetSignal,
 }: {
   onKeyPress: (char: string) => void;
+  resetSignal: number;
 }) {
   const [lastConsonant, setLastConsonant] = useState<string | null>(null);
   const [inputBuffer, setInputBuffer] = useState<string>("");
   const [lastIsVowel, setLastIsVowel] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Reset all internal state when resetSignal changes
+    setLastConsonant(null);
+    setLastIsVowel(false);
+    setInputBuffer("");
+  }, [resetSignal]);
 
   const handleKeyPress = (char: string) => {
     if (char === "SPACE") {
@@ -116,7 +126,7 @@ export default function BaybayinKeyboard({
 const styles = StyleSheet.create({
   keyboardContainer: {
     position: "absolute",
-    bottom: 60,
+    bottom: 20,
     left: 0,
     right: 0,
     backgroundColor: "#f7f7f7",

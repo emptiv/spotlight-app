@@ -23,7 +23,7 @@ export default function SpellingAndCards() {
       <View style={styles.buttonsWrapper}>
         <TouchableOpacity
           style={styles.tile}
-          onPress={() => handlePress("/practice/type")}
+          onPress={() => handlePress("/challenge/TypingIntro")}
         >
           <Ionicons name="create" size={40} color={Colors.PRIMARY} />
           <Text style={styles.title}>Spelling Exercises</Text>

@@ -25,8 +25,9 @@ export default function TypingChallengeScreen() {
   const [showFinished, setShowFinished] = useState(false);
   const [error, setError] = useState("");
   const [correctMessage, setCorrectMessage] = useState("");
-  const router = useRouter();
+  const [keyboardResetSignal, setKeyboardResetSignal] = useState(0);
 
+  const router = useRouter();
   const current = gameStages[index];
   const isLast = index === gameStages.length - 1;
 
@@ -52,7 +53,7 @@ export default function TypingChallengeScreen() {
         return;
       }
 
-      // move forward
+      // Move to next question
       if (isLast) {
         setShowFinished(true);
       } else {
@@ -61,12 +62,15 @@ export default function TypingChallengeScreen() {
         setIsCorrect(false);
         setError("");
         setCorrectMessage("");
+        setKeyboardResetSignal((prev) => prev + 1);
       }
     } else {
+      // Advance from text type
       if (isLast) {
         setShowFinished(true);
       } else {
         setIndex(index + 1);
+        setKeyboardResetSignal((prev) => prev + 1);
       }
     }
   };
@@ -75,10 +79,7 @@ export default function TypingChallengeScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.lessonText}>🎉 You've completed the challenge!</Text>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
           <Text style={styles.buttonText}>Back to Menu</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -123,7 +124,10 @@ export default function TypingChallengeScreen() {
         </ScrollView>
 
         {current.type === "type" && (
-          <BaybayinKeyboard onKeyPress={handleKeyPress} />
+          <BaybayinKeyboard
+            onKeyPress={handleKeyPress}
+            resetSignal={keyboardResetSignal}
+          />
         )}
       </View>
     </SafeAreaView>

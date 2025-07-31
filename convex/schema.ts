@@ -75,4 +75,21 @@ export default defineSchema({
     completedAt: v.optional(v.number()),
   }).index("by_user_lesson", ["userId", "lessonId"])
   .index("by_user", ["userId"]),
+
+  vocabulary: defineTable({
+    latin: v.string(),     
+    baybayin: v.string(),  
+    difficulty: v.union(
+      v.literal("easy"),
+      v.literal("medium"),
+      v.literal("hard")
+    ),
+    type: v.union(
+      v.literal("word"),
+      v.literal("phrase"),
+      v.literal("expression")
+    ),
+  })
+  .index("by_difficulty", ["difficulty"])
+  .index("by_type", ["type"]),
 });
