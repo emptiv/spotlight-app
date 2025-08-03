@@ -147,12 +147,21 @@ export default function SpellingQuizScreen() {
   }
 
   if (showFinished) {
+    const maxScore = words.length;
+    const percentage = Math.round((score / maxScore) * 100);
+    const stars = Math.round((percentage / 100) * 5);
+
     return (
       <View style={styles.centered}>
         <Text style={styles.title}>🎉 Finished!</Text>
         <Text style={styles.scoreText}>
-          Your score: {score}/{words.length}
+          Your score: {score} / {maxScore}
         </Text>
+        <Text style={styles.percentageText}>({percentage}%)</Text>
+        <Text style={styles.starsText}>
+          {"★".repeat(stars) + "☆".repeat(5 - stars)}
+        </Text>
+
         <TouchableOpacity
           onPress={() => {
             setIsSetup(true);
@@ -221,7 +230,18 @@ const styles = StyleSheet.create({
   scoreText: {
     fontSize: 22,
     fontFamily: "outfit-bold",
-    marginVertical: 20,
+    marginVertical: 10,
+    color: Colors.PRIMARY,
+  },
+  percentageText: {
+    fontSize: 18,
+    fontFamily: "outfit",
+    color: Colors.PRIMARY,
+    marginBottom: 8,
+  },
+  starsText: {
+    fontSize: 24,
+    marginBottom: 20,
     color: Colors.PRIMARY,
   },
   button: {

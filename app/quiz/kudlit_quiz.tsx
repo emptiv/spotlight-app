@@ -22,84 +22,6 @@ import Svg, { Rect } from "react-native-svg";
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-const DRAG_CHARACTERS: CharacterData[] = [
-  {
-    symbol: "ᜆ",
-    expected: "te/ti",
-    label: "TE/TI",
-    correctMarker: "Kudlit",
-    correctDrop: "top",
-  },
-  {
-    symbol: "ᜆ",
-    expected: "to/tu",
-    label: "TO/TU",
-    correctMarker: "Kudlit",
-    correctDrop: "bottom",
-  },
-  {
-    symbol: "ᜆ",
-    expected: "t",
-    label: "T",
-    correctMarker: "Plus",
-    correctDrop: "bottom",
-  },
-  {
-    symbol: "ᜄ",
-    expected: "ge/gi",
-    label: "GE/GI",
-    correctMarker: "Kudlit",
-    correctDrop: "top",
-  },
-  {
-    symbol: "ᜄ",
-    expected: "go/gu",
-    label: "GO/GU",
-    correctMarker: "Kudlit",
-    correctDrop: "bottom",
-  },
-  {
-    symbol: "ᜄ",
-    expected: "g",
-    label: "G",
-    correctMarker: "Plus",
-    correctDrop: "bottom",
-  },
-];
-
-const MCQ_CHARACTERS: CharacterData[] = [
-  {
-    symbol: "ᜆᜒ",
-    expected: "te/ti",
-    label: "TE/TI",
-  },
-  {
-    symbol: "ᜆᜓ",
-    expected: "to/tu",
-    label: "TO/TU",
-  },
-  {
-    symbol: "ᜆ᜔",
-    expected: "t",
-    label: "T",
-  },
-  {
-    symbol: "ᜄᜒ",
-    expected: "ge/gi",
-    label: "GE/GI",
-  },
-  {
-    symbol: "ᜄᜓ",
-    expected: "go/gu",
-    label: "GO/GU",
-  },
-  {
-    symbol: "ᜄ᜔",
-    expected: "g",
-    label: "G",
-  },
-];
-
 
 type CharacterData = {
   symbol: string;
@@ -108,6 +30,105 @@ type CharacterData = {
   correctDrop?: "top" | "bottom";
   correctMarker?: "Kudlit" | "Plus";
 };
+
+const BAYBAYIN_BASES = [
+  { base: "p", symbol: "ᜉ" },
+  { base: "k", symbol: "ᜃ" },
+  { base: "n", symbol: "ᜈ" },
+  { base: "h", symbol: "ᜑ" },
+  { base: "b", symbol: "ᜊ" },
+  { base: "g", symbol: "ᜄ" },
+  { base: "s", symbol: "ᜐ" },
+  { base: "d", symbol: "ᜇ" },
+  { base: "t", symbol: "ᜆ" },
+  { base: "ng", symbol: "ᜅ" },
+  { base: "w", symbol: "ᜏ" },
+  { base: "l", symbol: "ᜎ" },
+  { base: "m", symbol: "ᜋ" },
+  { base: "y", symbol: "ᜌ" },
+];
+
+const vowelForms: Record<string, { ei: string, ou: string }> = {
+  b: { ei: "be/bi", ou: "bo/bu" },
+  g: { ei: "ge/gi", ou: "go/gu" },
+  k: { ei: "ke/ki", ou: "ko/ku" },
+  t: { ei: "te/ti", ou: "to/tu" },
+  d: { ei: "de/di", ou: "do/du" },
+  p: { ei: "pe/pi", ou: "po/pu" },
+  n: { ei: "ne/ni", ou: "no/nu" },
+  h: { ei: "he/hi", ou: "ho/hu" },
+  s: { ei: "se/si", ou: "so/su" },
+  ng: { ei: "nge/ngi", ou: "ngo/ngu" },
+  w: { ei: "we/wi", ou: "wo/wu" },
+  l: { ei: "le/li", ou: "lo/lu" },
+  m: { ei: "me/mi", ou: "mo/mu" },
+  y: { ei: "ye/yi", ou: "yo/yu" },
+};
+
+// For multiple-choice quiz characters (directly rendered with markers)
+export const generateMcqCharacters = (): CharacterData[] => {
+  const vowelMarkers = [
+    { suffix: "ᜒ", variant: "ei" },
+    { suffix: "ᜓ", variant: "ou" },
+    { suffix: "᜔", variant: "consonant" }, // consonant only
+  ];
+
+  return BAYBAYIN_BASES.flatMap(({ symbol, base }) =>
+    vowelMarkers.map(({ suffix, variant }) => {
+      let expected = "";
+      let label = "";
+
+      if (variant === "consonant") {
+        expected = base;
+        label = base.toUpperCase();
+      } else if (vowelForms[base]) {
+        expected = vowelForms[base][variant as "ei" | "ou"];
+        label = vowelForms[base][variant as "ei" | "ou"].toUpperCase();
+      } else {
+        expected = base;
+        label = base.toUpperCase();
+      }
+
+      return {
+        symbol: symbol + suffix,
+        expected,
+        label,
+      };
+    })
+  );
+};
+
+
+// For drag-based quiz (requires dropping markers on base symbols)
+export const generateDragCharacters = (): CharacterData[] => {
+  return BAYBAYIN_BASES.flatMap(({ symbol, base }) => [
+    {
+      symbol,
+      expected: `${base}e/${base}i`,
+      label: `${base.toUpperCase()}E/${base.toUpperCase()}I`,
+      correctMarker: "Kudlit",
+      correctDrop: "top",
+    },
+    {
+      symbol,
+      expected: `${base}o/${base}u`,
+      label: `${base.toUpperCase()}O/${base.toUpperCase()}U`,
+      correctMarker: "Kudlit",
+      correctDrop: "bottom",
+    },
+    {
+      symbol,
+      expected: base,
+      label: base.toUpperCase(),
+      correctMarker: "Plus",
+      correctDrop: "bottom",
+    },
+  ]);
+};
+
+// Usage
+export const MCQ_CHARACTERS: CharacterData[] = generateMcqCharacters();
+export const DRAG_CHARACTERS: CharacterData[] = generateDragCharacters();
 
 type QuestionType = "mcq" | "drag";
 
@@ -304,7 +325,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
       params: {
         stars: stars.toString(),
         score: totalPoints.toString(),
-        lessonRoute: modelName,
+        lessonRoute: "kudlit_quiz",
         answers: encodeURIComponent(JSON.stringify(finalLog)),
       },
     });
