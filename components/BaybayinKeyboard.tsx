@@ -16,25 +16,33 @@ const isKudlit = (c: string) => KUDLITS.includes(c);
 const isConsonant = (c: string) =>
   !KUDLITS.includes(c) && !["SPACE", "DEL", ...VOWELS, "᜵", "᜶"].includes(c);
 
+type BaybayinKeyboardProps = {
+  onKeyPress: (char: string) => void;
+  resetSignal: number;
+  disabled?: boolean;
+};
+
 export default function BaybayinKeyboard({
   onKeyPress,
   resetSignal,
-}: {
-  onKeyPress: (char: string) => void;
-  resetSignal: number;
-}) {
+  disabled = false,
+}: BaybayinKeyboardProps) {
   const [lastConsonant, setLastConsonant] = useState<string | null>(null);
   const [inputBuffer, setInputBuffer] = useState<string>("");
   const [lastIsVowel, setLastIsVowel] = useState<boolean>(false);
 
   useEffect(() => {
-    // Reset all internal state when resetSignal changes
-    setLastConsonant(null);
-    setLastIsVowel(false);
-    setInputBuffer("");
-  }, [resetSignal]);
+    if (resetSignal || disabled) {
+      setLastConsonant(null);
+      setLastIsVowel(false);
+      setInputBuffer("");
+    }
+  }, [resetSignal, disabled]);
+
 
   const handleKeyPress = (char: string) => {
+    if (disabled) return;
+
     if (char === "SPACE") {
       setLastConsonant(null);
       setLastIsVowel(false);
@@ -80,11 +88,13 @@ export default function BaybayinKeyboard({
   };
 
   return (
-    <View style={styles.keyboardContainer}>
+    <View style={[styles.keyboardContainer, disabled && { opacity: 0.5 }]}>
       {KEY_ROWS.map((row, rowIndex) => (
         <View style={styles.row} key={rowIndex}>
           {row.map((char) => {
-            const isDisabled = isKudlit(char) && (!lastConsonant || lastIsVowel);
+            const isKudlitDisabled = isKudlit(char) && (!lastConsonant || lastIsVowel);
+            const isThisKeyDisabled = disabled || isKudlitDisabled;
+
             const displayText =
               isKudlit(char) && lastConsonant
                 ? lastConsonant + char
@@ -97,19 +107,19 @@ export default function BaybayinKeyboard({
             return (
               <Pressable
                 key={char}
-                onPress={() => !isDisabled && handleKeyPress(char)}
+                onPress={() => !isThisKeyDisabled && handleKeyPress(char)}
                 style={({ pressed }) => [
                   styles.key,
                   char === "SPACE" && styles.spaceKey,
                   char === "DEL" && styles.delKey,
-                  isDisabled && styles.disabledKey,
-                  pressed && !isDisabled && styles.keyPressed,
+                  isThisKeyDisabled && styles.disabledKey,
+                  pressed && !isThisKeyDisabled && styles.keyPressed,
                 ]}
               >
                 <Text
                   style={[
                     styles.keyText,
-                    isDisabled && { color: "#bbb" },
+                    isThisKeyDisabled && { color: "#bbb" },
                   ]}
                 >
                   {displayText}

@@ -73,13 +73,28 @@ export default function QuizResults() {
           {parsedAnswers.length === 0 ? (
             <Text style={styles.answerText}>No answers available.</Text>
           ) : (
-            parsedAnswers.map((ans, i) => (
-              <View key={i} style={styles.answerRow}>
-                <Text style={styles.answerText}>
-                  [{ans.type}] {ans.symbol} ({ans.label}) → {ans.result.toUpperCase()} +{ans.pointsEarned}
-                </Text>
-              </View>
-            ))
+            parsedAnswers.map((ans, i) => {
+              const isCorrect = ans.result === "correct";
+              return (
+                <View
+                  key={i}
+                  style={[
+                    styles.answerCard,
+                    isCorrect ? styles.correctCard : styles.incorrectCard,
+                  ]}
+                >
+                  <Ionicons
+                    name={isCorrect ? "checkmark-circle" : "close-circle"}
+                    size={22}
+                    color={isCorrect ? "green" : "red"}
+                    style={styles.cardIcon}
+                  />
+                  <Text style={styles.answerText}>
+                    [{ans.type}] {ans.symbol} ({ans.label}) → {ans.result.toUpperCase()} +{ans.pointsEarned}
+                  </Text>
+                </View>
+              );
+            })
           )}
         </View>
       )}
@@ -147,6 +162,27 @@ const styles = StyleSheet.create({
   answersBox: {
     width: "100%",
     marginBottom: 24,
+  },
+  answerCard: {
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 12,
+    position: "relative",
+  },
+  correctCard: {
+    backgroundColor: "#e6ffec",
+    borderColor: "#b2f2bb",
+    borderWidth: 1,
+  },
+  incorrectCard: {
+    backgroundColor: "#ffe6e6",
+    borderColor: "#f5c2c7",
+    borderWidth: 1,
+  },
+  cardIcon: {
+    position: "absolute",
+    top: 8,
+    right: 8,
   },
   answerRow: {
     paddingVertical: 6,

@@ -92,4 +92,23 @@ export default defineSchema({
   })
   .index("by_difficulty", ["difficulty"])
   .index("by_type", ["type"]),
+
+typing_challenges: defineTable({
+  userId: v.string(),
+  score: v.number(),
+  stars: v.number(),
+  answers: v.array(
+    v.object({
+      symbol: v.string(),
+      label: v.string(),
+      expected: v.string(),
+      result: v.union(v.literal("correct"), v.literal("wrong")),
+      pointsEarned: v.number(),
+      timeTaken: v.number(), // ⏱ Time spent on this question (in seconds)
+    })
+  ),
+  createdAt: v.number(),
+  timeSpent: v.number(), // ⏱ Total session time (optional if summing answers)
+}).index("by_user", ["userId"]),
+
 });
