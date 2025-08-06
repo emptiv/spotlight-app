@@ -32,7 +32,7 @@ export default function SpellingAndCards() {
 
         <TouchableOpacity
           style={styles.tile}
-          onPress={() => handlePress("/flashcards")}
+          onPress={() => handlePress("/practice/cards")}
         >
           <Ionicons name="copy" size={40} color={Colors.PRIMARY} />
           <Text style={styles.title}>Offline Flashcards</Text>
