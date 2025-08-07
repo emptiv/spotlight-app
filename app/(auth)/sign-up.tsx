@@ -2,7 +2,15 @@ import { playSound } from '@/constants/playClickSound';
 import { useSignUp } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Colors from '../../constants/Colors';
 
 export default function SignUpScreen() {
@@ -54,7 +62,8 @@ export default function SignUpScreen() {
               onPress: async () => {
                 await playSound('click');
                 router.replace('/(auth)/sign-in');
-            }},
+              },
+            },
           ]
         );
       }
@@ -87,106 +96,124 @@ export default function SignUpScreen() {
 
   if (pendingVerification) {
     return (
-      <View style={{ padding: 16 }}>
-        <Text style={{ fontSize: 24, fontFamily: 'outfit-bold', marginBottom: 20 }}>
-          Verify your email
-        </Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>Verify Email</Text>
+        <Text style={styles.subtitle}>We've sent a code to your email. Enter it below to continue.</Text>
 
+        <Image
+          source={require('../../assets/images/verify.png')}
+          style={styles.image}
+          resizeMode="contain"
+        />
+
+        <Text style={styles.label}>Verification Code</Text>
         <TextInput
-          style={{
-            borderWidth: 1,
-            borderColor: '#ddd',
-            borderRadius: 8,
-            padding: 14,
-            fontSize: 16,
-            marginBottom: 16,
-            fontFamily: 'outfit',
-          }}
+          style={styles.input}
           value={code}
-          placeholder="Enter your verification code"
+          placeholder="123456"
           onChangeText={setCode}
+          keyboardType="number-pad"
           placeholderTextColor="#aaa"
         />
 
-        <TouchableOpacity
-          style={{
-            backgroundColor: Colors.PRIMARY,
-            padding: 16,
-            borderRadius: 10,
-            alignItems: 'center',
-          }}
-          onPress={onVerifyPress}
-        >
-          <Text style={{ color: Colors.WHITE, fontSize: 18, fontFamily: 'outfit-bold' }}>
-            Verify
-          </Text>
+        <TouchableOpacity style={styles.buttonDark} onPress={onVerifyPress}>
+          <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Verify</Text>
         </TouchableOpacity>
 
-      {error && <Text style={{ color: 'red', marginTop: 12 }}>{error}</Text>}
-    </View>
-  )
-}
+        {error && <Text style={styles.errorText}>{error}</Text>}
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign up</Text>
+      <Text style={styles.title}>Get Started</Text>
+      <Text style={styles.subtitle}>Write the past, shape the future.</Text>
 
+      <Image
+        source={require('../../assets/images/signup.png')}
+        style={styles.image}
+        resizeMode="contain"
+      />
+
+      <Text style={styles.label}>Email</Text>
       <TextInput
         style={styles.input}
         autoCapitalize="none"
         keyboardType="email-address"
-        placeholder="Enter email"
+        placeholder="juandelacruz@gmail.com"
         value={emailAddress}
         onChangeText={setEmailAddress}
         placeholderTextColor="#aaa"
       />
 
+      <Text style={styles.label}>Password</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter password"
+        autoCapitalize="none"
+        placeholder="8-32 chars, include letters and numbers"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
         placeholderTextColor="#aaa"
       />
 
-      <TouchableOpacity 
-        style={[styles.button, { backgroundColor: Colors.PRIMARY }]}
+      <TouchableOpacity
+        style={styles.buttonDark}
         onPress={onSignUpPress}
       >
-        <Text style={[styles.buttonText, { color: Colors.WHITE }]}>Continue</Text>
+        <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Sign Up</Text>
       </TouchableOpacity>
+
 
       {error && <Text style={styles.errorText}>{error}</Text>}
 
       <View style={styles.linkRow}>
-        <Text style={{ color: Colors.BLACK }}>Already have an account?</Text>
         <TouchableOpacity
           onPress={async () => {
             await playSound('click');
             router.push('/(auth)/sign-in');
           }}
         >
-          <Text style={{ color: Colors.PRIMARY, fontWeight: 'bold' }}> Sign in</Text>
+          <Text style={{ fontFamily: 'outfit-bold', color: Colors.PRIMARY }}> Already have an account?</Text>
         </TouchableOpacity>
       </View>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 40,
     padding: 24,
     flex: 1,
     backgroundColor: Colors.WHITE,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   title: {
-    fontSize: 28,
+    fontSize: 35,
     fontFamily: 'outfit-bold',
-    marginBottom: 24,
+    marginBottom: 1,
     color: Colors.PRIMARY,
-    textAlign: 'center',
+    textAlign: 'left',
+  },
+  subtitle: {
+    fontSize: 16,
+    fontFamily: 'outfit',
+    color: '#666',
+    textAlign: 'left',
+    marginBottom: 24,
+  },
+  image: {
+    width: '100%',
+    height: 250,
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 15,
+    fontFamily: 'outfit-bold',
+    color: Colors.PRIMARY,
+    marginBottom: 6,
   },
   input: {
     borderWidth: 1,
@@ -199,7 +226,6 @@ const styles = StyleSheet.create({
     fontFamily: 'outfit',
   },
   button: {
-    backgroundColor: Colors.WHITE,
     padding: 16,
     borderRadius: 10,
     marginTop: 10,
@@ -208,6 +234,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 18,
     fontFamily: 'outfit-bold',
+    textAlign: 'center',
   },
   errorText: {
     color: 'red',
@@ -220,4 +247,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 24,
   },
-})
+  buttonDark: {
+    marginTop: 10,
+    padding: 15,
+    backgroundColor: Colors.SECONDARY,
+    borderRadius: 25,
+    width: '65%',
+    alignSelf: 'center',
+  },
+});

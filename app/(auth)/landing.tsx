@@ -4,92 +4,84 @@ import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Colors from '../../constants/Colors';
 
-
 export default function landing() {
+  const router = useRouter();
 
-  const router = useRouter()
-  
   return (
-    <View style={{ 
-        flex: 1, 
-        backgroundColor: Colors.WHITE, 
-        alignItems: 'center' }}>
+    <View style={styles.container}>
+      <Text style={styles.title}>Welcome to Plumatika!</Text>
+
       <Image
-        source={require('../../assets/images/landing-2.png')}
-        style={{ width: '80%', height: 320, marginTop: 70, marginBottom: 50}}/>
+        source={require('../../assets/images/logo.png')}
+        style={styles.logo}
+      />
 
-      <View style={{ 
-        padding: 25, 
-        backgroundColor: Colors.PRIMARY, 
-        height: '100%', 
-        width: '100%',
-        borderTopLeftRadius: 35,
-        borderTopRightRadius: 35,}}>
+      <TouchableOpacity 
+        style={styles.buttonDark} 
+        onPress={async () => {
+          await playSound('click');
+          router.push('/(auth)/sign-up');
+        }}
+      >
+        <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>
+          Sign Up
+        </Text>
+      </TouchableOpacity>
 
-        
-        <Text style={{
-          fontFamily: 'outfit-bold',
-          fontSize: 30,
-          textAlign: 'center',
-          color: Colors.WHITE,
-        }}>Welcome to Plumatika</Text>
-
-        <Text style={{
-          fontFamily: 'outfit',
-          fontSize: 20,
-          textAlign: 'center',
-          color: Colors.WHITE,
-          marginTop: 20,
-          marginBottom: 20
-        }}>
-          Write the past, shape the future. Scribble your way to ace Baybayin!</Text>
-
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={async () => {
-            await playSound('click');
-            router.push('/(auth)/sign-up');
-          }}
-        >
-          <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>
-          Get Started
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.button,
-          {
-          backgroundColor: Colors.PRIMARY,
-          borderWidth: 1,
-          borderColor: Colors.WHITE,
-          },
-          ]}
-          onPress={async () => {
-            await playSound('click');
-            router.push('/(auth)/sign-in');
-          }}
-        >
-  
-  <Text style={[styles.buttonText, { color: Colors.WHITE }]}>
-    Already have an Account?
-  </Text>
-</TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={[styles.buttonDark, { marginTop: 13 }]}
+        onPress={async () => {
+          await playSound('click');
+          router.push('/(auth)/sign-in');
+        }}
+      >
+        <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>
+          Log In
+        </Text>
+      </TouchableOpacity>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  button:{
+  container: {
+    flex: 1,
+    backgroundColor: Colors.WHITE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontFamily: 'outfit-bold',
+    fontSize: 40,
+    color: Colors.PRIMARY,
+    marginBottom: 30,
+    textAlign: 'center',
+  },
+  logo: {
+    width: '70%',
+    height: 280,
+    resizeMode: 'contain',
+    marginBottom: 40,
+  },
+  buttonLight: {
     padding: 15,
     backgroundColor: Colors.WHITE,
-    marginTop: 20,
-    borderRadius: 10
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.PRIMARY,
+    width: '65%',
+    marginBottom: 16,
+  },
+  buttonDark: {
+    padding: 15,
+    backgroundColor: Colors.SECONDARY,
+    borderRadius: 25,
+    width: '65%',
   },
   buttonText: {
     textAlign: 'center',
     fontSize: 18,
-    fontFamily: 'outfit'
-  }
-})
+    fontFamily: 'outfit',
+  },
+});

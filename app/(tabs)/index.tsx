@@ -1,296 +1,248 @@
-import Colors from "@/constants/Colors";
 import { playSound } from '@/constants/playClickSound';
-import { api } from "@/convex/_generated/api";
-import { useAuth } from "@clerk/clerk-expo";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useConvex, useQuery } from "convex/react";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useRouter } from 'expo-router';
+import React from 'react';
 import {
-  ActivityIndicator,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import Svg, { Circle, Path } from "react-native-svg";
+} from 'react-native';
+import Colors from '../../constants/Colors';
 
-const LESSONS = [
-  { id: "jx72aewjef2n2jzw5ajht6b32s7jb6bm", title: "Lesson 1", path: "/lessons/lesson1", x: 150, y: 4 },
-  { id: "jx73gf6kgan5zd49zfjza2hyss7jamra", title: "Lesson 2", path: "/lessons/lesson2", x: 240, y: 140 },
-  { id: "jx7fgkbfxajnghpcgf9ebjhjdd7jb9s1", title: "Lesson 3", path: "/lessons/lesson3", x: 60, y: 240 },
-  { id: "jx75w094cp3g52bw137thd7fy57jbrn3", title: "Lesson 4", path: "/lessons/lesson4", x: 60, y: 400 },
-  { id: "jx7aznjdjmag8g7v2v7w7mavtn7jbf9p", title: "Lesson 5", path: "/lessons/lesson5", x: 240, y: 400 },
-  { id: "jx755h0x70cmbc38y6h4wjzss97jaae7", title: "Lesson 6", path: "/lessons/lesson6", x: 240, y: 560 },
-  { id: "jx71t9nq18esz01frqwe6af9xn7md24g", title: "Lesson 7", path: "/lessons/lesson7", x: 240, y: 720 },
-];
-
-const TILE_SIZE = 80;
-const MAP_HEIGHT = LESSONS[LESSONS.length - 1].y + TILE_SIZE + 50;
-const PROGRESS_SIZE = 60;
-const STROKE_WIDTH = 8;
-const RADIUS = (PROGRESS_SIZE - STROKE_WIDTH) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-
-export default function LessonMap() {
+export default function HomeScreen() {
   const router = useRouter();
-  const { userId: clerkUserId } = useAuth();
-  const convex = useConvex();
-
-  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
-    clerkId: clerkUserId ?? "",
-  });
-
-  const fetchCompletedLessons = useCallback(async () => {
-    if (!convexUserId) return;
-    try {
-      setLoading(true);
-      const result = await convex.query(api.user_lesson_progress.getCompletedLessons, {
-        userId: convexUserId,
-      });
-      const completedIds = Array.isArray(result) ? result : [];
-      setCompletedLessons(completedIds);
-    } catch (err) {
-      console.error("Failed to fetch completed lessons:", err);
-      setCompletedLessons([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [convexUserId, convex]);
-
-  useEffect(() => {
-    fetchCompletedLessons();
-  }, [fetchCompletedLessons]);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchCompletedLessons();
-    }, [fetchCompletedLessons])
-  );
-
-  if (!convexUserId || loading) {
-    return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <ActivityIndicator size="large" />
-        <Text>Loading map...</Text>
-      </ScrollView>
-    );
-  }
-
-  const lessonsWithStatus = LESSONS.map((lesson, index) => {
-    const isCompleted = completedLessons.includes(lesson.id);
-    const previousLesson = LESSONS[index - 1];
-    const previousCompleted = index === 0 || (previousLesson && completedLessons.includes(previousLesson.id));
-
-    const status = isCompleted
-      ? "completed"
-      : previousCompleted
-      ? "unlocked"
-      : "locked";
-
-    return { ...lesson, status };
-  });
-
-  const completedCount = lessonsWithStatus.filter((l) => l.status === "completed").length;
-  const progress = completedCount / lessonsWithStatus.length;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
-      <View style={styles.chapterCard}>
-        <Text style={styles.chapterTitle}>The Letters of Baybayin</Text>
-        <View style={styles.progressCircle}>
-          <Svg width={PROGRESS_SIZE} height={PROGRESS_SIZE}>
-            <Circle
-              stroke="#eee"
-              fill="none"
-              cx={PROGRESS_SIZE / 2}
-              cy={PROGRESS_SIZE / 2}
-              r={RADIUS}
-              strokeWidth={STROKE_WIDTH}
-            />
-            <Circle
-              stroke={Colors.PRIMARY}
-              fill="none"
-              cx={PROGRESS_SIZE / 2}
-              cy={PROGRESS_SIZE / 2}
-              r={RADIUS}
-              strokeWidth={STROKE_WIDTH}
-              strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={CIRCUMFERENCE * (1 - progress)}
-              strokeLinecap="round"
-              rotation="-90"
-              origin={`${PROGRESS_SIZE / 2}, ${PROGRESS_SIZE / 2}`}
-            />
-          </Svg>
-          <Text style={styles.progressLabel}>{Math.round(progress * 100)}%</Text>
-        </View>
+      <Text style={styles.title}>Hello, Mei!</Text>
+      <Text style={styles.subtitle}>How do you want to start your day?</Text>
+
+    {/* Card 1: Manually positioned group on the left, image bottom-right */}
+    <View style={[styles.card, styles.card1]}>
+      <View style={styles.card1Group}>
+        <Text style={styles.cardText}>Continue learning?</Text>
+          <TouchableOpacity style={styles.card1Button} onPress={async () => {
+            await playSound('click');
+            router.push('/lessons');
+          }}>
+            <Text style={styles.buttonText}>Go to Lessons</Text>
+          </TouchableOpacity>
       </View>
+      <Image
+        source={require('../../assets/images/home1.png')}
+        style={styles.card1Image}
+        resizeMode="contain"
+      />
+    </View>
 
-      {/* Map */}
-      <View style={styles.pathContainer}>
-        <Svg height={MAP_HEIGHT} width="100%" style={StyleSheet.absoluteFill}>
-          {/* Background dots - fixed grid */}
-          {Array.from({ length: Math.ceil(MAP_HEIGHT / 60) }).flatMap((_, row) =>
-            Array.from({ length: 6 }).map((_, col) => {
-              const x = 40 + col * 60;
-              const y = 40 + row * 60;
-              return (
-                <Circle
-                  key={`bg-${row}-${col}`}
-                  cx={x}
-                  cy={y}
-                  r={4}
-                  fill="rgba(0,0,0,0.05)"
-                />
-              );
-            })
-          )}
 
-          {/* Paths between lessons */}
-          {lessonsWithStatus.map((_, index) => {
-            if (index === lessonsWithStatus.length - 1) return null;
+{/* Card 2 with external top text */}
+<View style={{ marginBottom: 8 }}>
+  <Text style={styles.topLabel}>Practice your scribbles</Text>
+  <View style={[styles.card, styles.card2]}>
+    <Image
+      source={require('../../assets/images/home2.png')}
+      style={styles.card2Image}
+      resizeMode="contain"
+    />
+    <View style={styles.card2Group}>
+      <Text style={styles.cardText}>Refresh your mind!</Text>
+        <TouchableOpacity style={styles.card2Button} onPress={async () => {
+          await playSound('click');
+          router.push('/practice');
+        }}>
+          <Text style={styles.buttonText}>Go to Practice</Text>
+        </TouchableOpacity>
+    </View>
+  </View>
+</View>
 
-            const curr = lessonsWithStatus[index];
-            const next = lessonsWithStatus[index + 1];
+{/* Card 3 with external top text */}
+<View style={{ marginBottom: 8 }}>
+  <Text style={styles.topLabel}>Play and learn</Text>
+  <View style={[styles.card, styles.card3]}>
+    <View style={styles.card3Group}>
+      <Text style={styles.cardText}>Make learning fun!</Text>
+        <TouchableOpacity style={styles.card3Button} onPress={async () => {
+          await playSound('click');
+          router.push('/minigames');
+        }}>
+          <Text style={styles.buttonText}>Go to Mini Games</Text>
+        </TouchableOpacity>
 
-            const startX = curr.x + TILE_SIZE / 2;
-            const startY = curr.y + TILE_SIZE / 2;
-            const endX = next.x + TILE_SIZE / 2;
-            const endY = next.y + TILE_SIZE / 2;
+    </View>
+    <Image
+      source={require('../../assets/images/home3.png')}
+      style={styles.card3Image}
+      resizeMode="contain"
+    />
+  </View>
+</View>
 
-            const isCompletedConnection =
-              curr.status === "completed" && next.status === "completed";
-
-            return (
-              <Path
-                key={`path-${index}`}
-                d={`M${startX},${startY} L${startX},${endY} L${endX},${endY}`}
-                stroke={isCompletedConnection ? "#83c985" : "#e3e3e3"}
-                strokeWidth={17}
-                fill="none"
-              />
-            );
-          })}
-        </Svg>
-
-        {/* Lesson nodes */}
-        {lessonsWithStatus.map((lesson) => (
-          <View
-            key={lesson.id}
-            style={[styles.nodeWrapper, { top: lesson.y, left: lesson.x }]}
-          >
-            <TouchableOpacity
-              activeOpacity={lesson.status !== "locked" ? 0.7 : 1}
-              onPress={async () => {
-                if (lesson.status !== "locked") {
-                  await playSound('click');
-                  router.push(lesson.path as any);
-                }
-              }}
-              style={[
-                styles.tile,
-                {
-                  backgroundColor:
-                    lesson.status === "completed"
-                      ? Colors.SUCCESS
-                      : lesson.status === "unlocked"
-                      ? Colors.PRIMARY
-                      : "#ccc",
-                },
-              ]}
-            >
-              <Ionicons
-                name={
-                  lesson.status === "completed"
-                    ? "checkmark"
-                    : lesson.status === "locked"
-                    ? "lock-closed"
-                    : "book"
-                }
-                size={24}
-                color="white"
-              />
-              <Text style={styles.tileText}>{lesson.title}</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 48,
-    paddingBottom: 90,
+    padding: 24,
     backgroundColor: Colors.WHITE,
-    alignItems: "center",
   },
-  chapterCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#f5f5f5",
+  title: {
+    fontSize: 32,
+    fontFamily: 'outfit-bold',
+    color: Colors.PRIMARY,
+    marginBottom: 1,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontFamily: 'outfit-bold',
+    color: Colors.PRIMARY,
+    marginBottom: 15,
+  },
+  card: {
+    backgroundColor: Colors.SECONDARY,
+    borderRadius: 25,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    position: 'relative',
+    height: 125,
+  },
+  cardText: {
+    fontSize: 15,
+    fontFamily: 'outfit-bold',
+    color: Colors.PRIMARY,
+    marginBottom: 1,
+  },
+  cardButton: {
+    backgroundColor: Colors.PRIMARY,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: 12,
-    width: "85%",
-    marginBottom: 32,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
+    alignSelf: 'flex-start',
   },
-  chapterTitle: {
-    fontSize: 18,
-    fontFamily: "outfit-bold",
-    color: Colors.PRIMARY,
-  },
-  progressCircle: {
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  progressLabel: {
-    position: "absolute",
+  buttonText: {
     fontSize: 12,
-    fontFamily: "outfit",
-    color: Colors.PRIMARY,
+    fontFamily: 'outfit-bold',
+    color: Colors.WHITE,
   },
-  pathContainer: {
-    width: "100%",
-    height: MAP_HEIGHT,
-    position: "relative",
+  cardImage: {
+    width: 60,
+    height: 60,
+    marginLeft: 12,
   },
-  nodeWrapper: {
-    position: "absolute",
-    width: TILE_SIZE,
-    height: TILE_SIZE,
+  cardImageSmall: {
+    width: 50,
+    height: 50,
   },
-  tile: {
-    width: TILE_SIZE,
-    height: TILE_SIZE,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 6,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 4,
+  bottomRightImage: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
   },
-  tileText: {
-    color: "white",
-    fontSize: 12,
-    fontFamily: "outfit",
-    marginTop: 4,
-    textAlign: "center",
-  },
+
+card1: {
+  justifyContent: 'flex-start',
+  alignItems: 'flex-start',
+  height: 140,
+  paddingBottom: 24,
+  position: 'relative',
+},
+
+card1Group: {
+  marginTop: 1,
+  marginLeft: 7,
+  alignItems: 'center', // center text + button within the group
+  justifyContent: 'center',
+},
+
+card1Button: {
+  backgroundColor: Colors.PRIMARY,
+  paddingVertical: 3,
+  paddingHorizontal: 24,
+  borderRadius: 17,
+  marginTop: 1,
+},
+
+card1Image: {
+  width: 200,
+  height: 200,
+  position: 'absolute',
+  bottom: -40,
+  right: -25,
+},
+
+card2: {
+  justifyContent: 'flex-start',
+  alignItems: 'flex-start',
+  height: 140,
+  paddingBottom: 24,
+  position: 'relative',
+},
+
+card2Image: {
+  width: 200,
+  height: 200,
+  position: 'absolute',
+  left: -40,
+  top: -35,
+},
+
+card2Group: {
+  marginTop: 62,
+  marginLeft: 168,
+  alignItems: 'center', // center text + button within the group
+  justifyContent: 'center',
+},
+
+card2Button: {
+  backgroundColor: Colors.PRIMARY,
+  paddingVertical: 3,
+  paddingHorizontal: 24,
+  borderRadius: 17,
+  marginTop: 1,
+},
+card3: {
+  justifyContent: 'flex-start',
+  alignItems: 'flex-start',
+  height: 140,
+  paddingBottom: 24,
+  position: 'relative',
+},
+
+card3Group: {
+  marginTop: 60,
+  marginLeft: 7,
+  alignItems: 'center', // center text + button within the group
+  justifyContent: 'center',
+},
+
+card3Button: {
+  backgroundColor: Colors.PRIMARY,
+  paddingVertical: 3,
+  paddingHorizontal: 19,
+  borderRadius: 17,
+  marginTop: 1,
+},
+
+card3Image: {
+  width: 180,
+  height: 180,
+  position: 'absolute',
+  bottom: 23,
+  right: -25,
+},
+
+topLabel: {
+  fontSize: 20,
+  fontFamily: 'outfit-bold',
+  color: Colors.PRIMARY,
+  marginBottom: 9,
+  marginLeft: 1,
+},
+
 });

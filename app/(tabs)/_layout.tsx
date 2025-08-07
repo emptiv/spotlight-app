@@ -1,105 +1,75 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Tabs, useRouter } from 'expo-router';
-import { Pressable, Text } from 'react-native';
-import { COLORS } from '../../constants/theme';
+import { Drawer } from 'expo-router/drawer';
+import Colors from '../../constants/Colors';
 
-const TabTitle = ({ label }: { label: string }) => (
-  <Text
-    style={{
-      fontSize: 20,
-      fontFamily: 'outfit-bold',
-      color: COLORS.primary,
-      marginLeft: 1,
-    }}
-  >
-    {label}
-  </Text>
-);
-
-export default function TabLayout() {
-  const router = useRouter();
-
-  const commonHeader = {
-    headerRight: () => (
-      <Pressable onPress={() => router.push("/help")}>
-        <Ionicons
-          name="help-circle-outline"
-          size={24}
-          color={COLORS.primary}
-          style={{ marginRight: 16 }}
-        />
-      </Pressable>
-    ),
-    headerStyle: {
-      height: 90,
-      backgroundColor: 'white',
-      borderBottomWidth: 1,
-      borderBottomColor: '#eee',
-    },
-  };
-
+export default function DrawerLayout() {
   return (
-    <Tabs
+    <Drawer
       screenOptions={{
-        tabBarShowLabel: true,
-        headerShown: true,
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.grey,
-        tabBarStyle: {
-          backgroundColor: 'white',
-          borderTopWidth: 1,
-          position: 'absolute',
-          elevation: 0,
-          height: 55,
-          paddingBottom: 8,
+        drawerType: 'slide',
+        drawerStyle: {
+          width: 200,
+          backgroundColor: '#fff',
+        },
+        drawerActiveTintColor: Colors.PRIMARY,
+        drawerInactiveTintColor: Colors.GRAY,
+        headerStyle: {
+          backgroundColor: Colors.SECONDARY,
+          height: 90,
+          borderBottomWidth: 1,
+          borderBottomColor: '#eee',
+        },
+        headerTitleStyle: {
+          fontFamily: 'outfit-bold',
+          fontSize: 20,
+          color: Colors.BLACK,
         },
       }}
     >
-      <Tabs.Screen
+
+      <Drawer.Screen
         name="index"
         options={{
-          ...commonHeader,
-          headerTitle: () => <TabTitle label="Plumatika" />,
-          tabBarLabel: 'Lessons',
-          tabBarIcon: ({ size, color }) => <Ionicons name="school" size={size} color={color} />,
+          title: "Home",
+          drawerIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
         }}
       />
-      <Tabs.Screen
+
+      <Drawer.Screen
+        name="lessons"
+        options={{
+          title: "Lessons",
+          drawerIcon: ({ color, size }) => <Ionicons name="school" size={size} color={color} />,
+        }}
+      />
+      <Drawer.Screen
         name="practice"
         options={{
-          ...commonHeader,
-          headerTitle: () => <TabTitle label="Practice" />,
-          tabBarLabel: 'Practice',
-          tabBarIcon: ({ size, color }) => <Ionicons name="flash" size={size} color={color} />,
+          title: "Practice",
+          drawerIcon: ({ color, size }) => <Ionicons name="flash" size={size} color={color} />,
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="minigames"
         options={{
-          ...commonHeader,
-          headerTitle: () => <TabTitle label="Minigames" />,
-          tabBarLabel: 'Minigames',
-          tabBarIcon: ({ size, color }) => <Ionicons name="game-controller" size={size} color={color} />,
+          title: "Minigames",
+          drawerIcon: ({ color, size }) => <Ionicons name="game-controller" size={size} color={color} />,
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="dashboard"
         options={{
-          ...commonHeader,
-          headerTitle: () => <TabTitle label="Dashboard" />,
-          tabBarLabel: 'Dashboard',
-          tabBarIcon: ({ size, color }) => <Ionicons name="trophy" size={size} color={color} />,
+          title: "Dashboard",
+          drawerIcon: ({ color, size }) => <Ionicons name="trophy" size={size} color={color} />,
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="profile"
         options={{
-          ...commonHeader,
-          headerTitle: () => <TabTitle label="Profile" />,
-          tabBarLabel: 'Me',
-          tabBarIcon: ({ size, color }) => <Ionicons name="person" size={size} color={color} />,
+          title: "Profile",
+          drawerIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
         }}
       />
-    </Tabs>
+    </Drawer>
   );
 }
