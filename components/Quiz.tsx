@@ -2,6 +2,7 @@ import HandwritingCanvas from "@/components/HandwritingCanvas";
 import Colors from "@/constants/Colors";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 import { useConvex, useMutation, useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -14,6 +15,7 @@ import {
   View,
 } from "react-native";
 import Svg, { Rect } from "react-native-svg";
+
 
 type CharacterData = {
   symbol: string;
@@ -57,10 +59,10 @@ export default function Quiz({
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerLog, setAnswerLog] = useState<AnswerSummary[]>([]);
+  const [hearts, setHearts] = useState<number>(3);
 
   const convex = useConvex();
 
-  // ✅ All mutations declared at top-level
   const recordAttempt = useMutation(api.quiz.recordQuizAttempt);
   const recordSingleAnswer = useMutation(api.quiz.recordSingleAnswer);
   const saveProgress = useMutation(api.user_lesson_progress.saveProgress);
@@ -138,6 +140,9 @@ export default function Quiz({
       q.pointsLeft = Math.max(0, q.pointsLeft - penalty);
       q.attempted = true;
 
+      // 💔 lose heart
+      setHearts((prev) => Math.max(0, prev - 1));
+
       if (q.pointsLeft <= 0) {
         updated.splice(currentIndex, 1);
       } else {
@@ -150,7 +155,7 @@ export default function Quiz({
     setQuestions(updated);
     setAnswerLog(newLog);
 
-    if (updated.length === 0) {
+    if (updated.length === 0 || hearts - (isCorrect ? 0 : 1) <= 0) {
       await finishQuiz(newLog);
     } else {
       setCurrentIndex(Math.min(currentIndex, updated.length - 1));
@@ -271,27 +276,26 @@ export default function Quiz({
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* SVG Progress Bar */}
+      {/* ❤️ Hearts Display */}
+      <View style={styles.heartsContainer}>
+        <View style={styles.hearts}>
+          {[...Array(3)].map((_, i) => (
+            <Ionicons
+              key={i}
+              name={i < hearts ? "heart" : "heart-outline"}
+              size={24}
+              color={i < hearts ? Colors.HEART : Colors.HEART_EMPTY}
+              style={{ marginHorizontal: 2 }}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* Progress Bar */}
       <View style={styles.progressBarContainer}>
         <Svg height="10" width="100%">
-          <Rect
-            x="0"
-            y="0"
-            width="100%"
-            height="10"
-            fill="#eee"
-            rx="5"
-            ry="5"
-          />
-          <Rect
-            x="0"
-            y="0"
-            width={`${progress * 100}%`}
-            height="10"
-            fill={Colors.PRIMARY}
-            rx="5"
-            ry="5"
-          />
+          <Rect x="0" y="0" width="100%" height="10" fill="#eee" rx="5" ry="5" />
+          <Rect x="0" y="0" width={`${progress * 100}%`} height="10" fill={Colors.PRIMARY} rx="5" ry="5" />
         </Svg>
       </View>
 
@@ -317,6 +321,15 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  heartsContainer: {
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  hearts: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
   progressBarContainer: {
     marginBottom: 12,
   },
@@ -338,7 +351,7 @@ const styles = StyleSheet.create({
     fontFamily: "outfit",
     fontSize: 18,
     textAlign: "center",
-    color: "white"
+    color: "white",
   },
   points: {
     fontFamily: "outfit-bold",

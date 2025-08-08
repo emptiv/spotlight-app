@@ -3,6 +3,7 @@ import BaybayinKeyboard from "@/components/BaybayinKeyboard";
 import Colors from "@/constants/Colors";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -14,8 +15,6 @@ import {
   View,
 } from "react-native";
 import * as Progress from "react-native-progress";
-
-
 
 // types
 type Word = { baybayin: string; latin: string; [key: string]: any };
@@ -38,10 +37,8 @@ function getStarRating(score: number, maxScore: number): number {
   return 1;
 }
 
-
 export default function SpellingQuizScreen() {
   const router = useRouter();
-
   const { user } = useUser();
 
   const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
@@ -61,10 +58,10 @@ export default function SpellingQuizScreen() {
   const [resetSignal, setResetSignal] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [words, setWords] = useState<Word[]>([]);
+  const [hearts, setHearts] = useState<number>(3);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const [seed] = useState(() => Math.random()); // ← will change on each mount
+  const [seed] = useState(() => Math.random());
 
   const fetchedWords = useQuery(
     api.getWords.getWords,
@@ -75,7 +72,6 @@ export default function SpellingQuizScreen() {
 
   useEffect(() => {
     if (fetchedWords) {
-      console.log("📦 Fetched words count:", fetchedWords.length);
       const shuffled = [...fetchedWords].sort(() => Math.random() - 0.5);
       setWords(shuffled);
     }
@@ -131,13 +127,8 @@ export default function SpellingQuizScreen() {
   const handleSubmit = (isTimeout = false) => {
     setHasSubmitted(true);
     const currentWord = words[currentIndex];
-    console.log("👉 Answer submitted:", input);
-    console.log("✅ Correct Baybayin:", currentWord.baybayin);
     const correct = input === currentWord.baybayin;
     const timeUsed = basePointsMap[difficulty!].time - timeLeft;
-    console.log("⏱️ Time used:", timeUsed, "seconds");
-    console.log("🔥 Current streak before submit:", streak);
-
     const base = basePointsMap[difficulty!].points;
     const speedBonus = Math.round(base * calculateSpeedBonus(timeUsed));
     const streakBonus = calculateStreakBonus();
@@ -147,10 +138,16 @@ export default function SpellingQuizScreen() {
       setScore((s) => s + totalPoints);
       setStreak((s) => s + 1);
       setIsCorrect(true);
-      console.log(`🎯 Correct! Base: ${base} SpeedBonus: ${speedBonus} StreakBonus: ${streakBonus}`);
     } else {
       setIsCorrect(false);
       setStreak(0);
+      setHearts((prev) => Math.max(0, prev - 1));
+
+      if (hearts - 1 <= 0) {
+        handleNext(true);
+        return;
+      }
+
       setTimeout(() => handleNext(), 500);
     }
 
@@ -171,8 +168,8 @@ export default function SpellingQuizScreen() {
 
   const insertChallenge = useMutation(api.typing.insertTypingChallenge);
 
-  const handleNext = async () => {
-    if (currentIndex + 1 === words.length) {
+  const handleNext = async (forceFinish = false) => {
+    if (currentIndex + 1 === words.length || forceFinish) {
       const base = basePointsMap[difficulty!].points;
 
       const maxScore = words.map((_, index) => {
@@ -186,39 +183,38 @@ export default function SpellingQuizScreen() {
 
       const stars = getStarRating(score, maxScore);
       const createdAt = Date.now();
-
       const totalTimeSpent = answers.reduce((sum, a) => sum + a.timeTaken, 0);
 
-    try {
-      await insertChallenge({
-        userId: convexUserId ?? "",
-        score,
-        stars,
-        answers,
-        createdAt,
-        timeSpent: totalTimeSpent,
-      });
+      try {
+        await insertChallenge({
+          userId: convexUserId ?? "",
+          score,
+          stars,
+          answers,
+          createdAt,
+          timeSpent: totalTimeSpent,
+        });
 
-      router.replace({
-        pathname: "/quiz/results",
-        params: {
-          score: String(score),
-          stars: String(stars),
-          answers: encodeURIComponent(JSON.stringify(answers)),
-          lessonRoute: "SpellingQuizScreen",
-        },
-      });
-    } catch (error) {
-      console.error("❌ Failed to save typing challenge:", error);
+        router.replace({
+          pathname: "/quiz/results",
+          params: {
+            score: String(score),
+            stars: String(stars),
+            answers: encodeURIComponent(JSON.stringify(answers)),
+            lessonRoute: "SpellingQuizScreen",
+          },
+        });
+      } catch (error) {
+        console.error("❌ Failed to save typing challenge:", error);
+      }
+    } else {
+      setCurrentIndex((i) => i + 1);
+      setInput("");
+      setIsCorrect(false);
+      setHasSubmitted(false);
+      setResetSignal((r) => r + 1);
     }
-  } else {
-    setCurrentIndex((i) => i + 1);
-    setInput("");
-    setIsCorrect(false);
-    setHasSubmitted(false);
-    setResetSignal((r) => r + 1);
-  }
-};
+  };
 
   if (isSetup) {
     return (
@@ -260,10 +256,7 @@ export default function SpellingQuizScreen() {
         <TouchableOpacity
           style={[styles.button, !(difficulty && questionCount) && { opacity: 0.5 }]}
           disabled={!(difficulty && questionCount)}
-          onPress={() => {
-            console.log("🎮 Starting quiz with:", { difficulty, questionCount });
-            setIsSetup(false);
-          }}
+          onPress={() => setIsSetup(false)}
         >
           <Text style={styles.buttonText}>Start Quiz</Text>
         </TouchableOpacity>
@@ -298,7 +291,7 @@ export default function SpellingQuizScreen() {
 
   return (
     <View style={styles.container}>
-      {/* ⏱ Circular timer in top right */}
+      {/* Timer */}
       <View style={styles.timerContainer}>
         <Progress.Circle
           size={50}
@@ -313,21 +306,34 @@ export default function SpellingQuizScreen() {
         />
       </View>
 
+      <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 10, marginBottom: 12 }}>
+        {[...Array(3)].map((_, i) => (
+          <Ionicons
+            key={i}
+            name={i < hearts ? "heart" : "heart-outline"}
+            size={24}
+            color={i < hearts ? Colors.HEART : Colors.HEART_EMPTY}
+            style={{ marginHorizontal: 4 }}
+          />
+        ))}
+      </View>
+
+      {/* Prompt */}
       <View style={{ alignItems: "center" }}>
-          <Text style={styles.promptText}>
-            Type: {difficulty === "hard"
-              ? current.latin.charAt(0).toUpperCase() + current.latin.slice(1)
-              : current.latin.toLowerCase()}
-          </Text>
+        <Text style={styles.promptText}>
+          Type: {difficulty === "hard"
+            ? current.latin.charAt(0).toUpperCase() + current.latin.slice(1)
+            : current.latin.toLowerCase()}
+        </Text>
         <View style={styles.inputBox}>
           <Text style={styles.inputText}>{input || " "}</Text>
-      </View>
-      {hasSubmitted && isCorrect && (
-        <Text style={styles.correctText}>Correct! ✅</Text>
-      )}
-      {hasSubmitted && !isCorrect && (
-        <Text style={styles.errorText}>Incorrect ❌</Text>
-      )}
+        </View>
+        {hasSubmitted && isCorrect && (
+          <Text style={styles.correctText}>Correct! ✅</Text>
+        )}
+        {hasSubmitted && !isCorrect && (
+          <Text style={styles.errorText}>Incorrect ❌</Text>
+        )}
       </View>
 
       {!hasSubmitted && (
@@ -337,11 +343,10 @@ export default function SpellingQuizScreen() {
       )}
 
       {hasSubmitted && isCorrect && (
-        <TouchableOpacity style={styles.button} onPress={handleNext}>
+        <TouchableOpacity style={styles.button} onPress={() => handleNext()}>
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
       )}
-
 
       <BaybayinKeyboard onKeyPress={handleKeyPress} resetSignal={resetSignal} />
     </View>
@@ -358,29 +363,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
     color: Colors.PRIMARY,
-  },
-  prompt: { fontSize: 20, fontFamily: "outfit-bold", marginBottom: 20 },
-  input: {
-    fontSize: 40,
-    borderBottomWidth: 2,
-    borderColor: Colors.PRIMARY,
-    textAlign: "center",
-    marginBottom: 20,
-    fontFamily: "outfit-bold",
-  },
-  correct: { color: "green", fontSize: 16 },
-  error: { color: "red", fontSize: 16 },
-  button: {
-    backgroundColor: Colors.PRIMARY,
-    padding: 14,
-    borderRadius: 8,
-    marginTop: 20,
-    alignSelf: "center",
-  },
-  buttonText: {
-    color: Colors.WHITE,
-    fontFamily: "outfit-bold",
-    fontSize: 16,
   },
   label: {
     marginTop: 20,
@@ -405,48 +387,59 @@ const styles = StyleSheet.create({
     color: Colors.PRIMARY,
     fontFamily: "outfit-bold",
   },
+  button: {
+    backgroundColor: Colors.PRIMARY,
+    padding: 14,
+    borderRadius: 8,
+    marginTop: 20,
+    alignSelf: "center",
+  },
+  buttonText: {
+    color: Colors.WHITE,
+    fontFamily: "outfit-bold",
+    fontSize: 16,
+  },
   timerContainer: {
     position: "absolute",
     top: 20,
     right: 20,
     zIndex: 10,
   },
-promptText: {
-  fontSize: 18,
-  marginVertical: 16,
-  color: Colors.PRIMARY,
-  fontFamily: "outfit-bold",
-},
-inputText: {
-  fontSize: 40,
-  color: Colors.PRIMARY,
-  textAlign: "center",
-  marginVertical: 20,
-  fontFamily: "outfit-bold",
-},
-inputBox: {
-  minHeight: 70,
-  minWidth: "80%",
-  borderWidth: 2,
-  borderColor: Colors.PRIMARY,
-  borderRadius: 12,
-  justifyContent: "center",
-  alignItems: "center",
-  padding: 10,
-  marginBottom: 10,
-  backgroundColor: "#FAFAFA",
-},
-errorText: {
-  fontSize: 16,
-  color: "red",
-  marginTop: 10,
-  fontFamily: "outfit",
-},
-correctText: {
-  fontSize: 16,
-  color: "green",
-  marginTop: 10,
-  fontFamily: "outfit",
-},
-
+  promptText: {
+    fontSize: 18,
+    marginVertical: 16,
+    color: Colors.PRIMARY,
+    fontFamily: "outfit-bold",
+  },
+  inputText: {
+    fontSize: 40,
+    color: Colors.PRIMARY,
+    textAlign: "center",
+    marginVertical: 20,
+    fontFamily: "outfit-bold",
+  },
+  inputBox: {
+    minHeight: 70,
+    minWidth: "80%",
+    borderWidth: 2,
+    borderColor: Colors.PRIMARY,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: "#FAFAFA",
+  },
+  errorText: {
+    fontSize: 16,
+    color: "red",
+    marginTop: 10,
+    fontFamily: "outfit",
+  },
+  correctText: {
+    fontSize: 16,
+    color: "green",
+    marginTop: 10,
+    fontFamily: "outfit",
+  },
 });

@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 import { useConvex, useMutation, useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -163,6 +164,7 @@ export default function Quiz({
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+    const [hearts, setHearts] = useState<number>(3);
   const [answerLog, setAnswerLog] = useState<AnswerSummary[]>([]);
   const [dragKey, setDragKey] = useState(Date.now());
   const [droppedZone, setDroppedZone] = useState<"top" | "bottom" | null>(null);
@@ -255,6 +257,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
       const penalty = q.type === "mcq" ? 2 : 3;
       q.pointsLeft = Math.max(0, q.pointsLeft - penalty);
       q.attempted = true;
+      setHearts((prev) => Math.max(0, prev - 1));
 
       if (q.pointsLeft <= 0) {
         updated.splice(currentIndex, 1);
@@ -272,7 +275,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
     setDragKey(Date.now());
     setShowWrong(false);
 
-    if (updated.length === 0) {
+    if (updated.length === 0 || hearts - (isCorrect ? 0 : 1) <= 0) {
       await finishQuiz(newLog);
     } else {
       setCurrentIndex(Math.min(currentIndex, updated.length - 1));
@@ -474,6 +477,21 @@ return (
 
   return (
     <SafeAreaView style={styles.container}>
+
+      <View style={styles.heartsContainer}>
+        <View style={styles.hearts}>
+          {[...Array(3)].map((_, i) => (
+            <Ionicons
+              key={i}
+              name={i < hearts ? "heart" : "heart-outline"}
+              size={24}
+              color={i < hearts ? Colors.HEART : Colors.HEART_EMPTY}
+              style={{ marginHorizontal: 2 }}
+            />
+          ))}
+        </View>
+      </View>
+
       <View style={styles.progressBarContainer}>
         <Svg height="10" width="100%">
           <Rect x="0" y="0" width="100%" height="10" fill="#eee" rx="5" ry="5" />
@@ -518,6 +536,15 @@ const styles = StyleSheet.create({
   includeFontPadding: false,
   marginTop: -30,
 },
+  heartsContainer: {
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  hearts: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
   progressBarContainer: {
     marginBottom: 12,
   },

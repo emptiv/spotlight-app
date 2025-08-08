@@ -17,21 +17,17 @@ import {
 import Svg, { Circle, Path } from "react-native-svg";
 
 const LESSONS = [
-  { id: "jx72aewjef2n2jzw5ajht6b32s7jb6bm", title: "Lesson 1", path: "/lessons/lesson1", x: 150, y: 4 },
-  { id: "jx73gf6kgan5zd49zfjza2hyss7jamra", title: "Lesson 2", path: "/lessons/lesson2", x: 240, y: 140 },
+  { id: "jx72aewjef2n2jzw5ajht6b32s7jb6bm", title: "Lesson 1", path: "/lessons/lesson1", x: 100, y: 4 },
+  { id: "jx73gf6kgan5zd49zfjza2hyss7jamra", title: "Lesson 2", path: "/lessons/lesson2", x: 220, y: 140 },
   { id: "jx7fgkbfxajnghpcgf9ebjhjdd7jb9s1", title: "Lesson 3", path: "/lessons/lesson3", x: 60, y: 240 },
   { id: "jx75w094cp3g52bw137thd7fy57jbrn3", title: "Lesson 4", path: "/lessons/lesson4", x: 60, y: 400 },
-  { id: "jx7aznjdjmag8g7v2v7w7mavtn7jbf9p", title: "Lesson 5", path: "/lessons/lesson5", x: 240, y: 400 },
-  { id: "jx755h0x70cmbc38y6h4wjzss97jaae7", title: "Lesson 6", path: "/lessons/lesson6", x: 240, y: 560 },
-  { id: "jx71t9nq18esz01frqwe6af9xn7md24g", title: "Lesson 7", path: "/lessons/lesson7", x: 240, y: 720 },
+  { id: "jx7aznjdjmag8g7v2v7w7mavtn7jbf9p", title: "Lesson 5", path: "/lessons/lesson5", x: 220, y: 400 },
+  { id: "jx755h0x70cmbc38y6h4wjzss97jaae7", title: "Lesson 6", path: "/lessons/lesson6", x: 120, y: 560 },
+  { id: "jx71t9nq18esz01frqwe6af9xn7md24g", title: "Lesson 7", path: "/lessons/lesson7", x: 220, y: 720 },
 ];
 
-const TILE_SIZE = 80;
+const TILE_SIZE = 100;
 const MAP_HEIGHT = LESSONS[LESSONS.length - 1].y + TILE_SIZE + 50;
-const PROGRESS_SIZE = 60;
-const STROKE_WIDTH = 8;
-const RADIUS = (PROGRESS_SIZE - STROKE_WIDTH) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export default function LessonMap() {
   const router = useRouter();
@@ -52,8 +48,7 @@ export default function LessonMap() {
       const result = await convex.query(api.user_lesson_progress.getCompletedLessons, {
         userId: convexUserId,
       });
-      const completedIds = Array.isArray(result) ? result : [];
-      setCompletedLessons(completedIds);
+      setCompletedLessons(Array.isArray(result) ? result : []);
     } catch (err) {
       console.error("Failed to fetch completed lessons:", err);
       setCompletedLessons([]);
@@ -95,46 +90,33 @@ export default function LessonMap() {
     return { ...lesson, status };
   });
 
-  const completedCount = lessonsWithStatus.filter((l) => l.status === "completed").length;
-  const progress = completedCount / lessonsWithStatus.length;
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
-      <View style={styles.chapterCard}>
-        <Text style={styles.chapterTitle}>The Letters of Baybayin</Text>
-        <View style={styles.progressCircle}>
-          <Svg width={PROGRESS_SIZE} height={PROGRESS_SIZE}>
-            <Circle
-              stroke="#eee"
-              fill="none"
-              cx={PROGRESS_SIZE / 2}
-              cy={PROGRESS_SIZE / 2}
-              r={RADIUS}
-              strokeWidth={STROKE_WIDTH}
-            />
-            <Circle
-              stroke={Colors.PRIMARY}
-              fill="none"
-              cx={PROGRESS_SIZE / 2}
-              cy={PROGRESS_SIZE / 2}
-              r={RADIUS}
-              strokeWidth={STROKE_WIDTH}
-              strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={CIRCUMFERENCE * (1 - progress)}
-              strokeLinecap="round"
-              rotation="-90"
-              origin={`${PROGRESS_SIZE / 2}, ${PROGRESS_SIZE / 2}`}
-            />
-          </Svg>
-          <Text style={styles.progressLabel}>{Math.round(progress * 100)}%</Text>
-        </View>
+      {/* Title and Subtitle */}
+      <View style={styles.headerWrapper}>
+        <Text style={styles.title}>Chapter 1</Text>
+        <Text style={styles.subtitle}>The Letters of Baybayin</Text>
       </View>
+
+      {/* Prologue Card */}
+      <TouchableOpacity
+        style={styles.prologueCard}
+        activeOpacity={0.8}
+        onPress={async () => {
+          await playSound('click');
+          router.push('./lessons');
+        }}
+      >
+        <View style={styles.prologueTextWrapper}>
+          <Text style={styles.prologueTitle}>Prologue</Text>
+          <Text style={styles.prologueSubtext}>The Moon God's Hope Descends</Text>
+        </View>
+      </TouchableOpacity>
 
       {/* Map */}
       <View style={styles.pathContainer}>
         <Svg height={MAP_HEIGHT} width="100%" style={StyleSheet.absoluteFill}>
-          {/* Background dots - fixed grid */}
+          {/* Background dots */}
           {Array.from({ length: Math.ceil(MAP_HEIGHT / 60) }).flatMap((_, row) =>
             Array.from({ length: 6 }).map((_, col) => {
               const x = 40 + col * 60;
@@ -151,7 +133,7 @@ export default function LessonMap() {
             })
           )}
 
-          {/* Paths between lessons */}
+          {/* Paths */}
           {lessonsWithStatus.map((_, index) => {
             if (index === lessonsWithStatus.length - 1) return null;
 
@@ -178,7 +160,7 @@ export default function LessonMap() {
           })}
         </Svg>
 
-        {/* Lesson nodes */}
+        {/* Lesson Nodes */}
         {lessonsWithStatus.map((lesson) => (
           <View
             key={lesson.id}
@@ -226,20 +208,33 @@ export default function LessonMap() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 48,
-    paddingBottom: 90,
+    paddingTop: 30,
+    paddingBottom: 30,
     backgroundColor: Colors.WHITE,
     alignItems: "center",
   },
-  chapterCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 12,
-    width: "85%",
+  headerWrapper: {
+    width: '85%',
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 32,
+    fontFamily: 'outfit-bold',
+    color: Colors.PRIMARY,
+    marginBottom: 0,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontFamily: 'outfit-bold',
+    color: Colors.PRIMARY,
+  },
+  prologueCard: {
+    width: '85%',
+    height: 130,
+    backgroundColor: Colors.PRIMARY,
+    borderRadius: 20  ,
+    justifyContent: 'flex-end',
+    padding: 16,
     marginBottom: 32,
     shadowColor: "#000",
     shadowOpacity: 0.05,
@@ -247,21 +242,19 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  chapterTitle: {
-    fontSize: 18,
-    fontFamily: "outfit-bold",
-    color: Colors.PRIMARY,
+  prologueTextWrapper: {
+    alignItems: 'flex-start',
   },
-  progressCircle: {
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
+  prologueTitle: {
+    fontSize: 28,
+    fontFamily: 'outfit-bold',
+    color: Colors.WHITE,
   },
-  progressLabel: {
-    position: "absolute",
-    fontSize: 12,
-    fontFamily: "outfit",
-    color: Colors.PRIMARY,
+  prologueSubtext: {
+    fontSize: 13,
+    fontFamily: 'outfit',
+    color: Colors.WHITE,
+    marginTop: 2,
   },
   pathContainer: {
     width: "100%",
@@ -288,7 +281,7 @@ const styles = StyleSheet.create({
   },
   tileText: {
     color: "white",
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "outfit",
     marginTop: 4,
     textAlign: "center",

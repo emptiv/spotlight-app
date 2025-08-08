@@ -25,7 +25,7 @@ export default function HomeScreen() {
         <Text style={styles.cardText}>Continue learning?</Text>
           <TouchableOpacity style={styles.card1Button} onPress={async () => {
             await playSound('click');
-            router.push('/lessons');
+            router.push('/chapters');
           }}>
             <Text style={styles.buttonText}>Go to Lessons</Text>
           </TouchableOpacity>
@@ -154,8 +154,8 @@ card1: {
 },
 
 card1Group: {
-  marginTop: 1,
-  marginLeft: 7,
+  marginTop: -3,
+  marginLeft: 3,
   alignItems: 'center', // center text + button within the group
   justifyContent: 'center',
 },
@@ -193,8 +193,8 @@ card2Image: {
 },
 
 card2Group: {
-  marginTop: 62,
-  marginLeft: 168,
+  marginTop: 68,
+  marginLeft: 170,
   alignItems: 'center', // center text + button within the group
   justifyContent: 'center',
 },
@@ -215,8 +215,8 @@ card3: {
 },
 
 card3Group: {
-  marginTop: 60,
-  marginLeft: 7,
+  marginTop: 65,
+  marginLeft: 3,
   alignItems: 'center', // center text + button within the group
   justifyContent: 'center',
 },

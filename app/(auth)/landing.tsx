@@ -1,4 +1,5 @@
 import { playSound } from '@/constants/playClickSound';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -39,6 +40,8 @@ export default function landing() {
           Log In
         </Text>
       </TouchableOpacity>
+
+      <Text style={styles.versionText}>v{Constants.expoConfig?.version}</Text>
     </View>
   );
 }
@@ -83,5 +86,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     fontFamily: 'outfit',
+  },
+  versionText: {
+    marginTop: 40,
+    fontSize: 14,
+    fontFamily: 'outfit',
+    color: Colors.GRAY,
+    opacity: 0.6,
   },
 });

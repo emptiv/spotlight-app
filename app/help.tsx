@@ -23,6 +23,13 @@ const IconWithLabelButton = ({ iconName, label }: { iconName: keyof typeof Ionic
   </View>
 );
 
+// NEW: Baybayin key preview
+const KeyboardKeyPreview = ({ label }: { label: string }) => (
+  <View style={previewStyles.key}>
+    <Text style={previewStyles.keyText}>{label}</Text>
+  </View>
+);
+
 export default function Help() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -94,6 +101,39 @@ export default function Help() {
         <InfoItem text="Press Edit Name to change your username" />
         <InfoItem text="Tap Sign Out to log out of your account" />
       </View>
+
+      <View style={styles.card}>
+        <IconTitle name="create" label="Baybayin Keyboard" />
+
+        <Text style={styles.subsection}>Key Types</Text>
+        <View style={styles.iconRow}>
+          <KeyboardKeyPreview label="ᜃ" />
+          <Text style={{ marginHorizontal: 4, alignSelf: "center" }}>= Consonant</Text>
+        </View>
+        <View style={styles.iconRow}>
+          <KeyboardKeyPreview label="ᜀ" />
+          <Text style={{ marginHorizontal: 4, alignSelf: "center" }}>= Vowel</Text>
+        </View>
+        <View style={styles.iconRow}>
+          <KeyboardKeyPreview label="ᜃᜒ" />
+          <Text style={{ marginHorizontal: 4, alignSelf: "center" }}>= Kudlit (after consonant)</Text>
+        </View>
+
+        <Text style={styles.subsection}>Special Keys</Text>
+        <View style={styles.iconRow}>
+          <KeyboardKeyPreview label="␣" />
+          <Text style={{ marginHorizontal: 4, alignSelf: "center" }}>= Space</Text>
+        </View>
+        <View style={styles.iconRow}>
+          <KeyboardKeyPreview label="⌫" />
+          <Text style={{ marginHorizontal: 4, alignSelf: "center" }}>= Delete</Text>
+        </View>
+
+        <Text style={styles.subsection}>How It Works</Text>
+        <InfoItem text="Tap a consonant → then a kudlit to modify its sound." />
+        <InfoItem text="Vowels are used independently." />
+        <InfoItem text="Kudlit buttons are disabled until a consonant is selected." />
+      </View>
     </ScrollView>
   );
 }
@@ -101,7 +141,7 @@ export default function Help() {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    paddingBottom: 24, // Adjusted from 100 to fix extra space
+    paddingBottom: 24,
   },
   card: {
     backgroundColor: "#f9f9f9",
@@ -190,7 +230,9 @@ const styles = StyleSheet.create({
   },
   iconRow: {
     flexDirection: "row",
-    gap: 16,
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
     marginTop: 6,
     marginBottom: 8,
   },
@@ -205,5 +247,23 @@ const styles = StyleSheet.create({
     color: "#555",
     marginTop: 2,
     textAlign: "center",
+  },
+});
+
+const previewStyles = StyleSheet.create({
+  key: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    marginHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 50,
+  },
+  keyText: {
+    fontSize: 22,
+    color: "#fff",
+    fontFamily: "outfit-bold",
   },
 });

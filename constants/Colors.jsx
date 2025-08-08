@@ -6,5 +6,7 @@ export default {
   GRAY: '#808080',
   LIGHT_GRAY: '#D3D3D3',
   SUCCESS: "#4CAF50",
-GREY_LIGHT: "#E0E0E0",
+  GREY_LIGHT: "#E0E0E0",
+  HEART: "#F2464F",
+  HEART_EMPTY: "#D3D3D3",
 }

@@ -1,41 +1,79 @@
 import Colors from "@/constants/Colors";
 import { playSound } from '@/constants/playClickSound';
 import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-
 const CHARACTERS = [
-  { symbol: "ᜀ", label: "A", value: "a" },
-  { symbol: "ᜁ", label: "E/I", value: "e_i" },
-  { symbol: "ᜂ", label: "O/U", value: "o_u" },
+  { symbol: "ᜀ", label: "A", value: "a", type: "vowel" },
+  { symbol: "ᜁ", label: "E/I", value: "e_i", type: "vowel" },
+  { symbol: "ᜂ", label: "O/U", value: "o_u", type: "vowel" },
 
-  { symbol: "ᜉ", label: "PA", value: "pa" },
-  { symbol: "ᜃ", label: "KA", value: "ka" },
-  { symbol: "ᜈ", label: "NA", value: "na" },
+  { symbol: "ᜉ", label: "PA", value: "pa", type: "consonant" },
+  { symbol: "ᜃ", label: "KA", value: "ka", type: "consonant" },
+  { symbol: "ᜈ", label: "NA", value: "na", type: "consonant" },
 
-  { symbol: "ᜑ", label: "HA", value: "ha" },
-  { symbol: "ᜊ", label: "BA", value: "ba" },
-  { symbol: "ᜄ", label: "GA", value: "ga" },
+  { symbol: "ᜑ", label: "HA", value: "ha", type: "consonant" },
+  { symbol: "ᜊ", label: "BA", value: "ba", type: "consonant" },
+  { symbol: "ᜄ", label: "GA", value: "ga", type: "consonant" },
 
-  { symbol: "ᜐ", label: "SA", value: "sa" },
-  { symbol: "ᜇ", label: "DA/RA", value: "da_ra" },
-  { symbol: "ᜆ", label: "TA", value: "ta" },
+  { symbol: "ᜐ", label: "SA", value: "sa", type: "consonant" },
+  { symbol: "ᜇ", label: "DA/RA", value: "da_ra", type: "consonant" },
+  { symbol: "ᜆ", label: "TA", value: "ta", type: "consonant" },
 
-  { symbol: "ᜅ", label: "NGA", value: "nga" },
-  { symbol: "ᜏ", label: "WA", value: "wa" },
-  { symbol: "ᜎ", label: "LA", value: "la" },
+  { symbol: "ᜅ", label: "NGA", value: "nga", type: "consonant" },
+  { symbol: "ᜏ", label: "WA", value: "wa", type: "consonant" },
+  { symbol: "ᜎ", label: "LA", value: "la", type: "consonant" },
 
-  { symbol: "ᜋ", label: "MA", value: "ma" },
-  { symbol: "ᜌ", label: "YA", value: "ya" }
+  { symbol: "ᜋ", label: "MA", value: "ma", type: "consonant" },
+  { symbol: "ᜌ", label: "YA", value: "ya", type: "consonant" }
 ];
 
 export default function Practice() {
   const router = useRouter();
+  const [filter, setFilter] = useState<"vowel" | "consonant">("vowel");
+
+  const filteredCharacters = CHARACTERS.filter((char) => char.type === filter);
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Practice</Text>
+        <Text style={styles.subtitle}>Scribble your way to mastery</Text>
+
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[styles.toggleButton, filter === "vowel" && styles.activeButton]}
+            onPress={() => setFilter("vowel")}
+          >
+            <Text
+              style={[
+                styles.toggleButtonText,
+                filter === "vowel" && styles.activeButtonText,
+              ]}
+            >
+              Vowels
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.toggleButton, filter === "consonant" && styles.activeButton]}
+            onPress={() => setFilter("consonant")}
+          >
+            <Text
+              style={[
+                styles.toggleButtonText,
+                filter === "consonant" && styles.activeButtonText,
+              ]}
+            >
+              Consonants
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <FlatList
-        data={CHARACTERS}
+        data={filteredCharacters}
         numColumns={2}
         keyExtractor={(item) => item.value}
         contentContainerStyle={styles.grid}
@@ -61,7 +99,53 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.WHITE,
     padding: 16,
-    paddingBottom: 65
+    paddingBottom: 1
+  },
+  header: {
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 32,
+    fontFamily: 'outfit-bold',
+    color: Colors.PRIMARY,
+    marginTop: 16,
+    marginLeft: 8,
+    marginBottom: -17,
+  },
+  subtitle: {
+    fontSize: 18,
+    fontFamily: 'outfit-bold',
+    color: Colors.PRIMARY,
+    marginTop: 16,
+    marginLeft: 8,
+    marginBottom: 20,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 12,
+    marginLeft: 8,
+    marginBottom: 15,
+  },
+  toggleButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Colors.SECONDARY,
+    backgroundColor: Colors.WHITE,
+  },
+  activeButton: {
+    backgroundColor: Colors.SECONDARY,
+  },
+  toggleButtonText: {
+    fontSize: 14,
+    fontFamily: "outfit",
+    color: Colors.PRIMARY,
+  },
+  activeButtonText: {
+    color: Colors.PRIMARY,
+    fontFamily: "outfit-bold",
   },
   grid: {
     justifyContent: "space-between",
@@ -70,13 +154,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f2f2f2",
     margin: 8,
-    borderRadius: 10,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: Colors.PRIMARY,
     alignItems: "center",
     paddingVertical: 24,
+
+      // iOS Shadow
+  shadowColor: Colors.PRIMARY,
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+
+  // Android Shadow
+  elevation: 5,
   },
+
   character: {
     fontSize: 80,
-    color: Colors.PRIMARY,
+    color: Colors.BLACK,
     fontFamily: "outfit-bold",
   },
   label: {

@@ -1,8 +1,11 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
+import { Pressable } from 'react-native';
 import Colors from '../../constants/Colors';
 
 export default function DrawerLayout() {
+  const router = useRouter();
   return (
     <Drawer
       screenOptions={{
@@ -24,8 +27,17 @@ export default function DrawerLayout() {
           fontSize: 20,
           color: Colors.BLACK,
         },
+        headerRight: () => (
+          <Pressable
+            onPress={() => router.push('/help')}
+            style={{ marginRight: 20 }}
+          >
+            <Ionicons name="help-circle-outline" size={24} color={Colors.BLACK} />
+          </Pressable>
+        ),
       }}
     >
+
 
       <Drawer.Screen
         name="index"
@@ -36,7 +48,7 @@ export default function DrawerLayout() {
       />
 
       <Drawer.Screen
-        name="lessons"
+        name="chapters"
         options={{
           title: "Lessons",
           drawerIcon: ({ color, size }) => <Ionicons name="school" size={size} color={color} />,
@@ -52,7 +64,7 @@ export default function DrawerLayout() {
       <Drawer.Screen
         name="minigames"
         options={{
-          title: "Minigames",
+          title: "Mini Games",
           drawerIcon: ({ color, size }) => <Ionicons name="game-controller" size={size} color={color} />,
         }}
       />
@@ -70,6 +82,15 @@ export default function DrawerLayout() {
           drawerIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
         }}
       />
+      <Drawer.Screen
+        name="screens/lessons"
+        options={{
+          drawerItemStyle: { display: 'none' },
+          title: "Lessons",
+          drawerIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+        }}
+      />
     </Drawer>
+
   );
 }
