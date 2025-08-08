@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
+import { useLanguage } from "../../../components/LanguageContext";
 
 const LESSONS = [
   { id: "jx72aewjef2n2jzw5ajht6b32s7jb6bm", title: "Lesson 1", path: "/lessons/lesson1", x: 100, y: 4 },
@@ -33,6 +34,7 @@ export default function LessonMap() {
   const router = useRouter();
   const { userId: clerkUserId } = useAuth();
   const convex = useConvex();
+  const { lang } = useLanguage();
 
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,11 +69,28 @@ export default function LessonMap() {
     }, [fetchCompletedLessons])
   );
 
+  const t = {
+    en: {
+      chapter: "Chapter 1",
+      subtitle: "The Letters of Baybayin",
+      prologue: "Prologue",
+      prologueSubtext: "The Moon God's Hope Descends",
+      loading: "Loading map...",
+    },
+    fil: {
+      chapter: "Kabanata 1",
+      subtitle: "Mga Titik ng Baybayin",
+      prologue: "Simula",
+      prologueSubtext: "Bumababa ang Pag-asa ng Diyosa ng Buwan",
+      loading: "Ikinakarga ang mapa...",
+    },
+  }[lang];
+
   if (!convexUserId || loading) {
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <ActivityIndicator size="large" />
-        <Text>Loading map...</Text>
+        <Text>{t.loading}</Text>
       </ScrollView>
     );
   }
@@ -94,8 +113,8 @@ export default function LessonMap() {
     <ScrollView contentContainerStyle={styles.container}>
       {/* Title and Subtitle */}
       <View style={styles.headerWrapper}>
-        <Text style={styles.title}>Chapter 1</Text>
-        <Text style={styles.subtitle}>The Letters of Baybayin</Text>
+        <Text style={styles.title}>{t.chapter}</Text>
+        <Text style={styles.subtitle}>{t.subtitle}</Text>
       </View>
 
       {/* Prologue Card */}
@@ -108,8 +127,8 @@ export default function LessonMap() {
         }}
       >
         <View style={styles.prologueTextWrapper}>
-          <Text style={styles.prologueTitle}>Prologue</Text>
-          <Text style={styles.prologueSubtext}>The Moon God's Hope Descends</Text>
+          <Text style={styles.prologueTitle}>{t.prologue}</Text>
+          <Text style={styles.prologueSubtext}>{t.prologueSubtext}</Text>
         </View>
       </TouchableOpacity>
 
@@ -232,7 +251,7 @@ const styles = StyleSheet.create({
     width: '85%',
     height: 130,
     backgroundColor: Colors.PRIMARY,
-    borderRadius: 20  ,
+    borderRadius: 20,
     justifyContent: 'flex-end',
     padding: 16,
     marginBottom: 32,

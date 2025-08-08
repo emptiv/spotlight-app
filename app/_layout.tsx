@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { LanguageProvider } from "../components/LanguageContext";
 import ClerkAndConvexProvider from "../providers/ClerkAndConvexProvider";
 
 export default function RootLayout() {
@@ -16,11 +17,13 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <ClerkAndConvexProvider>
-        <SafeAreaProvider>
-          <SafeAreaView style={styles.container}>
-            <Stack screenOptions={{ headerShown: false }} />
-          </SafeAreaView>
-        </SafeAreaProvider>
+        <LanguageProvider>
+          <SafeAreaProvider>
+            <SafeAreaView style={styles.container}>
+              <Stack screenOptions={{ headerShown: false }} />
+            </SafeAreaView>
+          </SafeAreaProvider>
+        </LanguageProvider>
       </ClerkAndConvexProvider>
     </GestureHandlerRootView>
   );

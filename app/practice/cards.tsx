@@ -19,6 +19,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useLanguage } from "../../components/LanguageContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -86,6 +87,31 @@ export default function FlashcardsScreen() {
 
   const rotateY = useSharedValue(0);
 
+  const { lang } = useLanguage();
+
+  const t = {
+    en: {
+      vowels: "Vowels",
+      consonants: "Consonants",
+      kudlit: "Kudlit",
+      krusKudlit: "Krus-Kudlit",
+      shuffle: "Shuffle",
+      shuffleOn: "Shuffle: On",
+      shuffleOff: "Shuffle: Off",
+      flipInstruction: "Tap the card to flip",
+    },
+    fil: {
+      vowels: "Patinig",
+      consonants: "Katinig",
+      kudlit: "Kudlit",
+      krusKudlit: "Krus-Kudlit",
+      shuffle: "Shuffle",
+      shuffleOn: "Shuffle: On",
+      shuffleOff: "Shuffle: Off",
+      flipInstruction: "I-tap ang kard upang baliktarin",
+    },
+  }[lang];
+
   const rawCards = useMemo(() => {
     if (mainCategory === "vowels") return allDecks.vowels;
     if (subCategory) return allDecks[subCategory];
@@ -117,8 +143,9 @@ export default function FlashcardsScreen() {
 
   const handleMainCategory = (cat: "vowels" | "consonants") => {
     setMainCategory(cat);
+    setSubCategory(null);
     setShuffledCards(null);
-    setIsShuffled(false); // <<< Turn off shuffle
+    setIsShuffled(false);
     setIndex(0);
     rotateY.value = 0;
   };
@@ -126,7 +153,7 @@ export default function FlashcardsScreen() {
   const handleSubCategory = (sub: "kudlit" | "krusKudlit") => {
     setSubCategory(sub);
     setShuffledCards(null);
-    setIsShuffled(false); // <<< Turn off shuffle
+    setIsShuffled(false);
     setIndex(0);
     rotateY.value = 0;
   };
@@ -150,7 +177,6 @@ export default function FlashcardsScreen() {
   };
 
   useEffect(() => {
-    // Reset when category or subcategory changes
     setShuffledCards(null);
     setIndex(0);
   }, [mainCategory, subCategory]);
@@ -180,12 +206,12 @@ export default function FlashcardsScreen() {
         <View style={styles.deckSelector}>
           <Pressable onPress={() => handleMainCategory("vowels")}>
             <View style={[styles.deckButton, mainCategory === "vowels" && styles.activeDeckButton]}>
-              <Text style={[styles.deckButtonText, mainCategory === "vowels" && styles.activeDeckText]}>Vowels</Text>
+              <Text style={[styles.deckButtonText, mainCategory === "vowels" && styles.activeDeckText]}>{t.vowels}</Text>
             </View>
           </Pressable>
           <Pressable onPress={() => handleMainCategory("consonants")}>
             <View style={[styles.deckButton, mainCategory === "consonants" && !subCategory && styles.activeDeckButton]}>
-              <Text style={[styles.deckButtonText, mainCategory === "consonants" && !subCategory && styles.activeDeckText]}>Consonants</Text>
+              <Text style={[styles.deckButtonText, mainCategory === "consonants" && !subCategory && styles.activeDeckText]}>{t.consonants}</Text>
             </View>
           </Pressable>
         </View>
@@ -195,12 +221,12 @@ export default function FlashcardsScreen() {
           <View style={styles.deckSelector}>
             <Pressable onPress={() => handleSubCategory("kudlit")}>
               <View style={[styles.deckButton, subCategory === "kudlit" && styles.activeDeckButton]}>
-                <Text style={[styles.deckButtonText, subCategory === "kudlit" && styles.activeDeckText]}>Kudlit</Text>
+                <Text style={[styles.deckButtonText, subCategory === "kudlit" && styles.activeDeckText]}>{t.kudlit}</Text>
               </View>
             </Pressable>
             <Pressable onPress={() => handleSubCategory("krusKudlit")}>
               <View style={[styles.deckButton, subCategory === "krusKudlit" && styles.activeDeckButton]}>
-                <Text style={[styles.deckButtonText, subCategory === "krusKudlit" && styles.activeDeckText]}>Krus-Kudlit</Text>
+                <Text style={[styles.deckButtonText, subCategory === "krusKudlit" && styles.activeDeckText]}>{t.krusKudlit}</Text>
               </View>
             </Pressable>
           </View>
@@ -211,11 +237,11 @@ export default function FlashcardsScreen() {
           <Text style={styles.deckTitleText}>
             {subCategory
               ? subCategory === "kudlit"
-                ? "Kudlit"
-                : "Krus-Kudlit"
+                ? t.kudlit
+                : t.krusKudlit
               : mainCategory === "vowels"
-              ? "Vowels"
-              : "Consonants"}
+              ? t.vowels
+              : t.consonants}
           </Text>
 
           <Pressable onPress={flipCard}>
@@ -244,11 +270,11 @@ export default function FlashcardsScreen() {
             style={[styles.shuffleButton, isShuffled && styles.shuffleButtonActive]}
           >
             <Text style={[styles.shuffleButtonText, isShuffled && styles.shuffleButtonTextActive]}>
-              Shuffle: {isShuffled ? "On" : "Off"}
+              {isShuffled ? t.shuffleOn : t.shuffleOff}
             </Text>
           </TouchableOpacity>
 
-          <Text style={styles.instruction}>Tap the card to flip</Text>
+          <Text style={styles.instruction}>{t.flipInstruction}</Text>
         </View>
       </SafeAreaView>
     </GestureHandlerRootView>

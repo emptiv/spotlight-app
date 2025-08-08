@@ -1,4 +1,3 @@
-// app/Chapters.tsx or app/(tabs)/Chapters.tsx
 import Colors from "@/constants/Colors";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@clerk/clerk-expo";
@@ -6,16 +5,17 @@ import { useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
+import { useLanguage } from "../../components/LanguageContext";
 
 const PROGRESS_SIZE = 75;
 const STROKE_WIDTH = 5;
 const RADIUS = (PROGRESS_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-// ...imports
 export default function ChaptersScreen() {
   const router = useRouter();
   const { userId: clerkUserId } = useAuth();
+  const { lang } = useLanguage();
 
   const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
     clerkId: clerkUserId ?? "",
@@ -31,18 +31,41 @@ export default function ChaptersScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Lessons</Text>
-      <Text style={styles.subtitle}>Begin to remember...</Text>
+      {lang === 'en' && <Text style={styles.title}>Lessons</Text>}
+      {lang === 'fil' && <Text style={styles.title}>Mga Aralin</Text>}
+
+      {lang === 'en' && <Text style={styles.subtitle}>Begin to remember...</Text>}
+      {lang === 'fil' && <Text style={styles.subtitle}>Simulan ang pag-alala...</Text>}
 
       <View style={[styles.card, styles.chapterCard]}>
         {/* LEFT SIDE — Text and Button */}
         <View style={styles.textColumn}>
-          <Text style={styles.chapterName}>Chapter 1: The Letters of Baybayin</Text>
+          {lang === 'en' && (
+            <Text
+              style={styles.chapterName}
+              numberOfLines={2}
+              adjustsFontSizeToFit
+            >
+              Chapter 1: The Letters of Baybayin
+            </Text>
+          )}
+          {lang === 'fil' && (
+            <Text
+              style={styles.chapterName}
+              numberOfLines={2}
+              adjustsFontSizeToFit
+            >
+              Kabanata 1: Mga Titik ng Baybayin
+            </Text>
+          )}
+
           <TouchableOpacity
             style={styles.chapterButton}
             onPress={() => router.push("/screens/lessons")}
           >
-            <Text style={styles.buttonText}>Start</Text>
+            <Text style={styles.buttonText}>
+              {lang === 'en' ? 'Start' : 'Start'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -85,7 +108,6 @@ export default function ChaptersScreen() {
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
     padding: 24,
@@ -108,7 +130,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 16,
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'space-between',
     height: 140,
     marginBottom: 16,
@@ -120,21 +142,21 @@ const styles = StyleSheet.create({
   textColumn: {
     flex: 1,
     paddingLeft: 6,
-    paddingTop: 2,
-    paddingBottom: -200,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start', // ensure left alignment
+    justifyContent: 'center',
+    alignItems: 'flex-start',
   },
   chapterName: {
     fontSize: 17,
     fontFamily: 'outfit-bold',
     color: Colors.PRIMARY,
+    maxWidth: 180,
+    textAlign: 'left',
   },
   chapterButton: {
     backgroundColor: Colors.PRIMARY,
     paddingVertical: 4,
     paddingHorizontal: 50,
-    marginTop: 30,
+    marginTop: 12,
     borderRadius: 16,
     alignSelf: 'flex-start',
   },
@@ -159,7 +181,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
     marginRight: -5,
-    marginTop: -28
+    marginTop: -28,
   },
   progressLabel: {
     position: 'absolute',

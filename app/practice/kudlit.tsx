@@ -7,24 +7,54 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  GestureHandlerRootView,
-} from "react-native-gesture-handler";
-import {
-  Draggable,
-  DropProvider,
-  Droppable,
-} from "react-native-reanimated-dnd";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Draggable, DropProvider, Droppable } from "react-native-reanimated-dnd";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useLanguage } from "@/components/LanguageContext";
 import Colors from "@/constants/Colors";
-import { playSound } from "@/constants/playClickSound"; // Optional: Remove if not using
+import { playSound } from "@/constants/playClickSound";
 
-const lessonSlug = "kudlit"; // Update if using dynamic routing
+const lessonSlug = "kudlit"; // Static slug for now
+
+const t = {
+  text1: {
+    en: "Let's learn about Kudlit markers placed above the character.",
+    fil: "Tuklasin natin ang Kudlit na inilalagay sa ibabaw ng karakter.",
+  },
+  text2: {
+    en: "Now observe the Kudlit marker when placed below.",
+    fil: "Ngayon, obserbahan ang Kudlit kapag inilagay sa ilalim.",
+  },
+  text3: {
+    en: "Lastly, let's try a Plus sign marker for this character.",
+    fil: "Panghuli, subukan natin ang simbolong Plus para sa karakter na ito.",
+  },
+  finished: {
+    en: "Study Session Finished!",
+    fil: "Tapos na ang Pag-aaral!",
+  },
+  retry: {
+    en: "Retry",
+    fil: "Retry",
+  },
+  continue: {
+    en: "Continue",
+    fil: "Continue",
+  },
+  next: {
+    en: "Next",
+    fil: "Susunod",
+  },
+  finish: {
+    en: "Finish",
+    fil: "Tapos",
+  },
+};
 
 type TextPage = {
   type: "text";
-  content: string;
+  contentKey: keyof typeof t;
 };
 
 type DragPage = {
@@ -39,7 +69,7 @@ type LessonPage = TextPage | DragPage;
 const lessonData: LessonPage[] = [
   {
     type: "text",
-    content: "Let's learn about Kudlit markers placed above the character.",
+    contentKey: "text1",
   },
   {
     type: "drag",
@@ -49,7 +79,7 @@ const lessonData: LessonPage[] = [
   },
   {
     type: "text",
-    content: "Now observe the Kudlit marker when placed below.",
+    contentKey: "text2",
   },
   {
     type: "drag",
@@ -59,7 +89,7 @@ const lessonData: LessonPage[] = [
   },
   {
     type: "text",
-    content: "Lastly, let's try a Plus sign marker for this character.",
+    contentKey: "text3",
   },
   {
     type: "drag",
@@ -70,6 +100,9 @@ const lessonData: LessonPage[] = [
 ];
 
 export default function LessonDragScreen() {
+  const { lang } = useLanguage();
+  const router = useRouter();
+
   const [index, setIndex] = useState(0);
   const [dragKey, setDragKey] = useState(Date.now());
   const [droppedZone, setDroppedZone] = useState<"top" | "bottom" | null>(null);
@@ -78,7 +111,6 @@ export default function LessonDragScreen() {
   const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
   const [showFinished, setShowFinished] = useState(false);
 
-  const router = useRouter();
   const isLast = index === lessonData.length - 1;
   const currentPage = lessonData[index];
 
@@ -214,7 +246,7 @@ export default function LessonDragScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.scrollContent}>
-          <Text style={styles.lessonText}>Study Session Finished!</Text>
+          <Text style={styles.lessonText}>{t.finished[lang]}</Text>
 
           <TouchableOpacity
             style={styles.button}
@@ -223,7 +255,7 @@ export default function LessonDragScreen() {
               resetLesson();
             }}
           >
-            <Text style={styles.buttonText}>Retry</Text>
+            <Text style={styles.buttonText}>{t.retry[lang]}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -233,7 +265,7 @@ export default function LessonDragScreen() {
               router.replace(`/lessons/lesson7`);
             }}
           >
-            <Text style={styles.buttonText}>Continue</Text>
+            <Text style={styles.buttonText}>{t.continue[lang]}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -246,7 +278,7 @@ export default function LessonDragScreen() {
         <DropProvider>
           <ScrollView contentContainerStyle={styles.scrollContent}>
             {currentPage.type === "text" ? (
-              <Text style={styles.lessonText}>{currentPage.content}</Text>
+              <Text style={styles.lessonText}>{t[currentPage.contentKey][lang]}</Text>
             ) : (
               renderDragPage(currentPage)
             )}
@@ -260,7 +292,7 @@ export default function LessonDragScreen() {
               disabled={currentPage.type === "drag" && !isAnswerCorrect}
             >
               <Text style={styles.buttonText}>
-                {isLast ? "Finish" : "Next"}
+                {isLast ? t.finish[lang] : t.next[lang]}
               </Text>
             </TouchableOpacity>
           </ScrollView>
@@ -271,6 +303,7 @@ export default function LessonDragScreen() {
 }
 
 const styles = StyleSheet.create({
+  // (same as yours, unchanged)
   container: {
     flex: 1,
     backgroundColor: Colors.WHITE,

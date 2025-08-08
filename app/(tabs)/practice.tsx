@@ -3,6 +3,7 @@ import { playSound } from '@/constants/playClickSound';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useLanguage } from "../../components/LanguageContext";
 
 const CHARACTERS = [
   { symbol: "ᜀ", label: "A", value: "a", type: "vowel" },
@@ -32,14 +33,30 @@ const CHARACTERS = [
 export default function Practice() {
   const router = useRouter();
   const [filter, setFilter] = useState<"vowel" | "consonant">("vowel");
+  const { lang } = useLanguage();
+
+  const t = {
+    en: {
+      practice: "Practice",
+      subtitle: "Scribble your way to mastery",
+      vowels: "Vowels",
+      consonants: "Consonants",
+    },
+    fil: {
+      practice: "Sanayin",
+      subtitle: "Magsanay sa pagsusulat",
+      vowels: "Patinig",
+      consonants: "Katinig",
+    },
+  }[lang];
 
   const filteredCharacters = CHARACTERS.filter((char) => char.type === filter);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Practice</Text>
-        <Text style={styles.subtitle}>Scribble your way to mastery</Text>
+        <Text style={styles.title}>{t.practice}</Text>
+        <Text style={styles.subtitle}>{t.subtitle}</Text>
 
         <View style={styles.buttonRow}>
           <TouchableOpacity
@@ -52,7 +69,7 @@ export default function Practice() {
                 filter === "vowel" && styles.activeButtonText,
               ]}
             >
-              Vowels
+              {t.vowels}
             </Text>
           </TouchableOpacity>
 
@@ -66,7 +83,7 @@ export default function Practice() {
                 filter === "consonant" && styles.activeButtonText,
               ]}
             >
-              Consonants
+              {t.consonants}
             </Text>
           </TouchableOpacity>
         </View>
@@ -99,7 +116,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.WHITE,
     padding: 16,
-    paddingBottom: 1
+    paddingBottom: 1,
   },
   header: {
     marginBottom: 8,
@@ -160,16 +177,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 24,
 
-      // iOS Shadow
-  shadowColor: Colors.PRIMARY,
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
+    // iOS Shadow
+    shadowColor: Colors.PRIMARY,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
 
-  // Android Shadow
-  elevation: 5,
+    // Android Shadow
+    elevation: 5,
   },
-
   character: {
     fontSize: 80,
     color: Colors.BLACK,

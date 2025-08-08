@@ -1,11 +1,13 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { useLanguage } from '../../components/LanguageContext';
 import Colors from '../../constants/Colors';
 
 export default function DrawerLayout() {
   const router = useRouter();
+  const { lang, setLang } = useLanguage();
   return (
     <Drawer
       screenOptions={{
@@ -28,12 +30,25 @@ export default function DrawerLayout() {
           color: Colors.BLACK,
         },
         headerRight: () => (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {/* Language Toggle Button */}
+            <Pressable
+              onPress={() => setLang(lang === 'en' ? 'fil' : 'en')}
+              style={{ marginRight: 20 }}
+            >
+              <Ionicons
+                name={lang === 'en' ? 'globe-outline' : 'globe'}
+                size={24}
+                color={Colors.BLACK}
+              />
+            </Pressable>
           <Pressable
             onPress={() => router.push('/help')}
             style={{ marginRight: 20 }}
           >
             <Ionicons name="help-circle-outline" size={24} color={Colors.BLACK} />
           </Pressable>
+        </View>
         ),
       }}
     >

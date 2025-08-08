@@ -1,8 +1,9 @@
 import BaybayinKeyboard from "@/components/BaybayinKeyboard";
+import { useLanguage } from "@/components/LanguageContext";
 import Colors from "@/constants/Colors";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
-import Ionicons from '@expo/vector-icons/Ionicons';
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import {
@@ -17,7 +18,53 @@ import {
 type Word = { baybayin: string; latin: string; [key: string]: any };
 type Difficulty = "easy" | "medium" | "hard";
 
+const t = {
+  en: {
+    selectSettings: "Select Practice Settings",
+    difficulty: "Difficulty",
+    numberOfQuestions: "Number of Questions",
+    startQuiz: "Start Quiz",
+    loadingQuiz: "Loading quiz...",
+    correct: "Correct!",
+    incorrect: "Incorrect",
+    submit: "Submit",
+    retry: "Retry",
+    next: "Next",
+    summary: "Quiz Summary",
+    correctLabel: "Correct",
+    incorrectLabel: "Incorrect",
+    firstTry: "Correct on first try!",
+    attempts: (n: number) => `Needed ${n} attempt${n > 1 ? "s" : ""}`,
+    perfect: "Perfect! You got everything right on the first try.",
+    review: "Great effort! Review the words that took more than one try.",
+    backToStart: "Back to Start",
+    type: "Type",
+  },
+  fil: {
+    selectSettings: "Pumili ng Mga Setting sa Pagsasanay",
+    difficulty: "Kahirapan",
+    numberOfQuestions: "Bilang ng mga Tanong",
+    startQuiz: "Simulan ang Pagsusulit",
+    loadingQuiz: "Ikinakarga ang pagsusulit...",
+    correct: "Tama!",
+    incorrect: "Mali",
+    submit: "Submit",
+    retry: "Retry",
+    next: "Next",
+    summary: "Buod ng Pagsusulit",
+    correctLabel: "Tama",
+    incorrectLabel: "Mali",
+    firstTry: "Tama sa unang subok!",
+    attempts: (n: number) => `Kinailangan ng ${n} subok`,
+    perfect: "Perpekto! Nakuha mong lahat ng tama sa unang subok.",
+    review: "Mahusay! Balikan ang mga salitang hindi agad nasagot.",
+    backToStart: "Bumalik sa Simula",
+    type: "I-type",
+  },
+};
+
 export default function SpellingQuizScreen() {
+  const { lang } = useLanguage();
   const { user } = useUser();
 
   const [isSetup, setIsSetup] = useState(true);
@@ -93,9 +140,8 @@ export default function SpellingQuizScreen() {
   if (isSetup) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Select Practice Settings</Text>
-
-        <Text style={styles.label}>Difficulty</Text>
+        <Text style={styles.title}>{t[lang].selectSettings}</Text>
+        <Text style={styles.label}>{t[lang].difficulty}</Text>
         {["easy", "medium", "hard"].map((level) => (
           <TouchableOpacity
             key={level}
@@ -112,8 +158,7 @@ export default function SpellingQuizScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-
-        <Text style={styles.label}>Number of Questions</Text>
+        <Text style={styles.label}>{t[lang].numberOfQuestions}</Text>
         {[5, 10, 15].map((num) => (
           <TouchableOpacity
             key={num}
@@ -130,13 +175,12 @@ export default function SpellingQuizScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-
         <TouchableOpacity
           style={[styles.button, !(difficulty && questionCount) && { opacity: 0.5 }]}
           disabled={!(difficulty && questionCount)}
           onPress={() => setIsSetup(false)}
         >
-          <Text style={styles.buttonText}>Start Quiz</Text>
+          <Text style={styles.buttonText}>{t[lang].startQuiz}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -147,7 +191,7 @@ export default function SpellingQuizScreen() {
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
         <Text style={{ marginTop: 12, fontFamily: "outfit" }}>
-          Loading quiz...
+          {t[lang].loadingQuiz}
         </Text>
       </View>
     );
@@ -155,99 +199,101 @@ export default function SpellingQuizScreen() {
 
   const current = words[currentIndex];
 
-if (showSummary) {
-  return (
-    <View style={{ flex: 1, backgroundColor: Colors.WHITE }}>
-      <ScrollView
-        contentContainerStyle={{
-          padding: 20,
-          alignItems: "center",
-          paddingBottom: 60,
-        }}
-      >
-        <Text style={styles.title}>Quiz Summary</Text>
-
-        <View style={styles.summaryStats}>
-          <View style={styles.statItem}>
-            <Ionicons name="checkmark-circle" size={45} color="green" />
-            <Text style={styles.bigStat}>Correct: {correctCount}</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Ionicons name="close-circle" size={45} color="red" />
-            <Text style={styles.bigStat}>Incorrect: {incorrectCount}</Text>
-          </View>
-        </View>
-
-        <View style={styles.summaryList}>
-          {words.map((word, index) => {
-            const tries = attempts[index] || 1;
-            const isCorrect = tries === 1;
-
-            return (
-              <View
-                key={index}
-                style={[
-                  styles.wordCard,
-                  isCorrect ? styles.correctCard : styles.incorrectCard,
-                ]}
-              >
-                <Ionicons
-                  name={isCorrect ? "checkmark-circle" : "close-circle"}
-                  size={24}
-                  color={isCorrect ? "green" : "red"}
-                  style={styles.cardIcon}
-                />
-                <Text style={styles.wordLatin}>{word.latin}</Text>
-                <Text style={styles.wordBaybayin}>{word.baybayin}</Text>
-                <Text style={isCorrect ? styles.tryCount : styles.tryCountBold}>
-                  {isCorrect
-                    ? "Correct on first try!"
-                    : `Needed ${tries} attempt${tries > 1 ? "s" : ""}`}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-
-        <Text style={styles.message}>
-          {incorrectCount === 0
-            ? "Perfect! You got everything right on the first try."
-            : "Great effort! Review the words that took more than one try."}
-        </Text>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            setShowSummary(false);
-            setIsSetup(true);
-            setDifficulty(null);
-            setQuestionCount(null);
-            setCurrentIndex(0);
-            setCorrectCount(0);
-            setIncorrectCount(0);
-            setWords([]);
-            setInput("");
-            setAttempts([]);
-            setSeed(Math.random());
-            setResetSignal((r) => r + 1);
-            setHasSubmitted(false);
-            setIsCorrect(false);
-            setKeyboardEnabled(true);
+  if (showSummary) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.WHITE }}>
+        <ScrollView
+          contentContainerStyle={{
+            padding: 20,
+            alignItems: "center",
+            paddingBottom: 60,
           }}
         >
-          <Text style={styles.buttonText}>Back to Start</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
-  );
-}
+          <Text style={styles.title}>{t[lang].summary}</Text>
 
+          <View style={styles.summaryStats}>
+            <View style={styles.statItem}>
+              <Ionicons name="checkmark-circle" size={45} color="green" />
+              <Text style={styles.bigStat}>
+                {t[lang].correctLabel}: {correctCount}
+              </Text>
+            </View>
+            <View style={styles.statItem}>
+              <Ionicons name="close-circle" size={45} color="red" />
+              <Text style={styles.bigStat}>
+                {t[lang].incorrectLabel}: {incorrectCount}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.summaryList}>
+            {words.map((word, index) => {
+              const tries = attempts[index] || 1;
+              const correct = tries === 1;
+              return (
+                <View
+                  key={index}
+                  style={[
+                    styles.wordCard,
+                    correct ? styles.correctCard : styles.incorrectCard,
+                  ]}
+                >
+                  <Ionicons
+                    name={correct ? "checkmark-circle" : "close-circle"}
+                    size={24}
+                    color={correct ? "green" : "red"}
+                    style={styles.cardIcon}
+                  />
+                  <Text style={styles.wordLatin}>{word.latin}</Text>
+                  <Text style={styles.wordBaybayin}>{word.baybayin}</Text>
+                  <Text style={correct ? styles.tryCount : styles.tryCountBold}>
+                    {correct
+                      ? t[lang].firstTry
+                      : t[lang].attempts(tries)}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+
+          <Text style={styles.message}>
+            {incorrectCount === 0
+              ? t[lang].perfect
+              : t[lang].review}
+          </Text>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              setShowSummary(false);
+              setIsSetup(true);
+              setDifficulty(null);
+              setQuestionCount(null);
+              setCurrentIndex(0);
+              setCorrectCount(0);
+              setIncorrectCount(0);
+              setWords([]);
+              setInput("");
+              setAttempts([]);
+              setSeed(Math.random());
+              setResetSignal((r) => r + 1);
+              setHasSubmitted(false);
+              setIsCorrect(false);
+              setKeyboardEnabled(true);
+            }}
+          >
+            <Text style={styles.buttonText}>{t[lang].backToStart}</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.quizGroup}>
         <Text style={styles.promptText}>
-          Type:{" "}
+          {t[lang].type}:{" "}
           {difficulty === "hard"
             ? current.latin.charAt(0).toUpperCase() + current.latin.slice(1)
             : current.latin.toLowerCase()}
@@ -257,16 +303,16 @@ if (showSummary) {
         </View>
 
         {hasSubmitted && isCorrect && (
-          <Text style={styles.correctText}>Correct! ✅</Text>
+          <Text style={styles.correctText}>{t[lang].correct} ✅</Text>
         )}
         {hasSubmitted && !isCorrect && (
-          <Text style={styles.errorText}>Incorrect ❌</Text>
+          <Text style={styles.errorText}>{t[lang].incorrect} ❌</Text>
         )}
       </View>
 
       {!hasSubmitted && (
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Submit</Text>
+          <Text style={styles.buttonText}>{t[lang].submit}</Text>
         </TouchableOpacity>
       )}
 
@@ -279,13 +325,13 @@ if (showSummary) {
             setKeyboardEnabled(true);
           }}
         >
-          <Text style={styles.buttonText}>Retry</Text>
+          <Text style={styles.buttonText}>{t[lang].retry}</Text>
         </TouchableOpacity>
       )}
 
       {hasSubmitted && isCorrect && (
         <TouchableOpacity style={styles.button} onPress={handleNext}>
-          <Text style={styles.buttonText}>Next</Text>
+          <Text style={styles.buttonText}>{t[lang].next}</Text>
         </TouchableOpacity>
       )}
 
@@ -297,6 +343,7 @@ if (showSummary) {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: Colors.WHITE },

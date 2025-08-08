@@ -11,29 +11,54 @@ import {
   View,
 } from "react-native";
 
+// Optional: custom hook or context to detect selected language
+import { useLanguage } from "../../components/LanguageContext"; // adjust path as needed
+
 export default function SpellingAndCards() {
   const router = useRouter();
+  const { lang } = useLanguage(); // assuming useLang gives you the current language: 'en' or 'fil'
 
   const handlePress = async (route: string) => {
     await playSound("click");
     router.push(route as any);
   };
 
+  const t = {
+    en: {
+      title: "Mini Games",
+      subtitle: "Challenge your skills",
+      spellingTitle: "Spelling Exercise",
+      spellingSub: "Test words in Baybayin",
+      flashcardTitle: "Offline Flashcards",
+      flashcardSub: "Review characters anywhere",
+      start: "Start",
+    },
+    fil: {
+      title: "Mini Games",
+      subtitle: "Subukin ang iyong kasanayan",
+      spellingTitle: "Spelling Exercise",
+      spellingSub: "Subukin ang mga salita sa Baybayin",
+      flashcardTitle: "Offline Flashcards",
+      flashcardSub: "Mag-aral kahit saan",
+      start: "Start",
+    },
+  }[lang];
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Mini Games</Text>
-      <Text style={styles.subtitle}>Challenge your skills</Text>
+      <Text style={styles.title}>{t.title}</Text>
+      <Text style={styles.subtitle}>{t.subtitle}</Text>
 
       <View style={{ marginBottom: 8 }}>
         <View style={[styles.card, styles.card3]}>
           <View style={styles.card3Group}>
-            <Text style={styles.cardText}>Spelling Exercise</Text>
-            <Text style={styles.cardSubtitle}>Test words in Baybayin</Text>
+            <Text style={styles.cardText}>{t.spellingTitle}</Text>
+            <Text style={styles.cardSubtitle}>{t.spellingSub}</Text>
             <TouchableOpacity
               style={styles.card3Button}
               onPress={() => handlePress("/challenge/TypingIntro")}
             >
-              <Text style={styles.buttonText}>Start</Text>
+              <Text style={styles.buttonText}>{t.start}</Text>
             </TouchableOpacity>
           </View>
           <Image
@@ -47,13 +72,13 @@ export default function SpellingAndCards() {
       <View style={{ marginBottom: 8 }}>
         <View style={[styles.card, styles.card3]}>
           <View style={styles.card3Group}>
-            <Text style={styles.cardText}>Offline Flashcards</Text>
-            <Text style={styles.cardSubtitle}>Review characters anywhere</Text>
+            <Text style={styles.cardText}>{t.flashcardTitle}</Text>
+            <Text style={styles.cardSubtitle}>{t.flashcardSub}</Text>
             <TouchableOpacity
               style={styles.card3Button}
               onPress={() => handlePress("/practice/cards")}
             >
-              <Text style={styles.buttonText}>Start</Text>
+              <Text style={styles.buttonText}>{t.start}</Text>
             </TouchableOpacity>
           </View>
           <Image
@@ -66,6 +91,7 @@ export default function SpellingAndCards() {
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
