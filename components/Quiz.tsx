@@ -16,7 +16,6 @@ import {
 } from "react-native";
 import Svg, { Rect } from "react-native-svg";
 
-
 type CharacterData = {
   symbol: string;
   expected: string;
@@ -155,21 +154,25 @@ export default function Quiz({
     setQuestions(updated);
     setAnswerLog(newLog);
 
+    // Finish quiz if no questions left or hearts run out
     if (updated.length === 0 || hearts - (isCorrect ? 0 : 1) <= 0) {
-      await finishQuiz(newLog);
+      await finishQuiz(newLog, hearts - (isCorrect ? 0 : 1) <= 0);
     } else {
       setCurrentIndex(Math.min(currentIndex, updated.length - 1));
     }
   };
 
-  const finishQuiz = async (finalLog: AnswerSummary[]) => {
+  const finishQuiz = async (finalLog: AnswerSummary[], isGameOver = false) => {
     const totalPoints = finalLog.reduce((sum, a) => sum + a.pointsEarned, 0);
     const correctAnswers = finalLog.filter((a) => a.result === "correct").length;
     const maxPoints = characters.length * (10 + 15) * 2;
 
     const stars =
-      totalPoints >= maxPoints ? 3 :
-      totalPoints >= maxPoints * 0.75 ? 2 : 1;
+      totalPoints >= maxPoints
+        ? 3
+        : totalPoints >= maxPoints * 0.75
+        ? 2
+        : 1;
 
     if (!user || !convexUserId || pastAttempts === undefined) return;
 
@@ -210,6 +213,7 @@ export default function Quiz({
         score: totalPoints.toString(),
         lessonRoute: modelName,
         answers: encodeURIComponent(JSON.stringify(finalLog)),
+        gameOver: isGameOver ? "true" : "false",
       },
     });
   };
@@ -221,16 +225,12 @@ export default function Quiz({
     if (current.type === "mcq") {
       return (
         <View>
-          <Text style={styles.question}>
-            {current.character.symbol}
-          </Text>
+          <Text style={styles.question}>{current.character.symbol}</Text>
           {current.options!.map((option, idx) => (
             <TouchableOpacity
               key={idx}
               style={styles.option}
-              onPress={() =>
-                handleAnswer(option === current.character.expected)
-              }
+              onPress={() => handleAnswer(option === current.character.expected)}
             >
               <Text style={styles.optionText}>{option}</Text>
             </TouchableOpacity>
@@ -240,9 +240,7 @@ export default function Quiz({
     } else {
       return (
         <View>
-          <Text style={styles.question}>
-            Write {current.character.label}
-          </Text>
+          <Text style={styles.question}>Write {current.character.label}</Text>
           <HandwritingCanvas
             key={`${currentIndex}-${answerLog.length}`}
             lesson={current.character.modelName || modelName}
@@ -260,7 +258,8 @@ export default function Quiz({
     }
   };
 
-  const correctAnswersCount = answerLog.filter(a => a.result === "correct").length;
+  const correctAnswersCount = answerLog.filter((a) => a.result === "correct")
+    .length;
   const totalQuestionsCount = characters.length * 4;
 
   const progress = correctAnswersCount / totalQuestionsCount;
@@ -295,7 +294,15 @@ export default function Quiz({
       <View style={styles.progressBarContainer}>
         <Svg height="10" width="100%">
           <Rect x="0" y="0" width="100%" height="10" fill="#eee" rx="5" ry="5" />
-          <Rect x="0" y="0" width={`${progress * 100}%`} height="10" fill={Colors.PRIMARY} rx="5" ry="5" />
+          <Rect
+            x="0"
+            y="0"
+            width={`${progress * 100}%`}
+            height="10"
+            fill={Colors.PRIMARY}
+            rx="5"
+            ry="5"
+          />
         </Svg>
       </View>
 

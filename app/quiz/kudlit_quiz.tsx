@@ -275,14 +275,17 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
     setDragKey(Date.now());
     setShowWrong(false);
 
-    if (updated.length === 0 || hearts - (isCorrect ? 0 : 1) <= 0) {
-      await finishQuiz(newLog);
+    const newHearts = hearts - (isCorrect ? 0 : 1);
+
+    if (updated.length === 0 || newHearts <= 0) {
+      await finishQuiz(newLog, newHearts <= 0);
+
     } else {
       setCurrentIndex(Math.min(currentIndex, updated.length - 1));
     }
   };
 
-  const finishQuiz = async (finalLog: AnswerSummary[]) => {
+  const finishQuiz = async (finalLog: AnswerSummary[], isGameOver = false) => {
     const totalPoints = finalLog.reduce((sum, a) => sum + a.pointsEarned, 0);
     const correctAnswers = finalLog.filter((a) => a.result === "correct").length;
     const maxPoints = 150;
@@ -330,6 +333,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
         score: totalPoints.toString(),
         lessonRoute: "kudlit_quiz",
         answers: encodeURIComponent(JSON.stringify(finalLog)),
+        gameOver: isGameOver ? "true" : "false",
       },
     });
   };

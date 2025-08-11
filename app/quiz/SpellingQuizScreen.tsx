@@ -144,7 +144,7 @@ export default function SpellingQuizScreen() {
       setHearts((prev) => Math.max(0, prev - 1));
 
       if (hearts - 1 <= 0) {
-        handleNext(true);
+        handleNext(true, true);
         return;
       }
 
@@ -168,7 +168,7 @@ export default function SpellingQuizScreen() {
 
   const insertChallenge = useMutation(api.typing.insertTypingChallenge);
 
-  const handleNext = async (forceFinish = false) => {
+  const handleNext = async (forceFinish = false, isGameOver = false) => {
     if (currentIndex + 1 === words.length || forceFinish) {
       const base = basePointsMap[difficulty!].points;
 
@@ -202,6 +202,7 @@ export default function SpellingQuizScreen() {
             stars: String(stars),
             answers: encodeURIComponent(JSON.stringify(answers)),
             lessonRoute: "SpellingQuizScreen",
+            gameOver: isGameOver ? "true" : "false",  // <-- Add here
           },
         });
       } catch (error) {
@@ -215,6 +216,7 @@ export default function SpellingQuizScreen() {
       setResetSignal((r) => r + 1);
     }
   };
+
 
   if (isSetup) {
     return (

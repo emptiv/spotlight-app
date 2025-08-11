@@ -41,109 +41,111 @@ export default function HomeScreen() {
       {lang === 'en' && <Text style={styles.subtitle}>How do you want to start your day?</Text>}
       {lang === 'fil' && <Text style={styles.subtitle}>Paano mo gustong simulan ang araw mo?</Text>}
 
-      {/* Card 1 */}
-      <View style={[styles.card, styles.card1]}>
-        <View style={styles.card1Group}>
+    {/* Card 1 */}
+    <TouchableOpacity
+      style={[styles.card, styles.card1]}
+      activeOpacity={0.9}
+      onPress={async () => {
+        await playSound('click');
+        router.push('/chapters');
+      }}
+    >
+      <View style={styles.card1Group}>
+        <Text
+          style={styles.cardText}
+          numberOfLines={2}
+          adjustsFontSizeToFit
+        >
+          {lang === 'en' ? 'Ready to learn?' : 'Handa ka na?'}
+        </Text>
+
+        {/* Optional: Keep the small button for looks only */}
+        <View style={styles.card1Button}>
+          <Text style={styles.buttonText}>Go to Lessons</Text>
+        </View>
+      </View>
+      <Image
+        source={require('../../assets/images/home1.png')}
+        style={styles.card1Image}
+        resizeMode="contain"
+      />
+    </TouchableOpacity>
+
+    {/* Card 2 */}
+    <View style={{ marginBottom: 8 }}>
+      <Text
+        style={styles.topLabel}
+        numberOfLines={2}
+        adjustsFontSizeToFit
+      >
+        {lang === 'en' ? 'Practice your scribbles' : 'Sanayin ang iyong pagsusulat'}
+      </Text>
+
+      <TouchableOpacity
+        style={[styles.card, styles.card2]}
+        activeOpacity={0.9}
+        onPress={async () => {
+          await playSound('click');
+          router.push('/practice');
+        }}
+      >
+        <Image
+          source={require('../../assets/images/home2.png')}
+          style={styles.card2Image}
+          resizeMode="contain"
+        />
+        <View style={styles.card2Group}>
           <Text
             style={styles.cardText}
             numberOfLines={2}
             adjustsFontSizeToFit
           >
-            {lang === 'en' ? 'Ready to learn?' : 'Handa ka na?'}
+            {lang === 'en' ? 'Refresh your mind!' : 'Patalasin ang isip!'}
           </Text>
+          <View style={styles.card2Button}>
+            <Text style={styles.buttonText}>Go to Practice</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    </View>
 
-          <TouchableOpacity
-            style={styles.card1Button}
-            onPress={async () => {
-              await playSound('click');
-              router.push('/chapters');
-            }}
+    {/* Card 3 */}
+    <View style={{ marginBottom: 8 }}>
+      <Text
+        style={styles.topLabel}
+        numberOfLines={2}
+        adjustsFontSizeToFit
+      >
+        {lang === 'en' ? 'Play and learn' : 'Maglaro at matuto'}
+      </Text>
+
+      <TouchableOpacity
+        style={[styles.card, styles.card3]}
+        activeOpacity={0.9}
+        onPress={async () => {
+          await playSound('click');
+          router.push('/minigames');
+        }}
+      >
+        <View style={styles.card3Group}>
+          <Text
+            style={styles.cardText}
+            numberOfLines={2}
+            adjustsFontSizeToFit
           >
-            <Text style={styles.buttonText}>Go to Lessons</Text>
-          </TouchableOpacity>
+            {lang === 'en' ? 'Make learning fun!' : 'Tara, matuto tayo!'}
+          </Text>
+          <View style={styles.card3Button}>
+            <Text style={styles.buttonText}>Go to Mini Games</Text>
+          </View>
         </View>
         <Image
-          source={require('../../assets/images/home1.png')}
-          style={styles.card1Image}
+          source={require('../../assets/images/home3.png')}
+          style={styles.card3Image}
           resizeMode="contain"
         />
-      </View>
-
-      {/* Card 2 */}
-      <View style={{ marginBottom: 8 }}>
-        <Text
-          style={styles.topLabel}
-          numberOfLines={2}
-          adjustsFontSizeToFit
-        >
-          {lang === 'en' ? 'Practice your scribbles' : 'Sanayin ang iyong pagsusulat'}
-        </Text>
-
-        <View style={[styles.card, styles.card2]}>
-          <Image
-            source={require('../../assets/images/home2.png')}
-            style={styles.card2Image}
-            resizeMode="contain"
-          />
-          <View style={styles.card2Group}>
-            <Text
-              style={styles.cardText}
-              numberOfLines={2}
-              adjustsFontSizeToFit
-            >
-              {lang === 'en' ? 'Refresh your mind!' : 'Patalasin ang isip!'}
-            </Text>
-
-            <TouchableOpacity
-              style={styles.card2Button}
-              onPress={async () => {
-                await playSound('click');
-                router.push('/practice');
-              }}
-            >
-              <Text style={styles.buttonText}>Go to Practice</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      {/* Card 3 */}
-      <View style={{ marginBottom: 8 }}>
-        <Text
-          style={styles.topLabel}
-          numberOfLines={2}
-          adjustsFontSizeToFit
-        >
-          {lang === 'en' ? 'Play and learn' : 'Maglaro at matuto'}
-        </Text>
-
-        <View style={[styles.card, styles.card3]}>
-          <View style={styles.card3Group}>
-            <Text
-              style={styles.cardText}
-              numberOfLines={2}
-              adjustsFontSizeToFit
-            >
-              {lang === 'en' ? 'Make learning fun!' : 'Tara, matuto tayo!'}
-            </Text>
-
-            <TouchableOpacity
-              style={styles.card3Button}
-              onPress={async () => {
-                await playSound('click');
-                router.push('/minigames');
-              }}
-            >
-              <Text style={styles.buttonText}>Go to Mini Games</Text>
-            </TouchableOpacity>
-          </View>
-          <Image
-            source={require('../../assets/images/home3.png')}
-            style={styles.card3Image}
-            resizeMode="contain"
-          />
-        </View>
-      </View>
+      </TouchableOpacity>
+    </View>
     </ScrollView>
   );
 }

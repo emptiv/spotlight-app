@@ -1,15 +1,45 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { DrawerContentComponentProps, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { useLanguage } from '../../components/LanguageContext';
 import Colors from '../../constants/Colors';
 
+function CustomDrawerContent(props: DrawerContentComponentProps) {
+  const { lang, setLang } = useLanguage();
+  const isEnglish = lang === 'en';
+
+  return (
+    <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
+      {/* Language Setting */}
+      <View style={styles.languageContainer}>
+        <Text style={styles.languageLabel}>Language</Text>
+        <View style={styles.languageSwitch}>
+          <Text style={styles.languageText}>ENG</Text>
+          <Switch
+            value={!isEnglish}
+            onValueChange={(value) => setLang(value ? 'fil' : 'en')}
+            trackColor={{ false: Colors.PRIMARY, true: Colors.PRIMARY }}
+            thumbColor={Colors.WHITE}
+            ios_backgroundColor={Colors.SECONDARY}
+          />
+          <Text style={styles.languageText}>FIL</Text>
+        </View>
+      </View>
+
+      {/* Default Drawer Items */}
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
+  );
+}
+
 export default function DrawerLayout() {
   const router = useRouter();
-  const { lang, setLang } = useLanguage();
+
   return (
     <Drawer
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         drawerType: 'slide',
         drawerStyle: {
@@ -30,30 +60,12 @@ export default function DrawerLayout() {
           color: Colors.BLACK,
         },
         headerRight: () => (
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {/* Language Toggle Button */}
-            <Pressable
-              onPress={() => setLang(lang === 'en' ? 'fil' : 'en')}
-              style={{ marginRight: 20 }}
-            >
-              <Ionicons
-                name={lang === 'en' ? 'globe-outline' : 'globe'}
-                size={24}
-                color={Colors.BLACK}
-              />
-            </Pressable>
-          <Pressable
-            onPress={() => router.push('/help')}
-            style={{ marginRight: 20 }}
-          >
+          <Pressable onPress={() => router.push('/help')} style={{ marginRight: 20 }}>
             <Ionicons name="help-circle-outline" size={24} color={Colors.BLACK} />
           </Pressable>
-        </View>
         ),
       }}
     >
-
-
       <Drawer.Screen
         name="index"
         options={{
@@ -61,7 +73,6 @@ export default function DrawerLayout() {
           drawerIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
         }}
       />
-
       <Drawer.Screen
         name="chapters"
         options={{
@@ -106,6 +117,29 @@ export default function DrawerLayout() {
         }}
       />
     </Drawer>
-
   );
 }
+
+const styles = StyleSheet.create({
+  languageContainer: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  languageLabel: {
+    fontSize: 14,
+    fontFamily: 'outfit-bold',
+    color: Colors.BLACK,
+    marginBottom: 8,
+  },
+  languageSwitch: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  languageText: {
+    fontSize: 14,
+    fontFamily: 'outfit-bold',
+    color: Colors.BLACK,
+    marginHorizontal: 6,
+  },
+});

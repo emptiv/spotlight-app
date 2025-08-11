@@ -37,8 +37,12 @@ export default function ChaptersScreen() {
       {lang === 'en' && <Text style={styles.subtitle}>Begin to remember...</Text>}
       {lang === 'fil' && <Text style={styles.subtitle}>Simulan ang pag-alala...</Text>}
 
-      <View style={[styles.card, styles.chapterCard]}>
-        {/* LEFT SIDE — Text and Button */}
+      <TouchableOpacity
+        style={[styles.card, styles.chapterCard]}
+        activeOpacity={0.9}
+        onPress={() => router.push("/screens/lessons")}
+      >
+        {/* LEFT SIDE — Text and Fake Button */}
         <View style={styles.textColumn}>
           {lang === 'en' && (
             <Text
@@ -59,14 +63,12 @@ export default function ChaptersScreen() {
             </Text>
           )}
 
-          <TouchableOpacity
-            style={styles.chapterButton}
-            onPress={() => router.push("/screens/lessons")}
-          >
+          {/* Fake Button — for look only */}
+          <View style={styles.chapterButton}>
             <Text style={styles.buttonText}>
               {lang === 'en' ? 'Start' : 'Start'}
             </Text>
-          </TouchableOpacity>
+          </View>
         </View>
 
         {/* RIGHT SIDE — Image and Progress */}
@@ -103,7 +105,7 @@ export default function ChaptersScreen() {
             <Text style={styles.progressLabel}>{Math.round(progress * 100)}%</Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     </ScrollView>
   );
 }

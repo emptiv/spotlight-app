@@ -1,7 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Colors from "../../constants/Colors";
 
 type AnswerSummary = {
@@ -14,15 +21,40 @@ type AnswerSummary = {
 };
 
 export default function QuizResults() {
-  const { stars, score, lessonRoute, answers } = useLocalSearchParams<{
-    stars: string;
-    score: string;
-    lessonRoute?: string;
-    answers?: string;
-  }>();
+  const { stars, score, lessonRoute, answers, gameOver } =
+    useLocalSearchParams<{
+      stars: string;
+      score: string;
+      lessonRoute?: string;
+      answers?: string;
+      gameOver?: string;
+    }>();
 
   const router = useRouter();
   const [showAnswers, setShowAnswers] = useState(false);
+
+  // For overlay animation
+  const [showOverlay, setShowOverlay] = useState(gameOver === "true");
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (showOverlay) {
+      const timer = setTimeout(() => {
+        fadeOutOverlay();
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [showOverlay]);
+
+  const fadeOutOverlay = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowOverlay(false);
+    });
+  };
 
   const numericStars = Math.max(0, Math.min(3, Number(stars)));
   const totalPoints = Number(score);
@@ -30,9 +62,6 @@ export default function QuizResults() {
   const parsedAnswers: AnswerSummary[] = answers
     ? JSON.parse(decodeURIComponent(answers))
     : [];
-
-  console.log("✅ Raw 'answers' param:", answers);
-  console.log("✅ Parsed Answers:", parsedAnswers);
 
   const message =
     numericStars === 3
@@ -42,81 +71,98 @@ export default function QuizResults() {
       : "Keep practicing! Try again for a better score.";
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Quiz Results</Text>
+    <>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Quiz Results</Text>
 
-      <View style={styles.starsContainer}>
-        {[...Array(3)].map((_, i) => (
-          <Ionicons
-            key={i}
-            name={i < numericStars ? "star" : "star-outline"}
-            size={32}
-            color={Colors.PRIMARY}
-          />
-        ))}
-      </View>
-
-      <Text style={styles.score}>You earned {totalPoints} points</Text>
-      <Text style={styles.message}>{message}</Text>
-
-      <TouchableOpacity
-        onPress={() => setShowAnswers((prev) => !prev)}
-        style={styles.toggleButton}
-      >
-        <Text style={styles.toggleButtonText}>
-          {showAnswers ? "Hide Answers" : "Show Answers"}
-        </Text>
-      </TouchableOpacity>
-
-      {showAnswers && (
-        <View style={styles.answersBox}>
-          {parsedAnswers.length === 0 ? (
-            <Text style={styles.answerText}>No answers available.</Text>
-          ) : (
-            parsedAnswers.map((ans, i) => {
-              const isCorrect = ans.result === "correct";
-              return (
-                <View
-                  key={i}
-                  style={[
-                    styles.answerCard,
-                    isCorrect ? styles.correctCard : styles.incorrectCard,
-                  ]}
-                >
-                  <Ionicons
-                    name={isCorrect ? "checkmark-circle" : "close-circle"}
-                    size={22}
-                    color={isCorrect ? "green" : "red"}
-                    style={styles.cardIcon}
-                  />
-                  <Text style={styles.answerText}>
-                    [{ans.type}] {ans.symbol} ({ans.label}) → {ans.result.toUpperCase()} +{ans.pointsEarned}
-                  </Text>
-                </View>
-              );
-            })
-          )}
+        <View style={styles.starsContainer}>
+          {[...Array(3)].map((_, i) => (
+            <Ionicons
+              key={i}
+              name={i < numericStars ? "star" : "star-outline"}
+              size={32}
+              color={Colors.PRIMARY}
+            />
+          ))}
         </View>
-      )}
 
-      <View style={styles.buttonContainer}>
+        <Text style={styles.score}>You earned {totalPoints} points</Text>
+        <Text style={styles.message}>{message}</Text>
+
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.replace("/")}
+          onPress={() => setShowAnswers((prev) => !prev)}
+          style={styles.toggleButton}
         >
-          <Text style={styles.buttonText}>Back to Home</Text>
+          <Text style={styles.toggleButtonText}>
+            {showAnswers ? "Hide Answers" : "Show Answers"}
+          </Text>
         </TouchableOpacity>
 
-        {lessonRoute && (
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: Colors.GRAY }]}
-            onPress={() => router.replace(`/quiz/${lessonRoute}` as any)}
-          >
-            <Text style={styles.buttonText}>Retake Quiz</Text>
-          </TouchableOpacity>
+        {showAnswers && (
+          <View style={styles.answersBox}>
+            {parsedAnswers.length === 0 ? (
+              <Text style={styles.answerText}>No answers available.</Text>
+            ) : (
+              parsedAnswers.map((ans, i) => {
+                const isCorrect = ans.result === "correct";
+                return (
+                  <View
+                    key={i}
+                    style={[
+                      styles.answerCard,
+                      isCorrect ? styles.correctCard : styles.incorrectCard,
+                    ]}
+                  >
+                    <Ionicons
+                      name={isCorrect ? "checkmark-circle" : "close-circle"}
+                      size={22}
+                      color={isCorrect ? "green" : "red"}
+                      style={styles.cardIcon}
+                    />
+                    <Text style={styles.answerText}>
+                      [{ans.type}] {ans.symbol} ({ans.label}) →{" "}
+                      {ans.result.toUpperCase()} +{ans.pointsEarned}
+                    </Text>
+                  </View>
+                );
+              })
+            )}
+          </View>
         )}
-      </View>
-    </ScrollView>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.replace("/")}
+          >
+            <Text style={styles.buttonText}>Back to Home</Text>
+          </TouchableOpacity>
+
+          {lessonRoute && (
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: Colors.GRAY }]}
+              onPress={() => router.replace(`/quiz/${lessonRoute}` as any)}
+            >
+              <Text style={styles.buttonText}>Retake Quiz</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+
+      {showOverlay && (
+        <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.overlayTouchable}
+            onPress={fadeOutOverlay}
+          >
+            <Ionicons name="close-circle" size={64} color={Colors.PRIMARY} />
+            <Text style={styles.gameOverText}>Game Over</Text>
+            <Text style={styles.gameOverSubtext}>You ran out of hearts!</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+    </>
   );
 }
 
@@ -207,4 +253,42 @@ const styles = StyleSheet.create({
     fontFamily: "outfit-bold",
     fontSize: 16,
   },
+overlay: {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: "rgba(0,0,0,0.6)",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+  // Optional: add blur effect if you want, requires extra setup in react-native
+},
+
+overlayTouchable: {
+  backgroundColor: Colors.WHITE,
+  paddingVertical: 36,
+  paddingHorizontal: 44,
+  borderRadius: 20,
+  alignItems: "center",
+  minWidth: 280,
+},
+
+gameOverText: {
+  fontFamily: "outfit-bold",
+  fontSize: 28,
+  color: Colors.PRIMARY,
+  marginTop: 12,
+  marginBottom: 6,
+},
+
+gameOverSubtext: {
+  fontFamily: "outfit",
+  fontSize: 18,
+  color: Colors.GRAY,
+  marginBottom: 20,
+  textAlign: "center",
+},
+
 });

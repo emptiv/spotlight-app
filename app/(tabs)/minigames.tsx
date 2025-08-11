@@ -50,44 +50,51 @@ export default function SpellingAndCards() {
       <Text style={styles.subtitle}>{t.subtitle}</Text>
 
       <View style={{ marginBottom: 8 }}>
-        <View style={[styles.card, styles.card3]}>
+        <TouchableOpacity
+          style={[styles.card, styles.card3]}
+          activeOpacity={0.9}
+          onPress={() => handlePress("/challenge/TypingIntro")}
+        >
           <View style={styles.card3Group}>
             <Text style={styles.cardText}>{t.spellingTitle}</Text>
             <Text style={styles.cardSubtitle}>{t.spellingSub}</Text>
-            <TouchableOpacity
-              style={styles.card3Button}
-              onPress={() => handlePress("/challenge/TypingIntro")}
-            >
+
+            {/* Decorative Start Button */}
+            <View style={styles.card3Button}>
               <Text style={styles.buttonText}>{t.start}</Text>
-            </TouchableOpacity>
+            </View>
           </View>
           <Image
             source={require("@/assets/images/spelling.png")}
             style={styles.card3Image}
             resizeMode="contain"
           />
-        </View>
+        </TouchableOpacity>
       </View>
 
       <View style={{ marginBottom: 8 }}>
-        <View style={[styles.card, styles.card3]}>
+        <TouchableOpacity
+          style={[styles.card, styles.card3]}
+          activeOpacity={0.9}
+          onPress={() => handlePress("/practice/cards")}
+        >
           <View style={styles.card3Group}>
             <Text style={styles.cardText}>{t.flashcardTitle}</Text>
             <Text style={styles.cardSubtitle}>{t.flashcardSub}</Text>
-            <TouchableOpacity
-              style={styles.card3Button}
-              onPress={() => handlePress("/practice/cards")}
-            >
+
+            {/* Decorative Start Button */}
+            <View style={styles.card3Button}>
               <Text style={styles.buttonText}>{t.start}</Text>
-            </TouchableOpacity>
+            </View>
           </View>
           <Image
             source={require("@/assets/images/flashcard.png")}
             style={styles.card3ImageLower}
             resizeMode="contain"
           />
-        </View>
+        </TouchableOpacity>
       </View>
+
     </ScrollView>
   );
 }
