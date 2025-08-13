@@ -1,3 +1,4 @@
+import { SignOutButton } from '@/components/SignOutButton';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { DrawerContentComponentProps, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
@@ -12,24 +13,34 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
-      {/* Language Setting */}
-      <View style={styles.languageContainer}>
-        <Text style={styles.languageLabel}>Language</Text>
-        <View style={styles.languageSwitch}>
-          <Text style={styles.languageText}>ENG</Text>
-          <Switch
-            value={!isEnglish}
-            onValueChange={(value) => setLang(value ? 'fil' : 'en')}
-            trackColor={{ false: Colors.PRIMARY, true: Colors.PRIMARY }}
-            thumbColor={Colors.WHITE}
-            ios_backgroundColor={Colors.SECONDARY}
-          />
-          <Text style={styles.languageText}>FIL</Text>
+      <View style={{ flex: 1, justifyContent: 'space-between' }}>
+        {/* Top content */}
+        <View>
+          {/* Language Setting */}
+          <View style={styles.languageContainer}>
+            <Text style={styles.languageLabel}>Language</Text>
+            <View style={styles.languageSwitch}>
+              <Text style={styles.languageText}>ENG</Text>
+              <Switch
+                value={!isEnglish}
+                onValueChange={(value) => setLang(value ? 'fil' : 'en')}
+                trackColor={{ false: Colors.PRIMARY, true: Colors.PRIMARY }}
+                thumbColor={Colors.WHITE}
+                ios_backgroundColor={Colors.SECONDARY}
+              />
+              <Text style={styles.languageText}>FIL</Text>
+            </View>
+          </View>
+
+          {/* Drawer Items */}
+          <DrawerItemList {...props} />
+        </View>
+
+        {/* Bottom Sign Out */}
+        <View style={{ padding: 20 }}>
+          <SignOutButton />
         </View>
       </View>
-
-      {/* Default Drawer Items */}
-      <DrawerItemList {...props} />
     </DrawerContentScrollView>
   );
 }

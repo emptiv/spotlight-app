@@ -106,7 +106,6 @@ typing_challenges: defineTable({
       result: v.union(v.literal("correct"), v.literal("wrong")),
       pointsEarned: v.number(),
       timeTaken: v.number(), // ⏱ Time spent on this question (in seconds)
-  
     })
   ),
   createdAt: v.number(),

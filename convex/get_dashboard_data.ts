@@ -62,11 +62,12 @@ export const getUserDashboardData = query({
     const typeStats = {
       mcq: { correct: 0, total: 0 },
       writing: { correct: 0, total: 0 },
+      drag: { correct: 0, total: 0 },
     };
 
     for (const answer of quizAnswers) {
       const { type, result } = answer;
-      if (type === "mcq" || type === "writing") {
+      if (type === "mcq" || type === "writing" || type === "drag") {
         typeStats[type].total += 1;
         if (result === "correct") {
           typeStats[type].correct += 1;

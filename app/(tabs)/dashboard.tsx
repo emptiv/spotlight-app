@@ -1,30 +1,94 @@
-import { api } from "@/convex/_generated/api";
-import { useAuth } from "@clerk/clerk-expo";
-import { useQuery } from "convex/react";
+
+import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
+import { api } from '@/convex/_generated/api';
+import { useAuth } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
+import { useMutation, useQuery } from 'convex/react';
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
+  Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
-  View,
-} from "react-native";
-import {
-  BarChart,
-  PieChart,
-} from "react-native-chart-kit";
-import { COLORS } from "../../constants/theme";
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 const screenWidth = Dimensions.get("window").width;
 
-export default function Dashboard() {
-  const { userId } = useAuth();
+// Map badge names to images
+const badgeImages: Record<string, any> = {
+  challenger: require('@/assets/badges/challenger.png'),
+  perfectionist: require('@/assets/badges/perfectionist.png'),
+  'su-su-supernova': require('@/assets/badges/supernova.png'),
+};
 
-  const data = useQuery(
-    api.get_dashboard_data.getUserDashboardData,
-    userId ? { userId } : "skip"
+export default function Dashboard() {
+  const router = useRouter();
+  const { userId: clerkUserId } = useAuth();
+
+  // Profile data
+  const convexUserId = useQuery(
+    api.users.getConvexUserIdByClerkId,
+    clerkUserId ? { clerkId: clerkUserId } : "skip"
+  );
+  const userRecord = useQuery(
+    api.users.getUserById,
+    convexUserId ? { userId: convexUserId } : "skip"
+  );
+  const updateName = useMutation(api.users.updateUserName);
+  const [name, setName] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
+
+  // Achievements data
+  const achievements = useQuery(
+    api.user_achievements.getUserAchievements,
+    convexUserId ? { userId: convexUserId } : "skip"
   );
 
-  if (!data) {
+  useEffect(() => {
+    if (userRecord?.name) setName(userRecord.name);
+  }, [userRecord?.name]);
+
+  const handleSave = async () => {
+    try {
+      await playSound('click');
+      if (!convexUserId) throw new Error('Missing Convex user ID');
+
+      await updateName({ userId: convexUserId, name });
+
+      setFeedbackText('Name updated successfully!');
+
+      setTimeout(() => {
+        setFeedbackText('');
+        setModalVisible(false);
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      setFeedbackText('Update failed.');
+      setTimeout(() => setFeedbackText(''), 2000);
+    }
+  };
+
+  // Dashboard data
+  const data = useQuery(
+    api.get_dashboard_data.getUserDashboardData,
+    clerkUserId ? { userId: clerkUserId } : "skip"
+  );
+
+  // Compute earned badge names safely
+  const earnedBadgeNames = achievements
+    ? Array.from(new Set(achievements.map(a => a.badge.toLowerCase())))
+    : [];
+
+  if (!data || !userRecord) {
     return (
       <View style={styles.center}>
         <Text>Loading dashboard...</Text>
@@ -32,214 +96,244 @@ export default function Dashboard() {
     );
   }
 
-  const {
-    user,
-    lessonProgress,
-    characterStats,
-    typeStats,
-  } = data;
-
+  const { user, lessonProgress } = data;
   const completedLessons = lessonProgress.filter((l) => l.isCompleted);
   const totalXP = user.totalXP ?? 0;
 
-  const accuracyChartWidth = Math.max(screenWidth, characterStats.length * 70);
-
-  const barChartData = {
-    labels: characterStats.map((c) => c.label),
-    datasets: [
-      {
-        data: characterStats.map((c) =>
-          Math.round((c.correct / c.total) * 100)
-        ),
-        color: () => COLORS.primary,
-      },
-    ],
-  };
-
-  const makePieData = (typeKey: "mcq" | "writing") => {
-    const stats = typeStats[typeKey];
-    if (!stats) return null;
-    const incorrect = stats.total - stats.correct;
-    return [
-      {
-        name: "Correct",
-        population: stats.correct,
-        color: COLORS.primary,
-      },
-      {
-        name: "Incorrect",
-        population: incorrect,
-        color: "#e57373",
-      },
-    ];
-  };
-
-  const mcqPieData = makePieData("mcq");
-  const writingPieData = makePieData("writing");
-
-  // Custom legend component for pie charts
-  function PieLegend({ data }: { data: typeof mcqPieData | null }) {
-    if (!data) return null;
-    const total = data.reduce((acc, cur) => acc + cur.population, 0);
-    return (
-      <View style={styles.legendContainer}>
-        {data.map((slice, i) => (
-          <View key={i} style={styles.legendItem}>
-            <View
-              style={[styles.legendColorBox, { backgroundColor: slice.color }]}
-            />
-            <Text style={styles.legendText}>
-              {slice.name}
-              {"\n"}
-              <Text style={{ fontWeight: "bold" }}>
-                {total > 0
-                  ? `${Math.round((slice.population / total) * 100)}%`
-                  : "0%"}
-              </Text>
-            </Text>
-          </View>
-        ))}
-      </View>
-    );
-  }
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Big Title */}
+      <Text style={styles.title}>{userRecord.name || 'Unnamed'}'s Dashboard</Text>
+      {/* Profile Summary */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>User Info</Text>
-        <Text>Name: {user.name || "N/A"}</Text>
-        <Text>Email: {user.email}</Text>
-        <Text>Total XP: {totalXP}</Text>
-        <Text>
-          Last Active:{" "}
-          {user.lastActive
-            ? new Date(user.lastActive).toLocaleString()
-            : "N/A"}
-        </Text>
+        <View style={styles.profileRow}>
+          <Image
+            source={{ uri: 'https://via.placeholder.com/80' }}
+            style={styles.avatar}
+          />
+          <View style={{ flex: 1 }}>
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>{userRecord.name || 'Unnamed'}</Text>
+              <TouchableOpacity
+                onPress={async () => {
+                  await playSound('click');
+                  setModalVisible(true);
+                  setName(userRecord.name || '');
+                  setFeedbackText('');
+                }}
+                style={{ marginLeft: 8 }}
+              >
+                <Ionicons name="pencil" size={20} color={Colors.BLACK} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.emailText}>{user.email}</Text>
+          </View>
+        </View>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Total XP</Text>
+            <Text style={styles.statValue}>{totalXP}</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Last Active</Text>
+            <Text style={styles.statValue}>
+              {user.lastActive ? new Date(user.lastActive).toLocaleDateString() : "N/A"}
+            </Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Achievements</Text>
+            <Text style={styles.statValue}>{achievements?.length ?? 0}</Text>
+          </View>
+        </View>
       </View>
 
+      {/* Tabs */}
+      <View style={styles.tabSelector}>
+        <TouchableOpacity
+          style={styles.reButton}
+          onPress={() => router.push('/dashb/achievements')}
+        >
+          <Text style={styles.reButtonText}>Achievements</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.reButton}
+          onPress={() => router.push('/dashb/statistics')}
+        >
+          <Text style={styles.reButtonText}>Statistics</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Badges Card */}
+      {earnedBadgeNames.length > 0 && (
+      <View style={styles.badgesCard}>
+        <Text style={styles.cardTitle}>Badges</Text>
+        <View style={styles.badgesContainer}>
+          {earnedBadgeNames.map((badgeName) => {
+            const badgeSrc = badgeImages[badgeName];
+            if (!badgeSrc) return null;
+
+            return (
+              <View key={badgeName} style={styles.badgeWrapper}>
+                <Image
+                  source={badgeSrc}
+                  style={styles.badgeImage}
+                />
+                <Text style={styles.badgeLabel}>{badgeName}</Text>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+
+      )}
+
+      {/* Progress */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Progress</Text>
-        <Text>
-          Lessons Completed: {completedLessons.length} / 6
+        <View style={styles.progressTopRow}>
+          <Text style={styles.progressTitleText}>
+            {completedLessons.length === 7 ? "🏆 Champion!" : "🚀 Keep Going!"}
+          </Text>
+          <Text style={styles.progressBigNumber}>
+            {Math.round((completedLessons.length / 7) * 100)}%
+          </Text>
+        </View>
+        <Text style={styles.progressSubText}>
+          {completedLessons.length} of 7 lessons completed
         </Text>
         <View style={styles.progressBarBackground}>
-          <View
+          <LinearGradient
+            colors={[Colors.PRIMARY, Colors.SECONDARY]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
             style={[
               styles.progressBarFill,
-              {
-                width: `${(completedLessons.length / 6) * 100}%`,
-              },
+              { width: `${(completedLessons.length / 7) * 100}%` },
             ]}
           />
         </View>
       </View>
 
-      {/* Accuracy by Character */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Accuracy by Character</Text>
-        {characterStats.length > 0 ? (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator
-            contentContainerStyle={{ paddingRight: 16 }}
-          >
-            <BarChart
-              data={barChartData}
-              width={accuracyChartWidth}
-              height={220}
-              yAxisLabel=""
-              yAxisSuffix="%"
-              fromZero
-              chartConfig={{
-                backgroundColor: "#fff",
-                backgroundGradientFrom: "#f9f9f9",
-                backgroundGradientTo: "#f9f9f9",
-                decimalPlaces: 0,
-                color: (opacity = 1) =>
-                  `${COLORS.primary}${Math.round(opacity * 255)
-                    .toString(16)
-                    .padStart(2, "0")}`,
-                labelColor: () => "#333",
-                propsForLabels: {
-                  fontFamily: "outfit-medium",
-                },
-              }}
-              verticalLabelRotation={30}
-              style={styles.chart}
+
+
+      {/* Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Edit Name</Text>
+            <TextInput
+              style={styles.nameInput}
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter your name"
+              placeholderTextColor="#aaa"
+              autoFocus
             />
-          </ScrollView>
-        ) : (
-          <Text>No character stats yet.</Text>
-        )}
-      </View>
-
-      {/* MCQ Pie Chart Card */}
-      {mcqPieData && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Correct vs Incorrect: MCQ</Text>
-          <PieChart
-            data={mcqPieData}
-            width={screenWidth - 64}
-            height={220}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="30"
-            chartConfig={{
-              color: () => "#000",
-              propsForLabels: {
-                fontFamily: "outfit-medium",
-              },
-            }}
-            absolute
-            style={styles.chart}
-          />
-          <PieLegend data={mcqPieData} />
+            {feedbackText ? (
+              <Text style={styles.feedbackText}>{feedbackText}</Text>
+            ) : null}
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => {
+                  setModalVisible(false);
+                  setFeedbackText('');
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      )}
-
-      {/* Writing Pie Chart Card */}
-      {writingPieData && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Correct vs Incorrect: Writing</Text>
-          <PieChart
-            data={writingPieData}
-            width={screenWidth - 64}
-            height={220}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="30"
-            chartConfig={{
-              color: () => "#000",
-              propsForLabels: {
-                fontFamily: "outfit-medium",
-              },
-            }}
-            absolute
-            style={styles.chart}
-          />
-          <PieLegend data={writingPieData} />
-        </View>
-      )}
+      </Modal>
     </ScrollView>
   );
 }
 
+
 const styles = StyleSheet.create({
+  title: {
+    fontSize: 28,
+    paddingLeft: 4,
+    fontFamily: 'outfit-bold',
+    color: Colors.PRIMARY,
+    marginTop: 10,
+    marginBottom: 16,
+  },
+
   container: {
     padding: 16,
-    paddingBottom: 100,
+    backgroundColor: Colors.WHITE,
   },
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
+  profileRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#eee",
+    marginRight: 16,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  name: {
+    fontSize: 20,
+    fontFamily: "outfit-bold",
+    color: "#222",
+  },
+  emailText: {
+    fontSize: 14,
+    color: "#555",
+    marginTop: 2,
+    fontFamily: "outfit",
+  },
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+    paddingTop: 12,
+  },
+  statBox: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#777",
+    fontFamily: "outfit",
+  },
+  statValue: {
+    fontSize: 16,
+    fontFamily: "outfit-bold",
+    color: Colors.PRIMARY,
+    marginTop: 2,
+  },
   card: {
     backgroundColor: "#f9f9f9",
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 5,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 1 },
@@ -247,45 +341,166 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontFamily: "outfit-bold",
-    marginBottom: 8,
-    color: COLORS.primary,
+    marginBottom: 5,
+    color: Colors.PRIMARY,
   },
-  chart: {
-    marginTop: 12,
-    borderRadius: 12,
+  progressTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  progressTitleText: {
+    fontFamily: "outfit-bold",
+    fontSize: 16,
+    color: Colors.PRIMARY,
+  },
+  progressBigNumber: {
+    fontFamily: "outfit-bold",
+    fontSize: 20,
+    color: Colors.PRIMARY,
+  },
+  progressSubText: {
+    fontFamily: "outfit",
+    fontSize: 13,
+    color: "#555",
+    marginBottom: 6,
   },
   progressBarBackground: {
-    height: 12,
-    backgroundColor: "#e0e0e0",
-    borderRadius: 6,
+    height: 8,
+    backgroundColor: "#eee",
+    borderRadius: 4,
     overflow: "hidden",
-    marginTop: 8,
   },
   progressBarFill: {
     height: "100%",
-    backgroundColor: COLORS.primary,
-  },
-  legendContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 12,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 16,
-  },
-  legendColorBox: {
-    width: 18,
-    height: 18,
     borderRadius: 4,
-    marginRight: 8,
   },
-  legendText: {
-    fontFamily: "outfit-medium",
-    color: "#333",
+  tabSelector: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 13,
+  },
+  reButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    margin: 4,
+    borderRadius: 20,
+    backgroundColor: Colors.SECONDARY,
+    width: 125,
+  },
+  reButtonText: {
+    fontFamily: "outfit",
+    fontSize: 14,
+    color: Colors.BLACK,
     textAlign: "center",
   },
+  signOutButton: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '85%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: "outfit-bold",
+    marginBottom: 12,
+    color: Colors.PRIMARY,
+  },
+  nameInput: {
+    width: '100%',
+    height: 44,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 12,
+    fontFamily: 'outfit',
+    color: Colors.BLACK,
+  },
+  feedbackText: {
+    fontSize: 14,
+    color: Colors.PRIMARY,
+    fontFamily: 'outfit-bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  saveButton: {
+    backgroundColor: Colors.PRIMARY,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  saveButtonText: {
+    color: Colors.WHITE,
+    fontFamily: 'outfit-bold',
+  },
+  cancelButton: {
+    backgroundColor: '#ccc',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    color: Colors.BLACK,
+    fontFamily: 'outfit-bold',
+  },
+badgesCard: {
+  backgroundColor: '#fff',
+  borderRadius: 12,
+  paddingLeft: 13,
+  paddingRight: 13,
+  paddingBottom: 5,
+  paddingTop: 5,
+},
+
+badgesContainer: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'center',   // center badges in each row
+  alignItems: 'center',       // center the rows themselves
+  gap: 16,                    // spacing between badges
+},
+
+badgeWrapper: {
+  alignItems: 'center',       // center image + text
+  width: 80,                  // control horizontal width
+  height: 100,                // fixed height for consistent alignment
+  marginBottom: 16,           // vertical spacing
+  justifyContent: 'flex-start', // text appears below image
+},
+
+badgeImage: {
+  width: 60,
+  height: 60,
+  borderRadius: 30,
+  borderWidth: 2,
+  borderColor: Colors.PRIMARY,
+  marginBottom: 4,            // spacing between image and label
+},
+
+badgeLabel: {
+  fontFamily: 'outfit',
+  fontSize: 12,
+  color: '#555',
+  textAlign: 'center',
+  textTransform: 'capitalize', // capitalizes first letter of each word/segment
+},
+
 });
