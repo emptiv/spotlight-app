@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "convex/react";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -64,12 +65,13 @@ const t = {
 };
 
 export default function SpellingQuizScreen() {
+  const router = useRouter();
   const { lang } = useLanguage();
   const { user } = useUser();
 
   const [isSetup, setIsSetup] = useState(true);
-  const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
-  const [questionCount, setQuestionCount] = useState<number | null>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty | null>("easy");
+  const [questionCount, setQuestionCount] = useState<number | null>(5);
   const [words, setWords] = useState<Word[]>([]);
   const [input, setInput] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -140,6 +142,12 @@ export default function SpellingQuizScreen() {
   if (isSetup) {
     return (
       <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+        </TouchableOpacity>
         <Text style={styles.title}>{t[lang].selectSettings}</Text>
         <Text style={styles.label}>{t[lang].difficulty}</Text>
         {["easy", "medium", "hard"].map((level) => (
@@ -189,6 +197,12 @@ export default function SpellingQuizScreen() {
   if (!user || !words || words.length === 0) {
     return (
       <View style={styles.centered}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+          </TouchableOpacity>
         <ActivityIndicator size="large" />
         <Text style={{ marginTop: 12, fontFamily: "outfit" }}>
           {t[lang].loadingQuiz}
@@ -202,6 +216,12 @@ export default function SpellingQuizScreen() {
   if (showSummary) {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.WHITE }}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+          </TouchableOpacity>
         <ScrollView
           contentContainerStyle={{
             padding: 20,
@@ -291,6 +311,12 @@ export default function SpellingQuizScreen() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+      </TouchableOpacity>
       <View style={styles.quizGroup}>
         <Text style={styles.promptText}>
           {t[lang].type}:{" "}
@@ -502,6 +528,19 @@ cardIcon: {
   fontSize: 40,
   top: 10,
   right: 10,
+},
+backButton: {
+  position: "absolute",
+  top: 16,
+  left: 16,
+  zIndex: 10,
+  backgroundColor: Colors.WHITE,
+  borderRadius: 20,
+  padding: 8,
+  shadowColor: "#000",
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
 },
 
 });

@@ -134,11 +134,17 @@ export default function StudyScreen({
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color={Colors.PRIMARY} />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={async () => {
+          await playSound("click");
+          router.back();
+        }}
+      >
+        <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+      </TouchableOpacity>
+
+
 
       <View style={styles.content}>
         <Text style={styles.title}>
@@ -212,4 +218,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "outfit-bold",
   },
+backButton: {
+  position: "absolute",
+  top: 16,
+  left: 16,
+  zIndex: 10,
+  backgroundColor: Colors.WHITE,
+  borderRadius: 20,
+  padding: 8,
+  shadowColor: "#000",
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
+
 });

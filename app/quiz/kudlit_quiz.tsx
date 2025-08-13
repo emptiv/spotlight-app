@@ -7,6 +7,8 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  BackHandler,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -217,6 +219,29 @@ useEffect(() => {
   setTotalQuestions(total.length);
 }, []);
 
+  const handleExitQuiz = () => {
+    Alert.alert(
+      "Leave Quiz?",
+      "Your progress will be lost. Are you sure you want to exit?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Leave",
+          style: "destructive",
+          onPress: () => router.back(),
+        },
+      ]
+    );
+    return true;
+  };
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleExitQuiz
+    );
+    return () => backHandler.remove();
+  }, []);
 
   const normalize = (s: string) => s.toLowerCase().replace(/[_\s\/]/g, "");
 
@@ -298,6 +323,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
 
     const isRetake = pastAttempts.length > 0;
     const attemptNumber = pastAttempts.length + 1;
+    const heartsUsedCount = 3 - hearts;
 
     await recordAttempt({
       userId: convexUserId,
@@ -311,6 +337,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
       timeSpent: Date.now() - startTime.current,
       isRetake,
       attemptNumber,
+      heartsUsed: heartsUsedCount,
     });
 
     await saveProgress({
@@ -482,6 +509,14 @@ return (
   return (
     <SafeAreaView style={styles.container}>
 
+      {/* Exit Button */}
+      <TouchableOpacity
+        style={styles.exitButton}
+        onPress={handleExitQuiz}
+      >
+        <Ionicons name="close" size={28} color={Colors.PRIMARY} />
+      </TouchableOpacity>
+
       <View style={styles.heartsContainer}>
         <View style={styles.hearts}>
           {[...Array(3)].map((_, i) => (
@@ -645,5 +680,15 @@ dropZoneCorrect: {
   droppable: {
     height: 60,
     width: 60,
+  },
+  exitButton: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    zIndex: 100,
+    backgroundColor: Colors.WHITE,
+    borderRadius: 20,
+    padding: 6,
+    elevation: 2,
   },
 });

@@ -44,6 +44,14 @@ export default function LessonOverviewScreen({
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Back Button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+      </TouchableOpacity>
+
       <View style={styles.container}>
         <Text style={styles.title}>Lesson {lessonId.toUpperCase()}</Text>
 
@@ -100,6 +108,19 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.WHITE,
+  },
+  backButton: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    zIndex: 10,
+    backgroundColor: Colors.WHITE,
+    borderRadius: 20,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   container: {
     flex: 1,

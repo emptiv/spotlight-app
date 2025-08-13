@@ -1,6 +1,7 @@
 import { useLanguage } from "@/components/LanguageContext";
 import Colors from "@/constants/Colors";
 import { playSound } from "@/constants/playClickSound";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -372,6 +373,17 @@ const renderDragPage = (page: DragPage) => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.container}>
+        {/* Back button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={async () => {
+            await playSound("click");
+            router.back();
+          }}
+        >
+          <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+        </TouchableOpacity>
+
         <DropProvider>
           <ScrollView contentContainerStyle={styles.scrollContent}>
             {currentPage.type === "text" && (
@@ -528,4 +540,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
   },
+backButton: {
+  position: "absolute",
+  top: 16,
+  left: 16,
+  zIndex: 10,
+  backgroundColor: Colors.WHITE,
+  borderRadius: 20,
+  padding: 8,
+  shadowColor: "#000",
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
+
 });

@@ -9,6 +9,8 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  BackHandler,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -28,14 +30,13 @@ const basePointsMap: Record<Difficulty, { points: number; time: number }> = {
 };
 
 // star rating logic
-function getStarRating(score: number, maxScore: number): number {
-  if (score <= 0) return 0;
+const getStarRating = (score: number, maxScore: number) => {
   const percentage = (score / maxScore) * 100;
 
-  if (percentage === 100) return 3;
-  if (percentage >= 75) return 2;
+  if (percentage >= 100) return 3;   // perfect score
+  if (percentage >= 60) return 2;    // was 75, now more forgiving
   return 1;
-}
+};
 
 export default function SpellingQuizScreen() {
   const router = useRouter();
@@ -47,8 +48,8 @@ export default function SpellingQuizScreen() {
 
   const [answers, setAnswers] = useState<any[]>([]);
   const [isSetup, setIsSetup] = useState(true);
-  const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
-  const [questionCount, setQuestionCount] = useState<number | null>(null);
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy");
+  const [questionCount, setQuestionCount] = useState<number>(5);
   const [input, setInput] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -59,6 +60,8 @@ export default function SpellingQuizScreen() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [words, setWords] = useState<Word[]>([]);
   const [hearts, setHearts] = useState<number>(3);
+  const [numberOfQuestions, setNumberOfQuestions] = useState(5); // default 10
+
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [seed] = useState(() => Math.random());
@@ -84,6 +87,32 @@ export default function SpellingQuizScreen() {
     return () => clearInterval(timerRef.current!);
   }, [currentIndex, words]);
 
+  // Exit confirmation
+  const handleExitQuiz = () => {
+    Alert.alert(
+      "Leave Quiz?",
+      "Your progress will be lost. Are you sure you want to exit?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Leave",
+          style: "destructive",
+          onPress: () => router.back(),
+        },
+      ]
+    );
+    return true;
+  };
+
+  // Android back button override
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleExitQuiz
+    );
+    return () => backHandler.remove();
+  }, []);
+
   const startTimer = () => {
     clearInterval(timerRef.current!);
     const limit = basePointsMap[difficulty!].time;
@@ -100,19 +129,10 @@ export default function SpellingQuizScreen() {
     }, 1000);
   };
 
-  const calculateSpeedBonus = (timeUsed: number) => {
-    const total = basePointsMap[difficulty!].time;
-    const ratio = (total - timeUsed) / total;
-    if (ratio > 0.75) return 0.5;
-    if (ratio > 0.5) return 0.25;
-    if (ratio > 0.25) return 0.1;
-    return 0;
-  };
-
-  const calculateStreakBonus = () => {
-    if (streak + 1 === 3) return 10;
-    if (streak + 1 === 5) return 20;
-    if (streak + 1 === 10) return 50;
+  const calculateStreakBonus = (newStreak: number) => {
+    if (newStreak >= 3) {
+      return 5;
+    }
     return 0;
   };
 
@@ -128,15 +148,15 @@ export default function SpellingQuizScreen() {
     setHasSubmitted(true);
     const currentWord = words[currentIndex];
     const correct = input === currentWord.baybayin;
-    const timeUsed = basePointsMap[difficulty!].time - timeLeft;
     const base = basePointsMap[difficulty!].points;
-    const speedBonus = Math.round(base * calculateSpeedBonus(timeUsed));
-    const streakBonus = calculateStreakBonus();
-    const totalPoints = correct ? base + speedBonus + streakBonus : 0;
 
     if (correct) {
+      const newStreak = streak + 1;
+      const streakBonus = calculateStreakBonus(newStreak);
+      const totalPoints = base + streakBonus;
+
       setScore((s) => s + totalPoints);
-      setStreak((s) => s + 1);
+      setStreak(newStreak);
       setIsCorrect(true);
     } else {
       setIsCorrect(false);
@@ -160,11 +180,13 @@ export default function SpellingQuizScreen() {
         label: currentWord.latin,
         expected: currentWord.baybayin,
         result: correct ? "correct" : "wrong",
-        pointsEarned: totalPoints,
-        timeTaken: timeUsed,
+        pointsEarned: correct ? base + calculateStreakBonus(streak + 1) : 0,
+        timeTaken: basePointsMap[difficulty!].time - timeLeft,
       },
     ]);
   };
+
+
 
   const insertChallenge = useMutation(api.typing.insertTypingChallenge);
 
@@ -172,14 +194,13 @@ export default function SpellingQuizScreen() {
     if (currentIndex + 1 === words.length || forceFinish) {
       const base = basePointsMap[difficulty!].points;
 
-      const maxScore = words.map((_, index) => {
-        const speedBonus = Math.round(base * 0.5);
-        let streakBonus = 0;
-        if (index + 1 === 3) streakBonus = 10;
-        else if (index + 1 === 5) streakBonus = 20;
-        else if (index + 1 === 10) streakBonus = 50;
-        return base + speedBonus + streakBonus;
-      }).reduce((a, b) => a + b, 0);
+    const maxScore = words.map((_, index) => {
+      const base = basePointsMap[difficulty!].points;
+      // Starting from question 3 (index 2), add +5 points per question for streak bonus
+      const streakBonus = index >= 2 ? 5 : 0;
+      return base + streakBonus;
+    }).reduce((a, b) => a + b, 0);
+
 
       const stars = getStarRating(score, maxScore);
       const createdAt = Date.now();
@@ -193,6 +214,8 @@ export default function SpellingQuizScreen() {
           answers,
           createdAt,
           timeSpent: totalTimeSpent,
+          numberOfQuestions,
+          difficulty,
         });
 
         router.replace({
@@ -202,7 +225,7 @@ export default function SpellingQuizScreen() {
             stars: String(stars),
             answers: encodeURIComponent(JSON.stringify(answers)),
             lessonRoute: "SpellingQuizScreen",
-            gameOver: isGameOver ? "true" : "false",  // <-- Add here
+            gameOver: isGameOver ? "true" : "false",
           },
         });
       } catch (error) {
@@ -217,10 +240,15 @@ export default function SpellingQuizScreen() {
     }
   };
 
-
   if (isSetup) {
     return (
       <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+        </TouchableOpacity>
         <Text style={styles.title}>Select Quiz Settings</Text>
 
         <Text style={styles.label}>Difficulty</Text>
@@ -293,6 +321,11 @@ export default function SpellingQuizScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Exit button */}
+      <TouchableOpacity style={styles.exitButton} onPress={handleExitQuiz}>
+        <Ionicons name="close" size={28} color={Colors.PRIMARY} />
+      </TouchableOpacity>
+
       {/* Timer */}
       <View style={styles.timerContainer}>
         <Progress.Circle
@@ -318,6 +351,13 @@ export default function SpellingQuizScreen() {
             style={{ marginHorizontal: 4 }}
           />
         ))}
+        {/* Streak Indicator */}
+        {streak > 0 && (
+          <View style={styles.streakContainer}>
+            <Ionicons name="flame" size={28} color="#FF6B00" />
+            <Text style={styles.streakText}>x{streak}</Text>
+          </View>
+        )}
       </View>
 
       {/* Prompt */}
@@ -407,6 +447,16 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 10,
   },
+  exitButton: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    zIndex: 100,
+    backgroundColor: Colors.WHITE,
+    borderRadius: 20,
+    padding: 6,
+    elevation: 2,
+  },
   promptText: {
     fontSize: 18,
     marginVertical: 16,
@@ -442,6 +492,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "green",
     marginTop: 10,
-    fontFamily: "outfit",
+    fontFamily: "outfit"
   },
+backButton: {
+  position: "absolute",
+  top: 16,
+  left: 16,
+  zIndex: 10,
+  backgroundColor: Colors.WHITE,
+  borderRadius: 20,
+  padding: 8,
+  shadowColor: "#000",
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
+streakContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: 8,
+},
+streakText: {
+  fontSize: 18,
+  fontFamily: "outfit-bold",
+  color: "#FF6B00",
+  marginLeft: 6,
+},
+
 });

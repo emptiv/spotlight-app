@@ -1,22 +1,22 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+const TOTAL_LESSONS = 7;
+const SUPERNOVA_BADGE_NAME = "Su-su-supernova"; // Badge title
+const SUPERNOVA_DESCRIPTION = "Finish all the lessons";
+
 export const getProgress = query({
   args: {
     userId: v.string(),
     lessonId: v.string(),
   },
   handler: async (ctx, { userId, lessonId }) => {
-    console.log("getProgress() called with:", { userId, lessonId });
-
     const progress = await ctx.db
       .query("user_lesson_progress")
       .withIndex("by_user_lesson", (q) =>
-      q.eq("userId", userId).eq("lessonId", lessonId)
+        q.eq("userId", userId).eq("lessonId", lessonId)
       )
       .unique();
-
-    console.log("Queried progress result:", progress);
 
     return {
       bestScore: progress?.bestScore ?? 0,
@@ -24,7 +24,6 @@ export const getProgress = query({
     };
   },
 });
-
 
 export const saveProgress = mutation({
   args: {
@@ -37,14 +36,14 @@ export const saveProgress = mutation({
     const existing = await ctx.db
       .query("user_lesson_progress")
       .withIndex("by_user_lesson", (q) =>
-      q.eq("userId", userId).eq("lessonId", lessonId)
-    )
-  .unique();
+        q.eq("userId", userId).eq("lessonId", lessonId)
+      )
+      .unique();
 
     if (existing) {
       const newBestScore = Math.max(existing.bestScore, score);
       const newBestStars = Math.max(existing.bestStars, stars);
-      
+
       await ctx.db.patch(existing._id, {
         bestScore: newBestScore,
         bestStars: newBestStars,
@@ -62,7 +61,36 @@ export const saveProgress = mutation({
         isCompleted: true,
       });
     }
-  },
+
+    // Check if user now has completed all lessons
+    const allLessons = await ctx.db
+      .query("user_lesson_progress")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const completedCount = allLessons.filter((l) => l.isCompleted).length;
+
+    if (completedCount >= TOTAL_LESSONS) {
+      // Check if the user already has this achievement
+      const existingAchievement = await ctx.db
+        .query("user_achievements")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .collect();
+
+      const hasBadge = existingAchievement.some(
+        (a) => a.badge === SUPERNOVA_BADGE_NAME
+      );
+
+      if (!hasBadge) {
+        await ctx.db.insert("user_achievements", {
+          userId,
+          badge: SUPERNOVA_BADGE_NAME,
+          description: SUPERNOVA_DESCRIPTION,
+          earnedAt: Date.now(),
+        });
+      }
+    }
+  }
 });
 
 export const getCompletedLessons = query({
@@ -75,6 +103,26 @@ export const getCompletedLessons = query({
 
     return all
       .filter((entry) => entry.isCompleted)
-      .map((entry) => entry.lessonId); // ["lesson1", "lesson2"]
+      .map((entry) => entry.lessonId);
+  },
+});
+
+export const checkSupernovaAchievement = query({
+  args: { userId: v.string() },
+  handler: async (ctx, { userId }) => {
+    const all = await ctx.db
+      .query("user_lesson_progress")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const completedCount = all.filter((l) => l.isCompleted).length;
+
+    const hasSupernova = completedCount >= TOTAL_LESSONS;
+
+    return {
+      achieved: hasSupernova,
+      completedCount,
+      totalLessons: TOTAL_LESSONS,
+    };
   },
 });

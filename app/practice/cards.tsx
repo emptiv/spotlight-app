@@ -1,5 +1,6 @@
 import Colors from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
@@ -79,6 +80,7 @@ const allDecks = {
 };
 
 export default function FlashcardsScreen() {
+  const router = useRouter();
   const [mainCategory, setMainCategory] = useState<"vowels" | "consonants">("vowels");
   const [subCategory, setSubCategory] = useState<"kudlit" | "krusKudlit" | null>(null);
   const [index, setIndex] = useState(0);
@@ -202,6 +204,13 @@ export default function FlashcardsScreen() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.container}>
+        {/* Back button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+        </TouchableOpacity>
         {/* Main Deck Selection */}
         <View style={styles.deckSelector}>
           <Pressable onPress={() => handleMainCategory("vowels")}>
@@ -383,5 +392,18 @@ const styles = StyleSheet.create({
   },
   shuffleButtonTextActive: {
     color: "#fff",
+  },
+  backButton: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    zIndex: 10,
+    backgroundColor: Colors.WHITE,
+    borderRadius: 20,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 });

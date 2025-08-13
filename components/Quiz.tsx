@@ -7,12 +7,13 @@ import { useConvex, useMutation, useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
+  ActivityIndicator, Alert,
+  BackHandler,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import Svg, { Rect } from "react-native-svg";
 
@@ -179,6 +180,8 @@ export default function Quiz({
     const isRetake = pastAttempts.length > 0;
     const attemptNumber = pastAttempts.length + 1;
 
+    const heartsUsedCount = 3 - hearts;
+
     await recordAttempt({
       userId: convexUserId,
       lessonId,
@@ -191,6 +194,7 @@ export default function Quiz({
       timeSpent: Date.now() - startTime.current,
       isRetake,
       attemptNumber,
+      heartsUsed: heartsUsedCount,
     });
 
     await saveProgress({
@@ -264,6 +268,30 @@ export default function Quiz({
 
   const progress = correctAnswersCount / totalQuestionsCount;
 
+  const handleExitQuiz = () => {
+    Alert.alert(
+      "Leave Quiz?",
+      "Your progress will be lost. Are you sure you want to exit?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Leave",
+          style: "destructive",
+          onPress: () => router.back(),
+        },
+      ]
+    );
+     return true;
+  };
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleExitQuiz
+    );
+    return () => backHandler.remove();
+  }, []);
+  
   if (!user || !convexUserId) {
     return (
       <View style={styles.centered}>
@@ -275,6 +303,13 @@ export default function Quiz({
 
   return (
     <SafeAreaView style={styles.container}>
+    {/* Exit Button */}
+    <TouchableOpacity
+      style={styles.exitButton}
+      onPress={handleExitQuiz}
+    >
+      <Ionicons name="close" size={28} color={Colors.PRIMARY} />
+    </TouchableOpacity>
       {/* ❤️ Hearts Display */}
       <View style={styles.heartsContainer}>
         <View style={styles.hearts}>
@@ -372,4 +407,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+exitButton: {
+  position: "absolute",
+  top: 20,
+  right: 20,
+  zIndex: 100,
+  backgroundColor: Colors.WHITE,
+  borderRadius: 20,
+  padding: 6,
+  elevation: 2,
+},
+
 });

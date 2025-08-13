@@ -4,7 +4,7 @@ import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const CHAR_MAP = {
   a:    { symbol: "ᜀ", answer: "a",    lesson: "lesson1" },
@@ -43,44 +43,51 @@ export default function CharacterPractice() {
   if (!character) return <Text>Invalid character</Text>;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color={Colors.PRIMARY} />
-        </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      {/* Floating back button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+      </TouchableOpacity>
+
+      <View style={styles.content}>
         <Text style={styles.title}>Write {character.symbol}</Text>
-        <View style={{ width: 28 }} />
+
+        <HandwritingCanvas
+          key={canvasKey}
+          lesson={character.lesson}
+          character={character.answer}
+          onPrediction={(result) => {
+            const isMatch = result.toLowerCase() === character.answer;
+            setPrediction(result);
+            setIsCorrect(isMatch);
+
+            if (isMatch) {
+              setTimeout(() => {
+                setPrediction(null);
+                setIsCorrect(false);
+                setCanvasKey((prev) => prev + 1); // force reset
+              }, 1000);
+            }
+          }}
+          onClear={() => {
+            setPrediction(null);
+            setIsCorrect(false);
+          }}
+        />
+
+        {prediction && (
+          <Text style={[
+            styles.feedback,
+            { color: isCorrect ? Colors.SUCCESS : "#f00" }
+          ]}>
+            {isCorrect ? "Correct!" : "Try again"}
+          </Text>
+        )}
       </View>
-
-      <HandwritingCanvas
-        key={canvasKey}
-        lesson={character.lesson}
-        character={character.answer}
-        onPrediction={(result) => {
-          const isMatch = result.toLowerCase() === character.answer;
-          setPrediction(result);
-          setIsCorrect(isMatch);
-
-          if (isMatch) {
-            setTimeout(() => {
-              setPrediction(null);
-              setIsCorrect(false);
-              setCanvasKey((prev) => prev + 1); // force reset
-            }, 1000);
-          }
-        }}
-        onClear={() => {
-          setPrediction(null);
-          setIsCorrect(false);
-        }}
-      />
-
-      {prediction && (
-        <Text style={[styles.feedback, { color: isCorrect ? Colors.SUCCESS : "#f00" }]}>
-          {isCorrect ? "Correct!" : "Try again"}
-        </Text>
-      )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -88,24 +95,36 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.WHITE,
-    padding: 16,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-    justifyContent: "space-between",
+  content: {
+    flex: 1,
+    padding: 24,
+    justifyContent: "center",
   },
   title: {
-    marginTop: 8,
     fontSize: 24,
     fontFamily: "outfit-bold",
+    marginBottom: 24,
     color: Colors.PRIMARY,
+    textAlign: "center",
   },
   feedback: {
     fontSize: 20,
     fontFamily: "outfit-bold",
     textAlign: "center",
     marginTop: 16,
+  },
+  backButton: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    zIndex: 10,
+    backgroundColor: Colors.WHITE,
+    borderRadius: 20,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 });

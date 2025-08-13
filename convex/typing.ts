@@ -1,6 +1,9 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+const PERFECTIONIST_BADGE = "Perfectionist";
+const PERFECTIONIST_DESCRIPTION = "Answered all questions correctly without using any hearts";
+
 export const insertTypingChallenge = mutation({
   args: {
     userId: v.string(),
@@ -14,16 +17,46 @@ export const insertTypingChallenge = mutation({
         result: v.union(v.literal("correct"), v.literal("wrong")),
         pointsEarned: v.number(),
         timeTaken: v.number(),
+        heartsUsed: v.optional(v.number()), // optional
       })
     ),
     createdAt: v.number(),
     timeSpent: v.number(),
+    numberOfQuestions: v.number(),
+    difficulty: v.union(v.literal("easy"), v.literal("medium"), v.literal("hard")),
   },
   handler: async (ctx, args) => {
+    // Insert the challenge record
     await ctx.db.insert("typing_challenges", args);
+
+    // Check for Perfectionist achievement
+    const allCorrect = args.answers.every((a) => a.result === "correct");
+    const noHeartsUsed = args.answers.every((a) => !a.heartsUsed || a.heartsUsed === 0);
+
+    if (allCorrect && noHeartsUsed) {
+      // Check if the user already has this badge
+      const existing = await ctx.db
+        .query("user_achievements")
+        .withIndex("by_user", (q) => q.eq("userId", args.userId))
+        .collect();
+
+      const hasBadge = existing.some((a) => a.badge === PERFECTIONIST_BADGE);
+
+      if (!hasBadge) {
+        await ctx.db.insert("user_achievements", {
+          userId: args.userId,
+          badge: PERFECTIONIST_BADGE,
+          description: PERFECTIONIST_DESCRIPTION,
+          earnedAt: Date.now(),
+          lessonId: undefined, // optional
+        });
+      }
+    }
   },
 });
 
+
+// Existing queries remain unchanged
 export const getBestTypingPerformance = query({
   args: { userId: v.string() },
   handler: async (ctx, { userId }) => {
@@ -32,9 +65,7 @@ export const getBestTypingPerformance = query({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
 
-    if (challenges.length === 0) {
-      return { bestScore: 0, bestStars: 0 };
-    }
+    if (challenges.length === 0) return { bestScore: 0, bestStars: 0 };
 
     const best = challenges.reduce(
       (acc, curr) => ({
@@ -45,5 +76,30 @@ export const getBestTypingPerformance = query({
     );
 
     return best;
+  },
+});
+
+export const getBestPerformancesByType = query({
+  args: { userId: v.string() },
+  handler: async (ctx, { userId }) => {
+    const challenges = await ctx.db
+      .query("typing_challenges")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    if (challenges.length === 0) return {};
+
+    const grouped = challenges.reduce((acc, challenge) => {
+      const key = `${challenge.numberOfQuestions}_${challenge.difficulty}`;
+      if (!acc[key]) {
+        acc[key] = { bestScore: challenge.score, bestStars: challenge.stars };
+      } else {
+        acc[key].bestScore = Math.max(acc[key].bestScore, challenge.score);
+        acc[key].bestStars = Math.max(acc[key].bestStars, challenge.stars);
+      }
+      return acc;
+    }, {} as Record<string, { bestScore: number; bestStars: number }>);
+
+    return grouped;
   },
 });

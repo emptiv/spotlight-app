@@ -51,6 +51,7 @@ export default defineSchema({
     timeSpent: v.number(),
     isRetake: v.boolean(),
     attemptNumber: v.number(),
+    heartsUsed: v.optional(v.number()),
   }).index("by_user_lesson", ["userId", "lessonId"]),
 
   user_difficulties: defineTable({
@@ -105,10 +106,23 @@ typing_challenges: defineTable({
       result: v.union(v.literal("correct"), v.literal("wrong")),
       pointsEarned: v.number(),
       timeTaken: v.number(), // ⏱ Time spent on this question (in seconds)
+  heartsUsed: v.optional(v.number()),
     })
   ),
   createdAt: v.number(),
   timeSpent: v.number(), // ⏱ Total session time (optional if summing answers)
+    numberOfQuestions: v.number(),   // new
+    difficulty: v.union(             // new
+      v.literal("easy"),
+      v.literal("medium"),
+      v.literal("hard")
+    ),
 }).index("by_user", ["userId"]),
-
+  user_achievements: defineTable({
+    userId: v.string(),
+    badge: v.string(),       // e.g., "Challenger"
+    description: v.string(), // optional: "Completed the first quiz"
+    earnedAt: v.number(),    // timestamp
+    lessonId: v.optional(v.string()),
+  }).index("by_user", ["userId"]),
 });
