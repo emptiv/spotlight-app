@@ -106,7 +106,7 @@ typing_challenges: defineTable({
       result: v.union(v.literal("correct"), v.literal("wrong")),
       pointsEarned: v.number(),
       timeTaken: v.number(), // ⏱ Time spent on this question (in seconds)
-  heartsUsed: v.optional(v.number()),
+  
     })
   ),
   createdAt: v.number(),
@@ -117,6 +117,7 @@ typing_challenges: defineTable({
       v.literal("medium"),
       v.literal("hard")
     ),
+  heartsUsed: v.optional(v.number()),
 }).index("by_user", ["userId"]),
   user_achievements: defineTable({
     userId: v.string(),

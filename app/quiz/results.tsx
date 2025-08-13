@@ -21,17 +21,22 @@ type AnswerSummary = {
 };
 
 export default function QuizResults() {
-  const { stars, score, lessonRoute, answers, gameOver } =
+  const { stars, score, lessonRoute, answers, gameOver, badges } =
     useLocalSearchParams<{
       stars: string;
       score: string;
       lessonRoute?: string;
       answers?: string;
       gameOver?: string;
+      badges?: string;
     }>();
 
   const router = useRouter();
   const [showAnswers, setShowAnswers] = useState(false);
+
+  const parsedBadges: string[] = badges
+    ? JSON.parse(decodeURIComponent(badges))
+    : [];
 
   // For overlay animation
   const [showOverlay, setShowOverlay] = useState(gameOver === "true");
@@ -88,6 +93,19 @@ export default function QuizResults() {
 
         <Text style={styles.score}>You earned {totalPoints} points</Text>
         <Text style={styles.message}>{message}</Text>
+
+        {/* ✅ Badge display */}
+        {parsedBadges.length > 0 && (
+          <View style={styles.badgesContainer}>
+            <Text style={styles.badgesTitle}>New Badges Earned</Text>
+            {parsedBadges.map((badge, idx) => (
+              <View key={idx} style={styles.badgeCard}>
+                <Ionicons name="ribbon" size={22} color={Colors.PRIMARY} />
+                <Text style={styles.badgeText}>{badge}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <TouchableOpacity
           onPress={() => setShowAnswers((prev) => !prev)}
@@ -193,6 +211,33 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: "center",
   },
+  badgesContainer: {
+    marginBottom: 20,
+    alignItems: "center",
+    width: "100%",
+  },
+  badgesTitle: {
+    fontFamily: "outfit-bold",
+    fontSize: 18,
+    marginBottom: 10,
+    color: Colors.PRIMARY,
+  },
+  badgeCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f1f8ff",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+    width: "100%",
+  },
+  badgeText: {
+    fontFamily: "outfit",
+    fontSize: 16,
+    marginLeft: 8,
+    color: Colors.PRIMARY,
+  },
   toggleButton: {
     marginBottom: 16,
     backgroundColor: Colors.GRAY,
@@ -230,9 +275,6 @@ const styles = StyleSheet.create({
     top: 8,
     right: 8,
   },
-  answerRow: {
-    paddingVertical: 6,
-  },
   answerText: {
     fontFamily: "outfit",
     fontSize: 16,
@@ -253,42 +295,37 @@ const styles = StyleSheet.create({
     fontFamily: "outfit-bold",
     fontSize: 16,
   },
-overlay: {
-  position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0,0,0,0.6)",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 1000,
-  // Optional: add blur effect if you want, requires extra setup in react-native
-},
-
-overlayTouchable: {
-  backgroundColor: Colors.WHITE,
-  paddingVertical: 36,
-  paddingHorizontal: 44,
-  borderRadius: 20,
-  alignItems: "center",
-  minWidth: 280,
-},
-
-gameOverText: {
-  fontFamily: "outfit-bold",
-  fontSize: 28,
-  color: Colors.PRIMARY,
-  marginTop: 12,
-  marginBottom: 6,
-},
-
-gameOverSubtext: {
-  fontFamily: "outfit",
-  fontSize: 18,
-  color: Colors.GRAY,
-  marginBottom: 20,
-  textAlign: "center",
-},
-
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  overlayTouchable: {
+    backgroundColor: Colors.WHITE,
+    paddingVertical: 36,
+    paddingHorizontal: 44,
+    borderRadius: 20,
+    alignItems: "center",
+    minWidth: 280,
+  },
+  gameOverText: {
+    fontFamily: "outfit-bold",
+    fontSize: 28,
+    color: Colors.PRIMARY,
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  gameOverSubtext: {
+    fontFamily: "outfit",
+    fontSize: 18,
+    color: Colors.GRAY,
+    marginBottom: 20,
+    textAlign: "center",
+  },
 });

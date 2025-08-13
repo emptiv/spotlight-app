@@ -1,13 +1,17 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+const PERFECTIONIST_BADGE = "Perfectionist";
+const PERFECTIONIST_DESCRIPTION =
+  "Answered all questions correctly without using any hearts";
+
 export const recordSingleAnswer = mutation({
   args: {
     userId: v.id("users"),
     lessonId: v.string(),
     symbol: v.string(),
     label: v.string(),
-    type: v.union(v.literal("mcq"), v.literal("writing"), v.literal("drag")), 
+    type: v.union(v.literal("mcq"), v.literal("writing"), v.literal("drag")),
     expected: v.string(),
     result: v.union(v.literal("correct"), v.literal("wrong")),
     pointsEarned: v.number(),
@@ -30,7 +34,7 @@ export const recordQuizAttempt = mutation({
       v.object({
         symbol: v.string(),
         label: v.string(),
-        type: v.union(v.literal("mcq"), v.literal("writing"), v.literal("drag")), 
+        type: v.union(v.literal("mcq"), v.literal("writing"), v.literal("drag")),
         expected: v.string(),
         result: v.union(v.literal("correct"), v.literal("wrong")),
         pointsEarned: v.number(),
@@ -40,18 +44,20 @@ export const recordQuizAttempt = mutation({
     timeSpent: v.number(),
     isRetake: v.boolean(),
     attemptNumber: v.number(),
-    heartsUsed: v.optional(v.number()), // <-- add this if you track hearts
+    heartsUsed: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("user_quiz_attempts", args);
 
+    const newlyAwarded: { badge: string; description: string }[] = [];
+
     // === Challenger Badge ===
-    const existingBadge = await ctx.db
+    const existingBadges = await ctx.db
       .query("user_achievements")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
 
-    if (!existingBadge.some((a) => a.badge === "Challenger")) {
+    if (!existingBadges.some((a) => a.badge === "Challenger")) {
       const firstLessonId = "jx72aewjef2n2jzw5ajht6b32s7jb6bm";
       if (args.lessonId === firstLessonId) {
         await ctx.db.insert("user_achievements", {
@@ -61,6 +67,10 @@ export const recordQuizAttempt = mutation({
           earnedAt: Date.now(),
           lessonId: args.lessonId,
         });
+        newlyAwarded.push({
+          badge: "Challenger",
+          description: "Completed the first quiz",
+        });
       }
     }
 
@@ -68,22 +78,30 @@ export const recordQuizAttempt = mutation({
     if (args.heartsUsed === 0) {
       await ctx.db.insert("user_achievements", {
         userId: args.userId,
-        badge: "Perfectionist",
-        description: `Finished lesson ${args.lessonId} without exhausting a heart`,
+        badge: PERFECTIONIST_BADGE,
+        description: PERFECTIONIST_DESCRIPTION,
         earnedAt: Date.now(),
-        lessonId: args.lessonId, // optional, to know which lesson/attempt
+        lessonId: args.lessonId,
+      });
+      newlyAwarded.push({
+        badge: PERFECTIONIST_BADGE,
+        description: PERFECTIONIST_DESCRIPTION,
       });
     }
+
+    // Return newly awarded badges so frontend can display them
+    return { newlyAwarded };
   },
 });
-
 
 export const getAttemptsForLesson = query({
   args: { userId: v.id("users"), lessonId: v.string() },
   handler: async (ctx, { userId, lessonId }) => {
     return await ctx.db
       .query("user_quiz_attempts")
-      .withIndex("by_user_lesson", (q) => q.eq("userId", userId).eq("lessonId", lessonId))
+      .withIndex("by_user_lesson", (q) =>
+        q.eq("userId", userId).eq("lessonId", lessonId)
+      )
       .collect();
   },
 });

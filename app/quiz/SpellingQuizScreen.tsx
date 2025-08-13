@@ -206,6 +206,14 @@ export default function SpellingQuizScreen() {
       const createdAt = Date.now();
       const totalTimeSpent = answers.reduce((sum, a) => sum + a.timeTaken, 0);
 
+      const heartsUsedCount = 3 - hearts;
+
+      // 🎯 BADGE CHECK
+      const newlyAwardedBadges: string[] = [];
+      if (heartsUsedCount === 0) {
+        newlyAwardedBadges.push("Perfectionist");
+      }
+
       try {
         await insertChallenge({
           userId: convexUserId ?? "",
@@ -216,6 +224,7 @@ export default function SpellingQuizScreen() {
           timeSpent: totalTimeSpent,
           numberOfQuestions,
           difficulty,
+          heartsUsed: heartsUsedCount,
         });
 
         router.replace({
@@ -224,6 +233,7 @@ export default function SpellingQuizScreen() {
             score: String(score),
             stars: String(stars),
             answers: encodeURIComponent(JSON.stringify(answers)),
+            badges: encodeURIComponent(JSON.stringify(newlyAwardedBadges)),
             lessonRoute: "SpellingQuizScreen",
             gameOver: isGameOver ? "true" : "false",
           },

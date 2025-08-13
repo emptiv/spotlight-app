@@ -181,6 +181,17 @@ export default function Quiz({
     const attemptNumber = pastAttempts.length + 1;
 
     const heartsUsedCount = 3 - hearts;
+    
+    const newlyAwardedBadges: string[] = [];
+    if (heartsUsedCount === 0) {
+      newlyAwardedBadges.push("Perfectionist");
+    }
+    if (lessonId === "jx72aewjef2n2jzw5ajht6b32s7jb6bm" && attemptNumber === 1 && !isGameOver) {
+      newlyAwardedBadges.push("Challenger")
+    }
+    if (lessonId === "jx71t9nq18esz01frqwe6af9xn7md24g" && attemptNumber === 1 && !isGameOver) {
+      newlyAwardedBadges.push("Supernova");
+    }
 
     await recordAttempt({
       userId: convexUserId,
@@ -217,6 +228,7 @@ export default function Quiz({
         score: totalPoints.toString(),
         lessonRoute: modelName,
         answers: encodeURIComponent(JSON.stringify(finalLog)),
+        badges: encodeURIComponent(JSON.stringify(newlyAwardedBadges)),
         gameOver: isGameOver ? "true" : "false",
       },
     });

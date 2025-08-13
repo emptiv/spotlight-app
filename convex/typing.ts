@@ -2,7 +2,8 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 const PERFECTIONIST_BADGE = "Perfectionist";
-const PERFECTIONIST_DESCRIPTION = "Answered all questions correctly without using any hearts";
+const PERFECTIONIST_DESCRIPTION =
+  "Answered all questions correctly without using any hearts";
 
 export const insertTypingChallenge = mutation({
   args: {
@@ -17,44 +18,39 @@ export const insertTypingChallenge = mutation({
         result: v.union(v.literal("correct"), v.literal("wrong")),
         pointsEarned: v.number(),
         timeTaken: v.number(),
-        heartsUsed: v.optional(v.number()), // optional
       })
     ),
     createdAt: v.number(),
     timeSpent: v.number(),
     numberOfQuestions: v.number(),
     difficulty: v.union(v.literal("easy"), v.literal("medium"), v.literal("hard")),
+    heartsUsed: v.optional(v.number()), // optional
   },
   handler: async (ctx, args) => {
     // Insert the challenge record
     await ctx.db.insert("typing_challenges", args);
 
+    const awardedBadges: string[] = [];
+
     // Check for Perfectionist achievement
     const allCorrect = args.answers.every((a) => a.result === "correct");
-    const noHeartsUsed = args.answers.every((a) => !a.heartsUsed || a.heartsUsed === 0);
+    const noHeartsUsed = !args.heartsUsed || args.heartsUsed === 0;
 
     if (allCorrect && noHeartsUsed) {
-      // Check if the user already has this badge
-      const existing = await ctx.db
-        .query("user_achievements")
-        .withIndex("by_user", (q) => q.eq("userId", args.userId))
-        .collect();
+      // Directly insert every time — no "already has" check
+      await ctx.db.insert("user_achievements", {
+        userId: args.userId,
+        badge: PERFECTIONIST_BADGE,
+        description: PERFECTIONIST_DESCRIPTION,
+        earnedAt: Date.now(),
+        lessonId:"typing", // optional
+      });
 
-      const hasBadge = existing.some((a) => a.badge === PERFECTIONIST_BADGE);
-
-      if (!hasBadge) {
-        await ctx.db.insert("user_achievements", {
-          userId: args.userId,
-          badge: PERFECTIONIST_BADGE,
-          description: PERFECTIONIST_DESCRIPTION,
-          earnedAt: Date.now(),
-          lessonId: undefined, // optional
-        });
-      }
+      awardedBadges.push(PERFECTIONIST_BADGE);
     }
+    return { newlyAwarded: awardedBadges };
   },
 });
-
 
 // Existing queries remain unchanged
 export const getBestTypingPerformance = query({

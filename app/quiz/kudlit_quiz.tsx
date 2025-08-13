@@ -325,6 +325,12 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
     const attemptNumber = pastAttempts.length + 1;
     const heartsUsedCount = 3 - hearts;
 
+      // 🎯 BADGE CHECK
+      const newlyAwardedBadges: string[] = [];
+      if (heartsUsedCount === 0) {
+        newlyAwardedBadges.push("Perfectionist");
+      }
+
     await recordAttempt({
       userId: convexUserId,
       lessonId: "jx71t9nq18esz01frqwe6af9xn7md24g",
@@ -360,6 +366,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
         score: totalPoints.toString(),
         lessonRoute: "kudlit_quiz",
         answers: encodeURIComponent(JSON.stringify(finalLog)),
+        badges: encodeURIComponent(JSON.stringify(newlyAwardedBadges)),
         gameOver: isGameOver ? "true" : "false",
       },
     });
