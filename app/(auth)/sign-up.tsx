@@ -5,6 +5,9 @@ import * as React from 'react';
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -96,93 +99,106 @@ export default function SignUpScreen() {
 
   if (pendingVerification) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Verify Email</Text>
-        <Text style={styles.subtitle}>We've sent a code to your email. Enter it below to continue.</Text>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'android' ? 'height' : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+          <View style={styles.container}>
+            <Text style={styles.title}>Verify Email</Text>
+            <Text style={styles.subtitle}>We've sent a code to your email. Enter it below to continue.</Text>
 
-        <Image
-          source={require('../../assets/images/verify.png')}
-          style={styles.image}
-          resizeMode="contain"
-        />
+            <Image
+              source={require('../../assets/images/verify.png')}
+              style={styles.image}
+              resizeMode="contain"
+            />
 
-        <Text style={styles.label}>Verification Code</Text>
-        <TextInput
-          style={styles.input}
-          value={code}
-          placeholder="123456"
-          onChangeText={setCode}
-          keyboardType="number-pad"
-          placeholderTextColor="#aaa"
-        />
+            <Text style={styles.label}>Verification Code</Text>
+            <TextInput
+              style={styles.input}
+              value={code}
+              placeholder="123456"
+              onChangeText={setCode}
+              keyboardType="number-pad"
+              placeholderTextColor="#aaa"
+            />
 
-        <TouchableOpacity style={styles.buttonDark} onPress={onVerifyPress}>
-          <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Verify</Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonDark} onPress={onVerifyPress}>
+              <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Verify</Text>
+            </TouchableOpacity>
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
-      </View>
+            {error && <Text style={styles.errorText}>{error}</Text>}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Get Started</Text>
-      <Text style={styles.subtitle}>Write the past, shape the future.</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'android' ? 'height' : undefined}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <View style={styles.container}>
+          <Text style={styles.title}>Get Started</Text>
+          <Text style={styles.subtitle}>Write the past, shape the future.</Text>
 
-      <Image
-        source={require('../../assets/images/signup.png')}
-        style={styles.image}
-        resizeMode="contain"
-      />
+          <Image
+            source={require('../../assets/images/signup.png')}
+            style={styles.image}
+            resizeMode="contain"
+          />
 
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        style={styles.input}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        placeholder="juandelacruz@gmail.com"
-        value={emailAddress}
-        onChangeText={setEmailAddress}
-        placeholderTextColor="#aaa"
-      />
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholder="juandelacruz@gmail.com"
+            value={emailAddress}
+            onChangeText={setEmailAddress}
+            placeholderTextColor="#aaa"
+          />
 
-      <Text style={styles.label}>Password</Text>
-      <TextInput
-        style={styles.input}
-        autoCapitalize="none"
-        placeholder="8-32 chars, include letters and numbers"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        placeholderTextColor="#aaa"
-      />
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            autoCapitalize="none"
+            placeholder="8-32 chars, include letters and numbers"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            placeholderTextColor="#aaa"
+          />
 
-      <TouchableOpacity
-        style={styles.buttonDark}
-        onPress={onSignUpPress}
-      >
-        <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Sign Up</Text>
-      </TouchableOpacity>
+          <TouchableOpacity style={styles.buttonDark} onPress={onSignUpPress}>
+            <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Sign Up</Text>
+          </TouchableOpacity>
 
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
-
-      <View style={styles.linkRow}>
-        <TouchableOpacity
-          onPress={async () => {
-            await playSound('click');
-            router.push('/(auth)/sign-in');
-          }}
-        >
-          <Text style={{ fontFamily: 'outfit-bold', color: Colors.PRIMARY }}> Already have an account?</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          <View style={styles.linkRow}>
+            <TouchableOpacity
+              onPress={async () => {
+                await playSound('click');
+                router.push('/(auth)/sign-in');
+              }}
+            >
+              <Text style={{ fontFamily: 'outfit-bold', color: Colors.PRIMARY }}> Already have an account?</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
   container: {
     paddingTop: 40,
     padding: 24,

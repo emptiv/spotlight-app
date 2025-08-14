@@ -1,6 +1,7 @@
 // app/practice/[char].tsx
 import HandwritingCanvas from "@/components/HandwritingCanvas";
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -47,7 +48,10 @@ export default function CharacterPractice() {
       {/* Floating back button */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => router.back()}
+        onPress={async () => {
+          await playSound('click');
+          router.back();
+        }}
       >
         <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
       </TouchableOpacity>

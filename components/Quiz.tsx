@@ -61,6 +61,7 @@ export default function Quiz({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerLog, setAnswerLog] = useState<AnswerSummary[]>([]);
   const [hearts, setHearts] = useState<number>(3);
+  const [sessionId] = useState(() => Date.now().toString());
 
   const convex = useConvex();
 
@@ -68,6 +69,7 @@ export default function Quiz({
   const recordSingleAnswer = useMutation(api.quiz.recordSingleAnswer);
   const saveProgress = useMutation(api.user_lesson_progress.saveProgress);
   const updateXp = useMutation(api.users.updateUserStats);
+  const deleteUnfinishedAnswers = useMutation(api.quiz.deleteUnfinishedAnswers);
 
   const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
     clerkId: user?.id || "",
@@ -127,6 +129,7 @@ export default function Quiz({
       await recordSingleAnswer({
         userId: convexUserId,
         lessonId,
+        sessionId,
         ...answer,
         createdAt: Date.now(),
       });
@@ -286,21 +289,31 @@ export default function Quiz({
 
   const progress = correctAnswersCount / totalQuestionsCount;
 
-  const handleExitQuiz = () => {
-    Alert.alert(
-      "Leave Quiz?",
-      "Your progress will be lost. Are you sure you want to exit?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Leave",
-          style: "destructive",
-          onPress: () => router.back(),
+
+const handleExitQuiz = () => {
+  Alert.alert(
+    "Leave Quiz?",
+    "Your progress will be lost. Are you sure you want to exit?",
+    [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Leave",
+        style: "destructive",
+        onPress: async () => {
+          if (convexUserId) {
+            await deleteUnfinishedAnswers({
+              userId: convexUserId,
+              lessonId,
+              sessionId,
+            });
+          }
+          router.back();
         },
-      ]
-    );
-     return true;
-  };
+      },
+    ]
+  );
+  return true;
+};
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -324,7 +337,10 @@ export default function Quiz({
     {/* Exit Button */}
     <TouchableOpacity
       style={styles.exitButton}
-      onPress={handleExitQuiz}
+      onPress={async () => {
+        await playSound('click');
+        handleExitQuiz();
+      }}
     >
       <Ionicons name="close" size={28} color={Colors.PRIMARY} />
     </TouchableOpacity>

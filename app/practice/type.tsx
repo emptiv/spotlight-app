@@ -149,7 +149,10 @@ export default function SpellingQuizScreen() {
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={async () => {
+            await playSound('click');
+            router.back();
+          }}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
         </TouchableOpacity>
@@ -191,7 +194,10 @@ export default function SpellingQuizScreen() {
         <TouchableOpacity
           style={[styles.button, !(difficulty && questionCount) && { opacity: 0.5 }]}
           disabled={!(difficulty && questionCount)}
-          onPress={() => setIsSetup(false)}
+          onPress={async () => {
+            await playSound('click');
+            setIsSetup(false);
+          }}
         >
           <Text style={styles.buttonText}>{t[lang].startQuiz}</Text>
         </TouchableOpacity>
@@ -204,7 +210,10 @@ export default function SpellingQuizScreen() {
       <View style={styles.centered}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+          onPress={async () => {
+            await playSound('click');
+            router.back();
+          }}
           >
             <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
           </TouchableOpacity>
@@ -223,7 +232,10 @@ export default function SpellingQuizScreen() {
       <View style={{ flex: 1, backgroundColor: Colors.WHITE }}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+          onPress={async () => {
+            await playSound('click');
+            router.back();
+          }}
           >
             <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
           </TouchableOpacity>
@@ -318,7 +330,10 @@ export default function SpellingQuizScreen() {
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => router.back()}
+          onPress={async () => {
+            await playSound('click');
+            router.back();
+          }}
       >
         <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
       </TouchableOpacity>
@@ -348,7 +363,12 @@ export default function SpellingQuizScreen() {
       </View>
 
       {!hasSubmitted && (
-        <TouchableOpacity style={styles.button} onPress={() => handleSubmit()}>
+        <TouchableOpacity style={styles.button} 
+      onPress={async () => {
+        await playSound('click');
+        handleSubmit();
+      }}
+          >
           <Text style={styles.buttonText}>{t[lang].submit}</Text>
         </TouchableOpacity>
       )}
@@ -356,18 +376,25 @@ export default function SpellingQuizScreen() {
       {hasSubmitted && !isCorrect && (
         <TouchableOpacity
           style={styles.button}
-          onPress={() => {
-            setInput("");
-            setHasSubmitted(false);
-            setKeyboardEnabled(true);
-          }}
+        onPress={async () => {
+          await playSound('click');
+          setInput("");
+          setHasSubmitted(false);
+          setKeyboardEnabled(true);
+        }}
         >
           <Text style={styles.buttonText}>{t[lang].retry}</Text>
         </TouchableOpacity>
       )}
 
       {hasSubmitted && isCorrect && (
-        <TouchableOpacity style={styles.button} onPress={handleNext}>
+        <TouchableOpacity style={styles.button} 
+
+      onPress={async () => {
+        await playSound('click');
+        handleNext();
+      }}
+          >
           <Text style={styles.buttonText}>{t[lang].next}</Text>
         </TouchableOpacity>
       )}
@@ -383,7 +410,7 @@ export default function SpellingQuizScreen() {
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: Colors.WHITE },
+  container: { flex: 1, padding: 20, backgroundColor: Colors.WHITE, paddingTop: 70 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   title: {
     fontSize: 22,
@@ -427,7 +454,7 @@ const styles = StyleSheet.create({
   },
   promptText: {
     textAlign: "center",
-    fontSize: 18,
+    fontSize: 22,
     marginVertical: 16,
     color: Colors.PRIMARY,
     fontFamily: "outfit-bold",

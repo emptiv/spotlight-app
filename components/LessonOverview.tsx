@@ -47,7 +47,10 @@ export default function LessonOverviewScreen({
       {/* Back Button */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => router.back()}
+      onPress={async () => {
+        await playSound('click');
+        router.back();
+      }}
       >
         <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
       </TouchableOpacity>

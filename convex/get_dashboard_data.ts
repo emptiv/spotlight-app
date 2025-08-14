@@ -20,21 +20,38 @@ export const getUserDashboardData = query({
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
-    // Step 3: Fetch all quiz attempts (Clerk ID string is used)
+    // Step 3: Fetch all quiz attempts (Convex user._id is used)
     const quizAttempts = await ctx.db
       .query("user_quiz_attempts")
-      .withIndex("by_user_lesson", (q) => q.eq("userId", userId))
+      .withIndex("by_user_lesson", (q) => q.eq("userId", user._id))
       .collect();
 
-    // Step 4: Fetch all quiz answers (Convex user ID is used)
+    // Step 4: Fetch all quiz answers (Convex user._id is used)
     const quizAnswers = await ctx.db
       .query("quiz_answers")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
-    // Step 5: Build characterStats
-    const labelMap = new Map<string, { correct: number; total: number }>();
+    // Step 5: Calculate totalXP
+    const quizXP = quizAttempts.reduce(
+      (sum, attempt) => sum + (attempt.score ?? 0),
+      0
+    );
 
+    const typingChallenges = await ctx.db
+      .query("typing_challenges")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    const typingXP = typingChallenges.reduce(
+      (sum, challenge) => sum + (challenge.score ?? 0),
+      0
+    );
+
+    const totalXP = quizXP + typingXP;
+
+    // Step 6: Build characterStats
+    const labelMap = new Map<string, { correct: number; total: number }>();
     for (const answer of quizAnswers) {
       const { label, result } = answer;
       if (!label) continue;
@@ -48,7 +65,6 @@ export const getUserDashboardData = query({
         entry.correct += 1;
       }
     }
-
     const characterStats = Array.from(labelMap.entries()).map(
       ([label, { correct, total }]) => ({
         label,
@@ -58,13 +74,12 @@ export const getUserDashboardData = query({
       })
     );
 
-    // Step 6: Build typeStats
+    // Step 7: Build typeStats
     const typeStats = {
       mcq: { correct: 0, total: 0 },
       writing: { correct: 0, total: 0 },
       drag: { correct: 0, total: 0 },
     };
-
     for (const answer of quizAnswers) {
       const { type, result } = answer;
       if (type === "mcq" || type === "writing" || type === "drag") {
@@ -81,6 +96,7 @@ export const getUserDashboardData = query({
       quizAttempts,
       characterStats,
       typeStats,
+      totalXP,
     };
   },
 });

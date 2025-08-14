@@ -174,6 +174,7 @@ export default function Quiz({
   const [droppedMarker, setDroppedMarker] = useState<"Kudlit" | "Plus" | null>(null);
   const [showWrong, setShowWrong] = useState(false);
   const [totalQuestions, setTotalQuestions] = useState(0);
+  const [sessionId] = useState(() => Date.now().toString());
 
   const convex = useConvex();
 
@@ -181,6 +182,7 @@ export default function Quiz({
   const recordSingleAnswer = useMutation(api.quiz.recordSingleAnswer);
   const saveProgress = useMutation(api.user_lesson_progress.saveProgress);
   const updateXp = useMutation(api.users.updateUserStats);
+  const deleteUnfinishedAnswers = useMutation(api.quiz.deleteUnfinishedAnswers);
 
   const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
     clerkId: user?.id || "",
@@ -229,7 +231,16 @@ useEffect(() => {
         {
           text: "Leave",
           style: "destructive",
-          onPress: () => router.back(),
+          onPress: async () => {
+            if (convexUserId) {
+              await deleteUnfinishedAnswers({
+                userId: convexUserId,
+                lessonId: "jx71t9nq18esz01frqwe6af9xn7md24g",
+                sessionId,
+              });
+            }
+            router.back();
+          },
         },
       ]
     );
@@ -270,6 +281,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
       await recordSingleAnswer({
         userId: convexUserId,
         lessonId: "jx71t9nq18esz01frqwe6af9xn7md24g",
+        sessionId,
         ...answer,
         createdAt: Date.now(),
       });
@@ -533,7 +545,10 @@ return (
       {/* Exit Button */}
       <TouchableOpacity
         style={styles.exitButton}
-        onPress={handleExitQuiz}
+        onPress={async () => {
+          await playSound('click');
+          handleExitQuiz();
+        }}
       >
         <Ionicons name="close" size={28} color={Colors.PRIMARY} />
       </TouchableOpacity>

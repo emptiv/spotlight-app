@@ -515,7 +515,10 @@ const renderDragPage = (page: DragPage) => {
                   !isAnswerCorrect &&
                   styles.buttonDisabled,
               ]}
-              onPress={handleNext}
+              onPress={async () => {
+                await playSound('click');
+                handleNext();
+              }}
               disabled={currentPage.type === "drag" && !isAnswerCorrect}
             >
               <Text style={styles.buttonText}>

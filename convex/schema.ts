@@ -22,6 +22,7 @@ export default defineSchema({
   quiz_answers: defineTable({
     userId: v.id("users"),
     lessonId: v.string(),
+    sessionId: v.optional(v.string()),
     symbol: v.string(),
     label: v.string(),
     type: v.union(v.literal("mcq"), v.literal("writing"), v.literal("drag")),
@@ -29,7 +30,8 @@ export default defineSchema({
     result: v.union(v.literal("correct"), v.literal("wrong")),
     pointsEarned: v.number(),
     createdAt: v.number(),
-  }).index("by_user", ["userId"]),
+  }).index("by_user", ["userId"])
+  .index("by_user_lesson_session", ["userId", "lessonId", "sessionId"]),
   user_quiz_attempts: defineTable({
     userId: v.string(),
     lessonId: v.string(),

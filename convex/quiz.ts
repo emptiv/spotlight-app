@@ -9,6 +9,7 @@ export const recordSingleAnswer = mutation({
   args: {
     userId: v.id("users"),
     lessonId: v.string(),
+    sessionId: v.optional(v.string()),
     symbol: v.string(),
     label: v.string(),
     type: v.union(v.literal("mcq"), v.literal("writing"), v.literal("drag")),
@@ -113,5 +114,27 @@ export const getUserAchievements = query({
       .query("user_achievements")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
+  },
+});
+
+export const deleteUnfinishedAnswers = mutation({
+  args: {
+    userId: v.id("users"),
+    lessonId: v.string(),
+    sessionId: v.string(),
+  },
+  handler: async (ctx, { userId, lessonId, sessionId }) => {
+    const answers = await ctx.db
+      .query("quiz_answers")
+      .withIndex("by_user_lesson_session", q =>
+        q.eq("userId", userId)
+         .eq("lessonId", lessonId)
+         .eq("sessionId", sessionId) // ✅ only delete current session
+      )
+      .collect();
+
+    for (const answer of answers) {
+      await ctx.db.delete(answer._id);
+    }
   },
 });

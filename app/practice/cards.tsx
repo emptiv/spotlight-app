@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -207,18 +208,34 @@ export default function FlashcardsScreen() {
         {/* Back button */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={async () => {
+            await playSound("click");
+            router.back();
+          }}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+
         </TouchableOpacity>
+          {/* Screen title */}
+          <Text style={styles.screenTitle}>Flashcards</Text>
         {/* Main Deck Selection */}
         <View style={styles.deckSelector}>
-          <Pressable onPress={() => handleMainCategory("vowels")}>
+          <Pressable 
+            onPress={async () => {
+              await playSound('click');
+              handleMainCategory("vowels");
+            }}
+            >
             <View style={[styles.deckButton, mainCategory === "vowels" && styles.activeDeckButton]}>
               <Text style={[styles.deckButtonText, mainCategory === "vowels" && styles.activeDeckText]}>{t.vowels}</Text>
             </View>
           </Pressable>
-          <Pressable onPress={() => handleMainCategory("consonants")}>
+          <Pressable 
+            onPress={async () => {
+              await playSound('click');
+              handleMainCategory("consonants");
+            }}
+            >
             <View style={[styles.deckButton, mainCategory === "consonants" && !subCategory && styles.activeDeckButton]}>
               <Text style={[styles.deckButtonText, mainCategory === "consonants" && !subCategory && styles.activeDeckText]}>{t.consonants}</Text>
             </View>
@@ -228,12 +245,22 @@ export default function FlashcardsScreen() {
         {/* Subcategory */}
         {mainCategory === "consonants" && (
           <View style={styles.deckSelector}>
-            <Pressable onPress={() => handleSubCategory("kudlit")}>
+            <Pressable 
+            onPress={async () => {
+              await playSound('click');
+              handleSubCategory("kudlit");
+            }}
+              >
               <View style={[styles.deckButton, subCategory === "kudlit" && styles.activeDeckButton]}>
                 <Text style={[styles.deckButtonText, subCategory === "kudlit" && styles.activeDeckText]}>{t.kudlit}</Text>
               </View>
             </Pressable>
-            <Pressable onPress={() => handleSubCategory("krusKudlit")}>
+            <Pressable 
+            onPress={async () => {
+              await playSound('click');
+              handleSubCategory("krusKudlit");
+            }}
+              >
               <View style={[styles.deckButton, subCategory === "krusKudlit" && styles.activeDeckButton]}>
                 <Text style={[styles.deckButtonText, subCategory === "krusKudlit" && styles.activeDeckText]}>{t.krusKudlit}</Text>
               </View>
@@ -253,7 +280,12 @@ export default function FlashcardsScreen() {
               : t.consonants}
           </Text>
 
-          <Pressable onPress={flipCard}>
+          <Pressable 
+            onPress={async () => {
+              await playSound('flip');
+              flipCard();
+            }}
+            >
             <View style={styles.cardWrapper}>
               <Animated.View style={[styles.card, frontAnimatedStyle]}>
                 <Text style={styles.cardText}>{current.front}</Text>
@@ -265,17 +297,30 @@ export default function FlashcardsScreen() {
           </Pressable>
 
           <View style={styles.navButtons}>
-            <TouchableOpacity onPress={handlePrev} style={styles.navButton}>
+            <TouchableOpacity 
+            onPress={async () => {
+              await playSound('click');
+              handlePrev();
+            }}
+              style={styles.navButton}>
               <Ionicons name="chevron-back-circle-outline" size={40} color={Colors.PRIMARY} />
             </TouchableOpacity>
             <Text style={styles.counter}>{index + 1} / {cards.length}</Text>
-            <TouchableOpacity onPress={handleNext} style={styles.navButton}>
+            <TouchableOpacity 
+            onPress={async () => {
+              await playSound('click');
+              handleNext();
+            }}
+              style={styles.navButton}>
               <Ionicons name="chevron-forward-circle-outline" size={40} color={Colors.PRIMARY} />
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            onPress={toggleShuffle}
+            onPress={async () => {
+              await playSound('click');
+              toggleShuffle();
+            }}
             style={[styles.shuffleButton, isShuffled && styles.shuffleButtonActive]}
           >
             <Text style={[styles.shuffleButtonText, isShuffled && styles.shuffleButtonTextActive]}>
@@ -347,11 +392,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 3,
-    elevation: 2,
   },
   cardText: {
     fontSize: 38,
@@ -410,5 +450,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  screenTitle: {
+    fontFamily: "outfit-bold",
+    fontSize: 30,
+    color: Colors.PRIMARY,
+    textAlign: "center",
+    marginTop: 50,
+    marginBottom: 10,
   },
 });

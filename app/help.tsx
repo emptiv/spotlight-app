@@ -1,3 +1,4 @@
+import { playSound } from '@/constants/playClickSound';
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -41,7 +42,10 @@ export default function Help() {
         {/* Back button */}
         <TouchableOpacity
           style={previewStyles.backButton}
-          onPress={() => router.back()}
+      onPress={async () => {
+        await playSound('click');
+        router.back();
+      }}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
         </TouchableOpacity>

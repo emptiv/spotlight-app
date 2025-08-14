@@ -83,12 +83,9 @@ export default function Dashboard() {
     clerkUserId ? { userId: clerkUserId } : "skip"
   );
 
-  // Compute earned badge names safely
-  const earnedBadgeNames = achievements
-    ? Array.from(new Set(achievements.map(a => a.badge.toLowerCase())))
-    : [];
+  const earnedBadgeNames = achievements ? Array.from(new Set(achievements.map(a => a.badge.toLowerCase()))) : [];
 
-  if (!data || !userRecord) {
+  if (!data) {
     return (
       <View style={styles.center}>
         <Text>Loading dashboard...</Text>
@@ -96,14 +93,13 @@ export default function Dashboard() {
     );
   }
 
-  const { user, lessonProgress } = data;
+  const { user, lessonProgress, totalXP } = data;
   const completedLessons = lessonProgress.filter((l) => l.isCompleted);
-  const totalXP = user.totalXP ?? 0;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Big Title */}
-      <Text style={styles.title}>{userRecord.name || 'Unnamed'}'s Dashboard</Text>
+      <Text style={styles.title}>{name || 'Unnamed'}'s Dashboard</Text>
       {/* Profile Summary */}
       <View style={styles.card}>
         <View style={styles.profileRow}>
@@ -113,12 +109,12 @@ export default function Dashboard() {
           />
           <View style={{ flex: 1 }}>
             <View style={styles.nameRow}>
-              <Text style={styles.name}>{userRecord.name || 'Unnamed'}</Text>
+              <Text style={styles.name}>{name || 'Unnamed'}</Text>
               <TouchableOpacity
                 onPress={async () => {
                   await playSound('click');
                   setModalVisible(true);
-                  setName(userRecord.name || '');
+                  setName(name || '');
                   setFeedbackText('');
                 }}
                 style={{ marginLeft: 8 }}
@@ -135,6 +131,7 @@ export default function Dashboard() {
             <Text style={styles.statLabel}>Total XP</Text>
             <Text style={styles.statValue}>{totalXP}</Text>
           </View>
+
           <View style={styles.statBox}>
             <Text style={styles.statLabel}>Last Active</Text>
             <Text style={styles.statValue}>
@@ -152,13 +149,19 @@ export default function Dashboard() {
       <View style={styles.tabSelector}>
         <TouchableOpacity
           style={styles.reButton}
-          onPress={() => router.push('/dashb/achievements')}
+          onPress={async () => {
+            await playSound('click');
+            router.push('/dashb/achievements');
+          }}
         >
           <Text style={styles.reButtonText}>Achievements</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.reButton}
-          onPress={() => router.push('/dashb/statistics')}
+          onPress={async () => {
+            await playSound('click');
+            router.push('/dashb/statistics');
+          }}
         >
           <Text style={styles.reButtonText}>Statistics</Text>
         </TouchableOpacity>

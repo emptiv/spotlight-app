@@ -61,7 +61,10 @@ export default function Practice() {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={[styles.toggleButton, filter === "vowel" && styles.activeButton]}
-            onPress={() => setFilter("vowel")}
+            onPress={async () => {
+              await playSound('click');
+              setFilter("vowel");
+            }}
           >
             <Text
               style={[
@@ -75,7 +78,10 @@ export default function Practice() {
 
           <TouchableOpacity
             style={[styles.toggleButton, filter === "consonant" && styles.activeButton]}
-            onPress={() => setFilter("consonant")}
+            onPress={async () => {
+              await playSound('click');
+              setFilter("consonant");
+            }}
           >
             <Text
               style={[

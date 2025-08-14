@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 
 import Colors from '@/constants/Colors';
+import { playSound } from '@/constants/playClickSound';
 import { api } from '@/convex/_generated/api';
 
 const screenWidth = Dimensions.get('window').width;
@@ -73,7 +74,10 @@ export default function Dashboard() {
         {/* Back button */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+        onPress={async () => {
+          await playSound('click');
+          router.back();
+        }}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
         </TouchableOpacity>

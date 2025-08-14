@@ -258,7 +258,10 @@ export default function SpellingQuizScreen() {
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={async () => {
+            await playSound('click');
+            router.back();
+          }}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
         </TouchableOpacity>
@@ -299,7 +302,10 @@ export default function SpellingQuizScreen() {
         <TouchableOpacity
           style={[styles.button, !(difficulty && questionCount) && { opacity: 0.5 }]}
           disabled={!(difficulty && questionCount)}
-          onPress={() => setIsSetup(false)}
+          onPress={async () => {
+            await playSound('click');
+            setIsSetup(false);
+          }}
         >
           <Text style={styles.buttonText}>Start Quiz</Text>
         </TouchableOpacity>
@@ -335,7 +341,12 @@ export default function SpellingQuizScreen() {
   return (
     <View style={styles.container}>
       {/* Exit button */}
-      <TouchableOpacity style={styles.exitButton} onPress={handleExitQuiz}>
+      <TouchableOpacity style={styles.exitButton} 
+        onPress={async () => {
+          await playSound('click');
+          handleExitQuiz();
+        }}
+        >
         <Ionicons name="close" size={28} color={Colors.PRIMARY} />
       </TouchableOpacity>
 
@@ -398,13 +409,23 @@ export default function SpellingQuizScreen() {
       </View>
 
       {!hasSubmitted && (
-        <TouchableOpacity style={styles.button} onPress={() => handleSubmit()}>
+        <TouchableOpacity style={styles.button} 
+        onPress={async () => {
+          await playSound('click');
+          handleSubmit();
+        }}
+          >
           <Text style={styles.buttonText}>Submit</Text>
         </TouchableOpacity>
       )}
 
       {hasSubmitted && isCorrect && (
-        <TouchableOpacity style={styles.button} onPress={() => handleNext()}>
+        <TouchableOpacity style={styles.button} 
+        onPress={async () => {
+          await playSound('click');
+          handleNext();
+        }}
+          >
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
       )}

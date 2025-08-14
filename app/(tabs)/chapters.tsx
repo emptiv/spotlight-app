@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
@@ -40,7 +41,10 @@ export default function ChaptersScreen() {
       <TouchableOpacity
         style={[styles.card, styles.chapterCard]}
         activeOpacity={0.9}
-        onPress={() => router.push("/screens/lessons")}
+        onPress={async () => {
+          await playSound('click');
+          router.push("/screens/lessons");
+        }}
       >
         {/* LEFT SIDE — Text and Fake Button */}
         <View style={styles.textColumn}>

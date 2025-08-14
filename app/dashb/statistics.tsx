@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { api } from '@/convex/_generated/api';
 import { useAuth } from '@clerk/clerk-expo';
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -40,14 +41,13 @@ export default function Dashboard() {
   if (!data || !userRecord) {
     return (
       <View style={styles.center}>
-        <Text>Loading dashboard...</Text>
+        <Text>Loading statistics...</Text>
       </View>
     );
   }
 
-  const { user, lessonProgress, characterStats, typeStats } = data;
+  const { user, lessonProgress, characterStats, typeStats, totalXP } = data;
   const completedLessons = lessonProgress.filter((l) => l.isCompleted);
-  const totalXP = user.totalXP ?? 0;
   const accuracyChartWidth = Math.max(screenWidth, characterStats.length * 70);
 
   const barChartData = {
@@ -106,12 +106,15 @@ export default function Dashboard() {
       {/* Back button */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => router.back()}
+      onPress={async () => {
+        await playSound('click');
+        router.back();
+      }}
       >
         <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
       </TouchableOpacity>
 
-      <Text style={styles.pageTitle}>Dashboard</Text>
+      <Text style={styles.pageTitle}>Statistics</Text>
 
       {/* --- Overview Stats --- */}
       <Text style={styles.sectionTitle}>Overview</Text>
@@ -122,7 +125,7 @@ export default function Dashboard() {
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Lessons Completed</Text>
-          <Text style={styles.statValue}>{completedLessons.length}/{lessonProgress.length}</Text>
+          <Text style={styles.statValue}>{completedLessons.length}/7</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Average Accuracy</Text>

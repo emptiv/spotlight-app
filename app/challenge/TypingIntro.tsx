@@ -79,7 +79,10 @@ export default function FlashcardIntroScreen() {
     <SafeAreaView style={styles.container}>
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => router.back()}
+          onPress={async () => {
+            await playSound('click');
+            router.back();
+          }}
       >
         <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
       </TouchableOpacity>
@@ -148,6 +151,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     padding: 24,
+    paddingTop: 65,
   },
   loadingContainer: {
     flex: 1,

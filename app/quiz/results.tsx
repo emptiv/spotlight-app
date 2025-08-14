@@ -1,3 +1,4 @@
+import { playSound } from '@/constants/playClickSound';
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -108,8 +109,11 @@ export default function QuizResults() {
         )}
 
         <TouchableOpacity
-          onPress={() => setShowAnswers((prev) => !prev)}
           style={styles.toggleButton}
+          onPress={async () => {
+            await playSound("click");
+            setShowAnswers((prev) => !prev);
+          }}
         >
           <Text style={styles.toggleButtonText}>
             {showAnswers ? "Hide Answers" : "Show Answers"}
@@ -151,7 +155,10 @@ export default function QuizResults() {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.replace("/")}
+            onPress={async () => {
+              await playSound("click");
+              router.replace("/");
+              }}
           >
             <Text style={styles.buttonText}>Back to Home</Text>
           </TouchableOpacity>
@@ -159,7 +166,10 @@ export default function QuizResults() {
           {lessonRoute && (
             <TouchableOpacity
               style={[styles.button, { backgroundColor: Colors.GRAY }]}
-              onPress={() => router.replace(`/quiz/${lessonRoute}` as any)}
+              onPress={async () => {
+                await playSound("click");
+                router.replace(`/quiz/${lessonRoute}` as any);
+              }}
             >
               <Text style={styles.buttonText}>Retake Quiz</Text>
             </TouchableOpacity>

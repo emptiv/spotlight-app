@@ -5,6 +5,9 @@ import React from 'react';
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -19,12 +22,14 @@ export default function SignInScreen() {
 
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
+  const [stage, setStage] = React.useState<'signIn' | 'requestReset' | 'resetPassword'>('signIn');
 
+  // --- Sign In flow ---
   const onSignInPress = async () => {
     if (!isLoaded) return;
     setError(null);
-
     try {
       await playSound('click');
 
@@ -47,67 +52,183 @@ export default function SignInScreen() {
     }
   };
 
+  // --- Forgot Password Step 1: Request reset ---
+  const requestPasswordReset = async () => {
+    if (!isLoaded) return;
+    setError(null);
+    try {
+      await playSound('click');
+      await signIn.create({
+        strategy: 'reset_password_email_code',
+        identifier: email,
+      });
+      setStage('resetPassword');
+      Alert.alert('Check your email', 'We sent you a code to reset your password.');
+    } catch (err: any) {
+      const message = err?.errors?.[0]?.message || 'Failed to send reset email.';
+      setError(message);
+      Alert.alert('Error', message);
+    }
+  };
+
+  // --- Forgot Password Step 2: Submit code + new password ---
+  const resetPassword = async () => {
+    if (!isLoaded) return;
+    setError(null);
+    try {
+      await playSound('click');
+      const result = await signIn.attemptFirstFactor({
+        strategy: 'reset_password_email_code',
+        code,
+        password,
+      });
+
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        router.replace('/(tabs)');
+      } else {
+        console.warn('Further steps required:', result);
+      }
+    } catch (err: any) {
+      const message = err?.errors?.[0]?.message || 'Failed to reset password.';
+      setError(message);
+      Alert.alert('Error', message);
+    }
+  };
+
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome back!</Text>
-      <Text style={styles.subtitle}>Good to see you again! Let's scribble our way to ace Baybayin!</Text>
-
-      <Image
-        source={require('../../assets/images/login.png')}
-        style={styles.image}
-        resizeMode="contain"
-      />
-
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        style={styles.input}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        placeholderTextColor="#aaa"
-      />
-
-      <Text style={styles.label}>Password</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        placeholderTextColor="#aaa"
-      />
-
-      <TouchableOpacity
-        style={styles.buttonDark}
-        onPress={async () => {
-          await playSound('click');
-          onSignInPress();
-        }}
-      >
-        <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Sign In</Text>
-      </TouchableOpacity>
-
-      {error && <Text style={styles.errorText}>{error}</Text>}
-
-      <View style={styles.linkRow}>
-        <TouchableOpacity
-          onPress={async () => {
-            await playSound('click');
-            router.push('/(auth)/sign-up');
-          }}
-        >
-          <Text style={{ fontFamily: 'outfit-bold', color: Colors.PRIMARY }}>
-            Don't have an account?
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'android' ? 'height' : undefined}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <View style={styles.container}>
+          <Text style={styles.title}>
+            {stage === 'signIn' ? 'Welcome back!' : 'Reset Password'}
           </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          <Text style={styles.subtitle}>
+            {stage === 'signIn'
+              ? "Good to see you again! Let's scribble our way to ace Baybayin!"
+              : stage === 'requestReset'
+              ? 'Enter your email and we will send you a reset code.'
+              : 'Enter the code from your email and your new password.'}
+          </Text>
+
+          {stage === 'signIn' && (
+            <Image source={require('../../assets/images/login.png')} style={styles.image} resizeMode="contain" />
+          )}
+
+          {/* Email Field */}
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            placeholderTextColor="#aaa"
+          />
+
+          {/* Password Field (Sign In) */}
+          {stage === 'signIn' && (
+            <>
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+                placeholderTextColor="#aaa"
+              />
+              <TouchableOpacity
+                onPress={async () => {
+                  await playSound('click');
+                  setStage('requestReset');
+                }}
+              >
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {/* Reset Request Button */}
+          {stage === 'requestReset' && (
+            <TouchableOpacity style={styles.buttonDark} onPress={requestPasswordReset}>
+              <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Send Reset Email</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Reset Password Fields */}
+          {stage === 'resetPassword' && (
+            <>
+              <Text style={styles.label}>Reset Code</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter code"
+                value={code}
+                onChangeText={setCode}
+                placeholderTextColor="#aaa"
+              />
+              <Text style={styles.label}>New Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="New password"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+                placeholderTextColor="#aaa"
+              />
+              <TouchableOpacity style={styles.buttonDark} onPress={resetPassword}>
+                <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Reset Password</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {/* Sign In Button */}
+          {stage === 'signIn' && (
+            <TouchableOpacity style={styles.buttonDark} onPress={onSignInPress}>
+              <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Sign In</Text>
+            </TouchableOpacity>
+          )}
+
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
+          {stage === 'signIn' && (
+            <View style={styles.linkRow}>
+              <TouchableOpacity
+                onPress={async () => {
+                  await playSound('click');
+                  router.push('/(auth)/sign-up');
+                }}
+              >
+                <Text style={{ fontFamily: 'outfit-bold', color: Colors.PRIMARY }}>
+                  Don't have an account?
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {(stage === 'requestReset' || stage === 'resetPassword') && (
+            <TouchableOpacity
+              onPress={async () => {
+                await playSound('click');
+                setStage('signIn');
+              }}
+              style={{ marginTop: 20 }}
+            >
+              <Text style={{ fontFamily: 'outfit', color: Colors.PRIMARY }}>Back to Sign In</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
   container: {
     paddingTop: 40,
     padding: 24,
@@ -149,6 +270,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: Colors.BLACK,
     fontFamily: 'outfit',
+  },
+  forgotPassword: {
+    fontFamily: 'outfit',
+    color: Colors.PRIMARY,
+    textAlign: 'right',
+    marginBottom: 16,
   },
   buttonText: {
     fontSize: 18,
