@@ -1,6 +1,7 @@
 // imports
 import BaybayinKeyboard from "@/components/BaybayinKeyboard";
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
@@ -144,11 +145,13 @@ export default function SpellingQuizScreen() {
     }
   };
 
-  const handleSubmit = (isTimeout = false) => {
+  const handleSubmit = async (isTimeout = false) => {
     setHasSubmitted(true);
     const currentWord = words[currentIndex];
     const correct = input === currentWord.baybayin;
     const base = basePointsMap[difficulty!].points;
+
+      await playSound(correct ? "correct" : "wrong");
 
     if (correct) {
       const newStreak = streak + 1;
@@ -377,7 +380,13 @@ export default function SpellingQuizScreen() {
             ? current.latin.charAt(0).toUpperCase() + current.latin.slice(1)
             : current.latin.toLowerCase()}
         </Text>
-        <View style={styles.inputBox}>
+        <View
+          style={[
+            styles.inputBox,
+            hasSubmitted && isCorrect && { borderColor: "green", backgroundColor: "#e6ffec" },
+            hasSubmitted && !isCorrect && { borderColor: "red", backgroundColor: "#ffe6e6" },
+          ]}
+        >
           <Text style={styles.inputText}>{input || " "}</Text>
         </View>
         {hasSubmitted && isCorrect && (

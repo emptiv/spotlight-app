@@ -70,9 +70,9 @@ export default function Lesson7() {
       bestScore={progress.bestScore}
       bestStars={progress.bestStars}
       characters={characters}
-      onStudyPress={() => router.push("/practice/kudlit")}
+      onStudyPress={() => router.replace("/practice/kudlit")}
       onQuizPress={() =>
-        router.push({
+        router.replace({
           pathname: "/quiz/[lessonRoute]",
           params: {
             lessonRoute: "kudlit_quiz",

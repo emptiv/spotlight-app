@@ -1,5 +1,6 @@
 import HandwritingCanvas from "@/components/HandwritingCanvas";
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
@@ -246,7 +247,11 @@ export default function Quiz({
             <TouchableOpacity
               key={idx}
               style={styles.option}
-              onPress={() => handleAnswer(option === current.character.expected)}
+                onPress={async () => {
+                  const isCorrect = option === current.character.expected;
+                  await playSound(isCorrect ? 'correct' : 'wrong');
+                  handleAnswer(isCorrect);
+                }}
             >
               <Text style={styles.optionText}>{option}</Text>
             </TouchableOpacity>
@@ -261,6 +266,7 @@ export default function Quiz({
             key={`${currentIndex}-${answerLog.length}`}
             lesson={current.character.modelName || modelName}
             hideAudioButton={true}
+            character={current.character.expected}
             showGuide={false}
             onPrediction={(prediction) => {
               const isCorrect =

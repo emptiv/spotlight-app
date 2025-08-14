@@ -1,6 +1,7 @@
 import BaybayinKeyboard from "@/components/BaybayinKeyboard";
 import { useLanguage } from "@/components/LanguageContext";
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -107,7 +108,7 @@ export default function SpellingQuizScreen() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setHasSubmitted(true);
     setKeyboardEnabled(false);
 
@@ -115,6 +116,9 @@ export default function SpellingQuizScreen() {
     const correct = input === current.baybayin;
 
     setIsCorrect(correct);
+
+    // Play audio feedback
+    await playSound(correct ? "correct" : "wrong");
 
     setAttempts((prev) => {
       const updated = [...prev];
@@ -125,6 +129,7 @@ export default function SpellingQuizScreen() {
     if (correct) setCorrectCount((c) => c + 1);
     else setIncorrectCount((c) => c + 1);
   };
+
 
   const handleNext = () => {
     if (currentIndex + 1 === words.length) {
@@ -324,7 +329,13 @@ export default function SpellingQuizScreen() {
             ? current.latin.charAt(0).toUpperCase() + current.latin.slice(1)
             : current.latin.toLowerCase()}
         </Text>
-        <View style={styles.inputBox}>
+        <View
+          style={[
+            styles.inputBox,
+            hasSubmitted && isCorrect && { borderColor: "green", backgroundColor: "#e6ffec" },
+            hasSubmitted && !isCorrect && { borderColor: "red", backgroundColor: "#ffe6e6" },
+          ]}
+        >
           <Text style={styles.inputText}>{input || " "}</Text>
         </View>
 
@@ -337,7 +348,7 @@ export default function SpellingQuizScreen() {
       </View>
 
       {!hasSubmitted && (
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <TouchableOpacity style={styles.button} onPress={() => handleSubmit()}>
           <Text style={styles.buttonText}>{t[lang].submit}</Text>
         </TouchableOpacity>
       )}

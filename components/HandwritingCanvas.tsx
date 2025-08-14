@@ -49,6 +49,7 @@ export default function HandwritingCanvas({
   const [currentPath, setCurrentPath] = useState<string>("");
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<string | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null); // <-- new state for visual feedback
   const [showGuideGIF, setShowGuideGIF] = useState(true);
   const canvasRef = useCanvasRef();
   const [strokeHistory, setStrokeHistory] = useState<Array<Array<{ x: number, y: number }>>>([]);
@@ -197,7 +198,7 @@ export default function HandwritingCanvas({
     const base64 = image.encodeToBase64();
 
     try {
-      const response = await fetch("http://192.168.68.55:8000/predict", {
+      const response = await fetch("http://192.168.68.64:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lesson, image: base64 }),
@@ -208,9 +209,22 @@ export default function HandwritingCanvas({
       setPrediction(result);
       onPrediction?.(result);
 
-      if (result === character) {
+      console.log(`Result: "${result}"`);
+      console.log(`Character: "${character}"`);
+
+      if (!character) {
+        console.warn("Character is undefined");
+        return;
+      }
+
+      const normalizedResult = result.trim().toLowerCase();
+      const normalizedCharacter = character.trim().toLowerCase();
+
+      if (normalizedResult === normalizedCharacter) {
+        setIsCorrect(true); 
         playSound('correct');
       } else {
+        setIsCorrect(false);
         playSound('wrong');
       }
 
@@ -224,7 +238,14 @@ export default function HandwritingCanvas({
 
   return (
     <View style={styles.container}>
-      <View style={styles.canvasContainer} {...panResponder.panHandlers}>
+      <View
+        style={[
+          styles.canvasContainer,
+          isCorrect === true && { borderColor: "green", borderWidth: 5 },
+          isCorrect === false && { borderColor: "red", borderWidth: 5 },
+        ]}
+        {...panResponder.panHandlers}
+      >
         {showGuide && (
           <>
             {guideImage && (

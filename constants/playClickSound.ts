@@ -5,6 +5,7 @@ const sounds = {
   confirm: require('../assets/sfx/confirm.wav'),
   correct: require('../assets/sfx/correct2.wav'),
   wrong: require('../assets/sfx/wrong.wav'),
+  confetti: require('../assets/sfx/celeb.mp3'),
 };
 
 export const playSound = async (key: keyof typeof sounds) => {

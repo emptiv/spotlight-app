@@ -5,15 +5,17 @@ import { useAuth } from "@clerk/clerk-expo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useConvex, useQuery } from "convex/react";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { Circle, Path } from "react-native-svg";
 import { useLanguage } from "../../../components/LanguageContext";
 
@@ -35,6 +37,8 @@ export default function LessonMap() {
   const { userId: clerkUserId } = useAuth();
   const convex = useConvex();
   const { lang } = useLanguage();
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiRef = useRef<any>(null);
 
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +80,8 @@ export default function LessonMap() {
       prologue: "Prologue",
       prologueSubtext: "The Moon God's Hope Descends",
       loading: "Loading map...",
+      achievementTitle: "🎉 Supernova Badge Earned!",
+      achievementDesc: "You completed all lessons. Well done!",
     },
     fil: {
       chapter: "Kabanata 1",
@@ -83,6 +89,8 @@ export default function LessonMap() {
       prologue: "Simula",
       prologueSubtext: "Bumababa ang Pag-asa ng Diyosa ng Buwan",
       loading: "Ikinakarga ang mapa...",
+      achievementTitle: "🎉 Supernova Badge Nakuha!",
+      achievementDesc: "Natapos mo na ang lahat ng aralin. Magaling!",
     },
   }[lang];
 
@@ -109,120 +117,151 @@ export default function LessonMap() {
     return { ...lesson, status };
   });
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Title and Subtitle */}
-      <View style={styles.headerWrapper}>
-        <Text style={styles.title}>{t.chapter}</Text>
-        <Text style={styles.subtitle}>{t.subtitle}</Text>
+return (
+  <ScrollView contentContainerStyle={styles.container}>
+    {/* Title and Subtitle */}
+    <View style={styles.headerWrapper}>
+      <Text style={styles.title}>{t.chapter}</Text>
+      <Text style={styles.subtitle}>{t.subtitle}</Text>
+    </View>
+
+    {/* Prologue Card */}
+    <TouchableOpacity
+      style={styles.prologueCard}
+      activeOpacity={0.8}
+      onPress={async () => {
+        await playSound('click');
+        router.push('./lessons');
+      }}
+    >
+      <View style={styles.prologueTextWrapper}>
+        <Text style={styles.prologueTitle}>{t.prologue}</Text>
+        <Text style={styles.prologueSubtext}>{t.prologueSubtext}</Text>
       </View>
+    </TouchableOpacity>
 
-      {/* Prologue Card */}
-      <TouchableOpacity
-        style={styles.prologueCard}
-        activeOpacity={0.8}
-        onPress={async () => {
-          await playSound('click');
-          router.push('./lessons');
-        }}
-      >
-        <View style={styles.prologueTextWrapper}>
-          <Text style={styles.prologueTitle}>{t.prologue}</Text>
-          <Text style={styles.prologueSubtext}>{t.prologueSubtext}</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Map */}
-      <View style={styles.pathContainer}>
-        <Svg height={MAP_HEIGHT} width="100%" style={StyleSheet.absoluteFill}>
-          {/* Background dots */}
-          {Array.from({ length: Math.ceil(MAP_HEIGHT / 60) }).flatMap((_, row) =>
-            Array.from({ length: 6 }).map((_, col) => {
-              const x = 40 + col * 60;
-              const y = 40 + row * 60;
-              return (
-                <Circle
-                  key={`bg-${row}-${col}`}
-                  cx={x}
-                  cy={y}
-                  r={4}
-                  fill="rgba(0,0,0,0.05)"
-                />
-              );
-            })
-          )}
-
-          {/* Paths */}
-          {lessonsWithStatus.map((_, index) => {
-            if (index === lessonsWithStatus.length - 1) return null;
-
-            const curr = lessonsWithStatus[index];
-            const next = lessonsWithStatus[index + 1];
-
-            const startX = curr.x + TILE_SIZE / 2;
-            const startY = curr.y + TILE_SIZE / 2;
-            const endX = next.x + TILE_SIZE / 2;
-            const endY = next.y + TILE_SIZE / 2;
-
-            const isCompletedConnection =
-              curr.status === "completed" && next.status === "completed";
-
+    {/* Map */}
+    <View style={styles.pathContainer}>
+      <Svg height={MAP_HEIGHT} width="100%" style={StyleSheet.absoluteFill}>
+        {/* Background dots */}
+        {Array.from({ length: Math.ceil(MAP_HEIGHT / 60) }).flatMap((_, row) =>
+          Array.from({ length: 6 }).map((_, col) => {
+            const x = 40 + col * 60;
+            const y = 40 + row * 60;
             return (
-              <Path
-                key={`path-${index}`}
-                d={`M${startX},${startY} L${startX},${endY} L${endX},${endY}`}
-                stroke={isCompletedConnection ? "#83c985" : "#e3e3e3"}
-                strokeWidth={17}
-                fill="none"
+              <Circle
+                key={`bg-${row}-${col}`}
+                cx={x}
+                cy={y}
+                r={4}
+                fill="rgba(0,0,0,0.05)"
               />
             );
-          })}
-        </Svg>
+          })
+        )}
 
-        {/* Lesson Nodes */}
-        {lessonsWithStatus.map((lesson) => (
-          <View
-            key={lesson.id}
-            style={[styles.nodeWrapper, { top: lesson.y, left: lesson.x }]}
-          >
-            <TouchableOpacity
-              activeOpacity={lesson.status !== "locked" ? 0.7 : 1}
-              onPress={async () => {
-                if (lesson.status !== "locked") {
-                  await playSound('click');
-                  router.push(lesson.path as any);
-                }
-              }}
-              style={[
-                styles.tile,
-                {
-                  backgroundColor:
-                    lesson.status === "completed"
-                      ? Colors.SUCCESS
-                      : lesson.status === "unlocked"
-                      ? Colors.PRIMARY
-                      : "#ccc",
-                },
-              ]}
-            >
-              <Ionicons
-                name={
+        {/* Paths */}
+        {lessonsWithStatus.map((_, index) => {
+          if (index === lessonsWithStatus.length - 1) return null;
+          const curr = lessonsWithStatus[index];
+          const next = lessonsWithStatus[index + 1];
+
+          const startX = curr.x + TILE_SIZE / 2;
+          const startY = curr.y + TILE_SIZE / 2;
+          const endX = next.x + TILE_SIZE / 2;
+          const endY = next.y + TILE_SIZE / 2;
+
+          const isCompletedConnection =
+            curr.status === "completed" && next.status === "completed";
+
+          return (
+            <Path
+              key={`path-${index}`}
+              d={`M${startX},${startY} L${startX},${endY} L${endX},${endY}`}
+              stroke={isCompletedConnection ? "#83c985" : "#e3e3e3"}
+              strokeWidth={17}
+              fill="none"
+            />
+          );
+        })}
+      </Svg>
+
+      {/* Lesson Nodes */}
+      {lessonsWithStatus.map((lesson) => (
+        <View
+          key={lesson.id}
+          style={[styles.nodeWrapper, { top: lesson.y, left: lesson.x }]}
+        >
+          <TouchableOpacity
+            activeOpacity={lesson.status !== "locked" ? 0.7 : 1}
+            onPress={async () => {
+              if (lesson.status !== "locked") {
+                await playSound('click');
+                router.push(lesson.path as any);
+              }
+            }}
+            style={[
+              styles.tile,
+              {
+                backgroundColor:
                   lesson.status === "completed"
-                    ? "checkmark"
-                    : lesson.status === "locked"
-                    ? "lock-closed"
-                    : "book"
-                }
-                size={24}
-                color="white"
-              />
-              <Text style={styles.tileText}>{lesson.title}</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
-  );
+                    ? Colors.SUCCESS
+                    : lesson.status === "unlocked"
+                    ? Colors.PRIMARY
+                    : "#ccc",
+              },
+            ]}
+          >
+            <Ionicons
+              name={
+                lesson.status === "completed"
+                  ? "checkmark"
+                  : lesson.status === "locked"
+                  ? "lock-closed"
+                  : "book"
+              }
+              size={24}
+              color="white"
+            />
+            <Text style={styles.tileText}>{lesson.title}</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+    </View>
+
+    {/* Achievement Card at the end */}
+    {completedLessons.length >= LESSONS.length && (
+      <TouchableOpacity
+        style={styles.achievementWrapper}
+        activeOpacity={0.8}
+        onPress={() => {
+          setShowConfetti(true); // trigger confetti immediately
+
+          setTimeout(() => {
+            playSound('confetti'); // play sound after 300ms
+          }, 300);
+        }}
+      >
+        <Image
+          source={require("../../../assets/badges/supernova.png")}
+          style={styles.achievementImage}
+          resizeMode="contain"
+        />
+        <Text style={styles.achievementTitle}>{t.achievementTitle}</Text>
+        <Text style={styles.achievementDescription}>{t.achievementDesc}</Text>
+
+        {showConfetti && (
+          <ConfettiCannon
+            count={200}
+            origin={{ x: 0, y: 0 }}
+            fadeOut={true}
+            onAnimationEnd={() => setShowConfetti(false)}
+          />
+        )}
+      </TouchableOpacity>
+    )}
+  </ScrollView>
+);
 }
 
 const styles = StyleSheet.create({
@@ -270,39 +309,78 @@ const styles = StyleSheet.create({
     color: Colors.WHITE,
   },
   prologueSubtext: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'outfit',
     color: Colors.WHITE,
-    marginTop: 2,
   },
   pathContainer: {
-    width: "100%",
+    width: '100%',
     height: MAP_HEIGHT,
-    position: "relative",
+    marginBottom: 50,
   },
   nodeWrapper: {
-    position: "absolute",
-    width: TILE_SIZE,
-    height: TILE_SIZE,
+    position: 'absolute',
+    alignItems: 'center',
   },
   tile: {
     width: TILE_SIZE,
     height: TILE_SIZE,
     borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 6,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   tileText: {
-    color: "white",
-    fontSize: 14,
-    fontFamily: "outfit",
+    fontSize: 12,
+    fontFamily: 'outfit',
+    color: 'white',
+    textAlign: 'center',
     marginTop: 4,
-    textAlign: "center",
   },
+  achievementCard: {
+    width: '85%',
+    backgroundColor: '#FFD700',
+    borderRadius: 20,
+    padding: 16,
+    marginVertical: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 3,
+    alignItems: 'center',
+  },
+achievementWrapper: {
+  width: '85%',
+  backgroundColor: Colors.PRIMARY, // dark background for contrast
+  borderRadius: 20,
+  paddingVertical: 24,
+  paddingHorizontal: 16,
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOpacity: 0.15,
+  shadowOffset: { width: 0, height: 4 },
+  shadowRadius: 10,
+  elevation: 5,
+  marginTop: -50,
+},
+achievementImage: {
+  width: 100,
+  height: 100,
+  borderRadius: 100,
+  marginBottom: 16,
+},
+achievementTitle: {
+  fontSize: 22,
+  fontFamily: 'outfit-bold',
+  color: '#FFD700', // gold color to match badge theme
+  textAlign: 'center',
+  marginBottom: 8,
+},
+achievementDescription: {
+  fontSize: 14,
+  fontFamily: 'outfit',
+  color: '#FFFFFF',
+  textAlign: 'center',
+},
 });

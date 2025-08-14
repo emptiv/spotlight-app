@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
@@ -384,7 +385,15 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
             <TouchableOpacity
               key={idx}
               style={styles.option}
-              onPress={() => handleAnswer(option === current.character.expected)}
+              onPress={async () => {
+                const isCorrect = option === current.character.expected;
+                try {
+                  await playSound(isCorrect ? 'correct' : 'wrong');
+                } catch (err) {
+                  console.error('Error playing sound:', err);
+                }
+                handleAnswer(isCorrect);
+              }}
             >
               <Text style={styles.optionText}>{option}</Text>
             </TouchableOpacity>
@@ -392,28 +401,30 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
         </View>
       );
     } else {
-      const handleDrop = (zone: "top" | "bottom", data: { title?: string }) => {
+      const handleDrop = async (zone: "top" | "bottom", data: { title?: string }) => {
         if (!data?.title) return;
 
         const marker = data.title as "Kudlit" | "Plus";
-        const correct =
+        const isCorrect =
           marker === current.character.correctMarker &&
           zone === current.character.correctDrop;
 
-        if (!correct) {
+        // Play sound first
+        await playSound(isCorrect ? "correct" : "wrong");
+
         setDroppedZone(zone);
         setDroppedMarker(marker);
-        setShowWrong(true);
+        setShowWrong(!isCorrect); // red if wrong
+
+        // Reset visual feedback after a short delay
         setTimeout(() => {
           setDragKey(Date.now());
           setDroppedZone(null);
           setDroppedMarker(null);
           setShowWrong(false);
         }, 700);
-        handleAnswer(false);
-        } else {
-          handleAnswer(true);
-        }
+
+        handleAnswer(isCorrect); // record the answer
       };
 
 return (
@@ -431,8 +442,11 @@ return (
             <View
               style={[
                 styles.dropZone,
-                showWrong && droppedZone === "top" && styles.dropZoneWrong,
-                !showWrong && droppedZone === "top" && styles.dropZoneCorrect,
+                droppedZone === "top" && droppedMarker
+                  ? showWrong
+                    ? styles.dropZoneWrong
+                    : styles.dropZoneCorrect
+                  : {},
               ]}
             />
           </Droppable>
@@ -676,14 +690,22 @@ dropZone: {
   height: 60,
   width: 60,
 },
-dropZoneWrong: {
-  borderColor: "red",
-  backgroundColor: "#ffe5e5",
-},
-dropZoneCorrect: {
-  borderColor: "green",
-  backgroundColor: "#e5ffe5",
-},
+  dropZoneCorrect: {
+    borderWidth: 2,
+    borderColor: "green",
+    backgroundColor: "rgba(0,255,0,0.1)",
+    borderRadius: 8,
+    height: 60,
+    marginVertical: 10,
+  },
+  dropZoneWrong: {
+    borderWidth: 2,
+    borderColor: "red",
+    backgroundColor: "rgba(255,0,0,0.1)",
+    borderRadius: 8,
+    height: 60,
+    marginVertical: 10,
+  },
   droppable: {
     height: 60,
     width: 60,

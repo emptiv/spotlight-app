@@ -113,13 +113,6 @@ export default function DrawerLayout() {
         }}
       />
       <Drawer.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          drawerIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
-        }}
-      />
-      <Drawer.Screen
         name="screens/lessons"
         options={{
           drawerItemStyle: { display: 'none' },

@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  BackHandler,
   ScrollView,
   StyleSheet,
   Text,
@@ -33,6 +34,7 @@ type DragPage = {
   character: string;
   correctMarker: "Kudlit" | "Plus";
   correctDrop: "top" | "bottom";
+  instructionText: { en: string; fil: string };
   explanation: { en: string; fil: string };
 };
 
@@ -51,9 +53,27 @@ const lessonData: LessonPage[] = [
     character: "ᜉ",
     correctDrop: "top",
     correctMarker: "Kudlit",
+    instructionText: {
+      en: "Drag the kudlit above to change PA to PE/PI.",
+      fil: "I-drag ang kudlit sa ibabaw para maging tunog na PE/PI.",
+    },
     explanation: {
-      en: "Adding the kudlit above changes the vowel to E/I, making it ‘pe’ or ‘pi’.",
-      fil: "Kapag inilagay ang kudlit sa ibabaw, nagiging tunog na E/I, kaya nagiging ‘pe’ o ‘pi’.",
+      en: "The kudlit above changes the vowel to E or I.",
+      fil: "Ang kudlit sa ibabaw ay nagiging tunog na E o I.",
+    },
+  },
+  {
+    type: "drag",
+    character: "ᜉ",
+    correctDrop: "top",
+    correctMarker: "Kudlit",
+    instructionText: {
+      en: "Try it again! Drag the kudlit above to change PA to PE/PI.",
+      fil: "Subukan muli! I-drag ang kudlit sa ibabaw para maging tunog na PE/PI.",
+    },
+    explanation: {
+      en: "Remember, the kudlit above changes the vowel to E or I.",
+      fil: "Tandaan, ang kudlit sa ibabaw ay nagiging tunog na E o I.",
     },
   },
   {
@@ -67,9 +87,27 @@ const lessonData: LessonPage[] = [
     character: "ᜇ",
     correctDrop: "bottom",
     correctMarker: "Kudlit",
+    instructionText: {
+      en: "Drag the kudlit below to change DA to DO/DU.",
+      fil: "I-drag ang kudlit sa ilalim para maging tunog na DO/DU.",
+    },
     explanation: {
-      en: "Adding the kudlit below changes the vowel to O/U, making it ‘do’ or ‘du’.",
-      fil: "Kapag inilagay sa ilalim ang kudlit, nagiging tunog na O/U, kaya nagiging ‘do’ o ‘du’.",
+      en: "The kudlit below changes the vowel to O or U.",
+      fil: "Ang kudlit sa ilalim ay nagiging tunog na O o U.",
+    },
+  },
+  {
+    type: "drag",
+    character: "ᜇ",
+    correctDrop: "bottom",
+    correctMarker: "Kudlit",
+    instructionText: {
+      en: "Try it again! Drag the kudlit below to change DA to DO/DU.",
+      fil: "Subukan muli! I-drag ang kudlit sa ilalim para maging tunog na DO/DU.",
+    },
+    explanation: {
+      en: "Remember, the kudlit below changes the vowel to O or U.",
+      fil: "Tandaan, ang kudlit sa ilalim ay nagiging tunog na O o U.",
     },
   },
   {
@@ -83,12 +121,32 @@ const lessonData: LessonPage[] = [
     character: "ᜅ",
     correctDrop: "bottom",
     correctMarker: "Plus",
+    instructionText: {
+      en: "Drag the plus sign to remove the vowel and make ‘ng’.",
+      fil: "I-drag ang simbolong plus para alisin ang patinig at maging ‘ng’.",
+    },
     explanation: {
-      en: "The plus sign adds a final consonant, so this becomes ‘ng’ with no vowel.",
-      fil: "Ang simbolong plus ay nagdaragdag ng katinig sa dulo, kaya nagiging ‘ng’ nang walang patinig.",
+      en: "The plus sign removes the vowel, leaving only the consonant sound ‘ng’.",
+      fil: "Ang simbolong plus ay nag-aalis ng patinig, kaya nagiging tunog na ‘ng’ lamang.",
+    },
+  },
+  {
+    type: "drag",
+    character: "ᜅ",
+    correctDrop: "bottom",
+    correctMarker: "Plus",
+    instructionText: {
+      en: "Try it again! Drag the plus sign to make ‘ng’.",
+      fil: "Subukan muli! I-drag ang simbolong plus para maging ‘ng’.",
+    },
+    explanation: {
+      en: "Remember, the plus sign removes the vowel to leave ‘ng’.",
+      fil: "Tandaan, ang simbolong plus ay nag-aalis ng patinig para maging ‘ng’.",
     },
   },
 ];
+
+
 
 // Animated text wrapper
 function AnimatedLessonText({ children }: { children: React.ReactNode }) {
@@ -110,6 +168,20 @@ function AnimatedLessonText({ children }: { children: React.ReactNode }) {
 export default function LessonDragScreen() {
   const { lang } = useLanguage();
   const router = useRouter();
+
+  useEffect(() => {
+    const backAction = () => {
+      router.replace("/lessons/lesson7"); // Go to your target page
+      return true; // Prevent default behavior
+    };
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => subscription.remove(); // Cleanup on unmount
+  }, [router]);
 
   const [index, setIndex] = useState(0);
   const [dragKey, setDragKey] = useState(Date.now());
@@ -189,12 +261,13 @@ export default function LessonDragScreen() {
   };
 
 const renderDragPage = (page: DragPage) => {
-  const handleDrop = (zone: "top" | "bottom", data: { title?: string }) => {
+  const handleDrop = async (zone: "top" | "bottom", data: { title?: string }) => {
     if (!data?.title) return;
     const marker = data.title as "Kudlit" | "Plus";
     setDroppedZone(zone);
     setDroppedMarker(marker);
     const correct = marker === page.correctMarker && zone === page.correctDrop;
+    await playSound(correct ? "correct" : "wrong");
     setIsAnswerCorrect(correct);
     setShowWrong(!correct);
 
@@ -228,6 +301,9 @@ const renderDragPage = (page: DragPage) => {
 
   return (
     <View style={styles.scrollContent}>
+    <Text style={styles.textInstruction}>
+      {lang === "en" ? page.instructionText?.en : page.instructionText?.fil}
+    </Text>
       <Animated.View
         style={[
           styles.characterStack,
@@ -338,33 +414,35 @@ const renderDragPage = (page: DragPage) => {
         <View style={styles.scrollContent}>
           <AnimatedLessonText>
             {lang === "en"
-              ? "Well done! You’ve completed the kudlit lesson and learned how each marker changes the sound of a character."
-              : "Magaling! Natapos mo na ang aralin sa kudlit at natutunan kung paano binabago ng bawat marka ang tunog ng isang karakter."}
+              ? "Well done! You’ve finished the kudlit lesson.\n\nPress Continue when you’re ready for the quiz."
+              : "Magaling! Natapos mo na ang aralin sa kudlit.\n\nPindutin ang Magpatuloy kapag handa ka na sa pagsusulit."}
           </AnimatedLessonText>
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={async () => {
-              await playSound("click");
-              resetLesson();
-            }}
-          >
-            <Text style={styles.buttonText}>
-              {lang === "en" ? "Retry" : "Ulitin"}
-            </Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row", justifyContent: "center", gap: 20 }}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={async () => {
+                await playSound("click");
+                resetLesson();
+              }}
+            >
+              <Text style={styles.buttonText}>
+                {lang === "en" ? "Retry" : "Ulitin"}
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={async () => {
-              await playSound("click");
-              router.replace(`/lessons/lesson7`);
-            }}
-          >
-            <Text style={styles.buttonText}>
-              {lang === "en" ? "Continue" : "Magpatuloy"}
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={async () => {
+                await playSound("click");
+                router.replace(`/lessons/lesson7`);
+              }}
+            >
+              <Text style={styles.buttonText}>
+                {lang === "en" ? "Continue" : "Magpatuloy"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -378,7 +456,7 @@ const renderDragPage = (page: DragPage) => {
           style={styles.backButton}
           onPress={async () => {
             await playSound("click");
-            router.back();
+            router.replace('/lessons/lesson7');
           }}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
@@ -390,20 +468,29 @@ const renderDragPage = (page: DragPage) => {
               <>
                 <AnimatedLessonText>
                   {lang === "en" && currentPage.contentKey === 1 &&
-                    "In Baybayin, the kudlit is a tiny mark that changes a character’s vowel sound. When placed above, the vowel becomes “E” or “I.” Let’s try it!"}
+                    "In Baybayin, the kudlit is a small mark that changes a character’s vowel sound.\n\n" +
+                    "When placed above, the vowel becomes “E” or “I.”\n\n" +
+                    "Let’s try it!"}
                   {lang === "fil" && currentPage.contentKey === 1 &&
-                    "Sa Baybayin, ang kudlit ay maliit na marka na nagpapalit ng tunog ng patinig. Kapag inilagay sa ibabaw, nagiging tunog na “E” o “I.” Subukan natin!"}
+                    "Sa Baybayin, ang kudlit ay maliit na marka na nagpapalit ng tunog ng patinig.\n\n" +
+                    "Kapag inilagay sa ibabaw, nagiging tunog na “E” o “I.”\n\n" +
+                    "Subukan natin!"}
 
                   {lang === "en" && currentPage.contentKey === 2 &&
-                    "When placed below the character, the kudlit changes the vowel to “O” or “U.” Let’s see it!"}
+                    "When placed below the character, the kudlit changes the vowel to “O” or “U.”\n\n" +
+                    "Give it a try!"}
                   {lang === "fil" && currentPage.contentKey === 2 &&
-                    "Kapag inilagay sa ilalim ng karakter, nagiging tunog na “O” o “U.” Tingnan natin!"}
+                    "Kapag inilagay sa ilalim ng karakter, nagiging tunog na “O” o “U.”\n\n" +
+                    "Subukan mo!"}
 
                   {lang === "en" && currentPage.contentKey === 3 &&
-                    "The plus sign works differently. It adds a final consonant sound instead of changing the vowel."}
+                    "The plus sign works differently. It adds a final consonant sound instead of changing the vowel.\n\n" +
+                    "Try it out!"}
                   {lang === "fil" && currentPage.contentKey === 3 &&
-                    "Iba naman ang plus sign. Nagdaragdag ito ng tunog na katinig sa dulo ng karakter."}
+                    "Iba naman ang plus sign. Nagdaragdag ito ng tunog na katinig sa dulo ng karakter.\n\n" +
+                    "Subukan mo!"}
                 </AnimatedLessonText>
+
 
                 {currentPage.example && (
                   <View style={{ alignItems: "center", marginTop: 20 }}>
@@ -450,7 +537,7 @@ const renderDragPage = (page: DragPage) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.WHITE },
-  scrollContent: { flexGrow: 1, padding: 24, justifyContent: "center" },
+  scrollContent: { flexGrow: 1, padding: 28, justifyContent: "center" },
   lessonText: {
     fontSize: 20,
     color: Colors.PRIMARY,
@@ -461,6 +548,13 @@ const styles = StyleSheet.create({
     fontSize: 80,
     color: Colors.PRIMARY,
     marginBottom: 5,
+  },
+  textInstruction: {
+    fontSize: 18,
+    color: Colors.PRIMARY,
+    textAlign: "center",
+    marginBottom: 25,
+    fontFamily: "outfit-bold",
   },
   characterStack: { alignItems: "center", gap: 1, marginBottom: 30 },
   droppable: { height: 60, width: 60 },
@@ -533,12 +627,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     marginTop: 20,
+    fontFamily: "outfit",
   },
   feedbackWrong: {
     color: "red",
     fontSize: 18,
     textAlign: "center",
     marginTop: 20,
+    fontFamily: "outfit",
   },
 backButton: {
   position: "absolute",
