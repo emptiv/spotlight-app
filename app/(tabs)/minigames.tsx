@@ -127,6 +127,11 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     position: "relative",
     height: 140,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 3,
+    elevation: 2,
   },
   card3: {
     justifyContent: "flex-start",

@@ -137,6 +137,11 @@ const styles = StyleSheet.create({
     height: 140,
     marginBottom: 16,
     position: 'relative',
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 3,
+    elevation: 2,
   },
   chapterCard: {
     paddingBottom: 24,

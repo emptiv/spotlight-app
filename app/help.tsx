@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Colors from "../constants/Colors";
 import { COLORS } from "../constants/theme";
 
 const IconTitle = ({ name, label }: { name: keyof typeof Ionicons.glyphMap; label: string }) => (
@@ -31,8 +33,18 @@ const KeyboardKeyPreview = ({ label }: { label: string }) => (
 );
 
 export default function Help() {
+
+  const router = useRouter();
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
+        {/* Back button */}
+        <TouchableOpacity
+          style={previewStyles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
+        </TouchableOpacity>
       <View style={styles.card}>
         <Text style={styles.title}>Help Guide</Text>
       </View>
@@ -142,6 +154,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     paddingBottom: 24,
+    paddingTop: 75,
   },
   card: {
     backgroundColor: "#f9f9f9",
@@ -265,5 +278,18 @@ const previewStyles = StyleSheet.create({
     fontSize: 22,
     color: "#fff",
     fontFamily: "outfit-bold",
+  },
+  backButton: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    zIndex: 10,
+    backgroundColor: Colors.WHITE,
+    borderRadius: 20,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 });
