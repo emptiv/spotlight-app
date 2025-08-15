@@ -4,11 +4,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import Colors from "../../constants/Colors";
 
@@ -38,6 +39,12 @@ export default function QuizResults() {
   const parsedBadges: string[] = badges
     ? JSON.parse(decodeURIComponent(badges))
     : [];
+
+  const badgeImages: Record<string, any> = {
+  challenger: require('@/assets/badges/challenger.png'),
+  perfectionist: require('@/assets/badges/perfectionist.png'),
+  'su-su-supernova': require('@/assets/badges/supernova.png'),
+};
 
   // For overlay animation
   const [showOverlay, setShowOverlay] = useState(gameOver === "true");
@@ -95,18 +102,33 @@ export default function QuizResults() {
         <Text style={styles.score}>You earned {totalPoints} points</Text>
         <Text style={styles.message}>{message}</Text>
 
-        {/* ✅ Badge display */}
-        {parsedBadges.length > 0 && (
-          <View style={styles.badgesContainer}>
-            <Text style={styles.badgesTitle}>New Badges Earned</Text>
-            {parsedBadges.map((badge, idx) => (
-              <View key={idx} style={styles.badgeCard}>
-                <Ionicons name="ribbon" size={22} color={Colors.PRIMARY} />
-                <Text style={styles.badgeText}>{badge}</Text>
-              </View>
-            ))}
-          </View>
+{/* ✅ Badge display */}
+{parsedBadges.length > 0 && (
+  <View style={styles.badgesContainer}>
+    <Text style={styles.badgesTitle}>New Badges Earned</Text>
+    {parsedBadges.map((badge, idx) => (
+      <TouchableOpacity 
+        key={idx} 
+        style={styles.badgeCard}
+        onPress={async () => {
+          await playSound("click"); // optional click sound
+          router.push("/dashb/achievements"); // navigate to achievements screen
+        }}
+        >
+        {badgeImages[badge.toLowerCase()] ? (
+          <Image
+            source={badgeImages[badge.toLowerCase()]}
+            style={{ width: 32, height: 32, marginRight: 8, borderRadius: 100 }}
+          />
+        ) : (
+          <Ionicons name="ribbon" size={22} color={Colors.PRIMARY} />
         )}
+        <Text style={styles.badgeText}>{badge}</Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+)}
+
 
         <TouchableOpacity
           style={styles.toggleButton}
@@ -338,4 +360,27 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
+badgesRow: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "center",
+  gap: 12,
+},
+badgeCircle: {
+  width: 80,
+  height: 80,
+  borderRadius: 40, // makes it circular
+  backgroundColor: "#f1f8ff",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 8,
+},
+badgeTextCircle: {
+  fontFamily: "outfit",
+  fontSize: 12,
+  color: Colors.PRIMARY,
+  marginTop: 4,
+  textAlign: "center",
+},
+
 });

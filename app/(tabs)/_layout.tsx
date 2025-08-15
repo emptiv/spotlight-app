@@ -145,6 +145,15 @@ export default function DrawerLayout() {
         }}
       />
       <Drawer.Screen
+        name="dashboard"
+        options={{
+          title: 'Dashboard',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="stats-chart" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
         name="minigames"
         options={{
           title: 'Mini Games',
@@ -154,14 +163,15 @@ export default function DrawerLayout() {
         }}
       />
       <Drawer.Screen
-        name="dashboard"
+        name="leaderboard"
         options={{
-          title: 'Dashboard',
+          title: 'Leaderboard',
           drawerIcon: ({ color, size }) => (
             <Ionicons name="trophy" size={size} color={color} />
           ),
         }}
       />
+
       <Drawer.Screen
         name="screens/lessons"
         options={{

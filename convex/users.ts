@@ -55,9 +55,8 @@ export const updateUserStats = mutation({
   args: {
     clerkId: v.string(),
     totalXP: v.number(),
-    lastActive: v.number(),
   },
-  handler: async (ctx, { clerkId, totalXP, lastActive }) => {
+  handler: async (ctx, { clerkId, totalXP }) => {
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", clerkId))
@@ -67,7 +66,7 @@ export const updateUserStats = mutation({
 
     await ctx.db.patch(user._id, {
       totalXP: (user.totalXP ?? 0) + totalXP,
-      lastActive,
+      lastActive: Date.now(), // set to current timestamp automatically
     });
   },
 });

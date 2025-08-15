@@ -4,34 +4,33 @@ import { useClerk } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-
 export const SignOutButton = () => {
-  const { signOut } = useClerk()
-  const router = useRouter()
+  const { signOut } = useClerk();
+  const router = useRouter();
 
   const handleSignOut = async () => {
     try {
-      await signOut()
-      // Navigate back to the root or sign-in page after sign out
-      router.replace('/(auth)/sign-in')  // or router.replace('/(auth)/sign-in')
+      // Play click sound first
+      await playSound('click');
+
+      // Sign out user
+      await signOut();
+
+      // Navigate to sign-in page safely
+      router.replace('/(auth)/sign-in');
     } catch (err) {
-      console.error(JSON.stringify(err, null, 2))
+      console.error('Sign out error:', err);
     }
-  }
+  };
 
   return (
-    <TouchableOpacity 
-      style={styles.button} 
-      onPress={async () => {
-        await playSound('click');
-        handleSignOut();
-      }}
-    >
+    <TouchableOpacity style={styles.button} onPress={handleSignOut}>
       <Text style={styles.text}>Sign out</Text>
     </TouchableOpacity>
-  )
-}
-  const styles = StyleSheet.create({
+  );
+};
+
+const styles = StyleSheet.create({
   button: {
     backgroundColor: COLORS.primary,
     paddingVertical: 12,
@@ -44,5 +43,4 @@ export const SignOutButton = () => {
     fontFamily: 'outfit-bold',
     fontSize: 16,
   },
-})
-
+});

@@ -149,33 +149,24 @@ export default function SpellingQuizScreen() {
     setHasSubmitted(true);
     const currentWord = words[currentIndex];
     const correct = input === currentWord.baybayin;
-    const base = basePointsMap[difficulty!].points;
 
-      await playSound(correct ? "correct" : "wrong");
+    // Set feedback immediately
+    setIsCorrect(correct);
 
-    if (correct) {
-      const newStreak = streak + 1;
-      const streakBonus = calculateStreakBonus(newStreak);
-      const totalPoints = base + streakBonus;
-
-      setScore((s) => s + totalPoints);
-      setStreak(newStreak);
-      setIsCorrect(true);
-    } else {
-      setIsCorrect(false);
+    // Deduct hearts if wrong
+    if (!correct) {
       setStreak(0);
-      setHearts((prev) => Math.max(0, prev - 1));
-
-      if (hearts - 1 <= 0) {
-        handleNext(true, true);
-        return;
-      }
-
-      setTimeout(() => handleNext(), 500);
+      setHearts((h) => Math.max(0, h - 1));
+    } else {
+      setStreak((s) => s + 1);
+      const streakBonus = calculateStreakBonus(streak + 1);
+      setScore((s) => s + basePointsMap[difficulty!].points + streakBonus);
     }
 
-    clearInterval(timerRef.current!);
+    // Play sound after feedback is set
+    await playSound(correct ? "correct" : "wrong");
 
+    // Save answer
     setAnswers((prev) => [
       ...prev,
       {
@@ -183,10 +174,19 @@ export default function SpellingQuizScreen() {
         label: currentWord.latin,
         expected: currentWord.baybayin,
         result: correct ? "correct" : "wrong",
-        pointsEarned: correct ? base + calculateStreakBonus(streak + 1) : 0,
+        pointsEarned: correct ? basePointsMap[difficulty!].points + calculateStreakBonus(streak + 1) : 0,
         timeTaken: basePointsMap[difficulty!].time - timeLeft,
       },
     ]);
+
+    clearInterval(timerRef.current!);
+
+    // Move to next question automatically for wrong answers if hearts remain
+    if (!correct && hearts > 1) {
+      setTimeout(() => handleNext(), 500);
+    } else if (!correct && hearts <= 1) {
+      handleNext(true, true); // game over
+    }
   };
 
 
@@ -204,18 +204,15 @@ export default function SpellingQuizScreen() {
       return base + streakBonus;
     }).reduce((a, b) => a + b, 0);
 
-
-      const stars = getStarRating(score, maxScore);
-      const createdAt = Date.now();
-      const totalTimeSpent = answers.reduce((sum, a) => sum + a.timeTaken, 0);
-
       const heartsUsedCount = 3 - hearts;
-
-      // 🎯 BADGE CHECK
       const newlyAwardedBadges: string[] = [];
       if (heartsUsedCount === 0) {
         newlyAwardedBadges.push("Perfectionist");
       }
+
+      const stars = getStarRating(score, maxScore);
+      const createdAt = Date.now();
+      const totalTimeSpent = answers.reduce((sum, a) => sum + a.timeTaken, 0);
 
       try {
         await insertChallenge({
