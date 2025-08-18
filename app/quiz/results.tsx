@@ -50,6 +50,17 @@ export default function QuizResults() {
   const [showOverlay, setShowOverlay] = useState(gameOver === "true");
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
+
+  // ✅ Play sound once when screen loads
+  useEffect(() => {
+    if (gameOver === "true") {
+      setShowOverlay(true);
+      playSound("gameover");
+    } else {
+      playSound("success");
+    }
+  }, []);
+
   useEffect(() => {
     if (showOverlay) {
       const timer = setTimeout(() => {

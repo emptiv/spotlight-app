@@ -16,7 +16,7 @@ const characters = [
     expected: "a",
     label: "A",
     guideGIF: require("@/assets/guides/a.gif"),
-    guideImage: require("@/assets/guides/a.png"),
+    guideImage: require("@/assets/guides/img/a.png"),
     gifDuration: 5170,
   },
   {
@@ -24,7 +24,7 @@ const characters = [
     expected: "e_i",
     label: "E/I",
     guideGIF: require("@/assets/guides/ei.gif"),
-    guideImage: require("@/assets/guides/ei.png"),
+    guideImage: require("@/assets/guides/img/ei.png"),
     gifDuration: 4900,
   },
   {
@@ -32,7 +32,7 @@ const characters = [
     expected: "o_u",
     label: "O/U",
     guideGIF: require("@/assets/guides/ou.gif"),
-    guideImage: require("@/assets/guides/ou.png"),
+    guideImage: require("@/assets/guides/img/ou.png"),
     gifDuration: 3200,
   },
 ].map((char) => ({

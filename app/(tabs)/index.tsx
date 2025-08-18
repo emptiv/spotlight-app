@@ -268,7 +268,7 @@ card1Group: {
   card2Button: {
     backgroundColor: Colors.PRIMARY,
     paddingVertical: 3,
-    paddingHorizontal: 24,
+    paddingHorizontal: 17,
     borderRadius: 17,
     marginTop: 1,
   },

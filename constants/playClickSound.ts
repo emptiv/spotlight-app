@@ -6,7 +6,9 @@ const sounds = {
   correct: require('../assets/sfx/correct2.wav'),
   wrong: require('../assets/sfx/wrong.wav'),
   confetti: require('../assets/sfx/celeb.mp3'),
-  flip: require('../assets/sfx/flip.mp3')
+  flip: require('../assets/sfx/flip.mp3'),
+  success: require('../assets/sfx/game-success.mp3'),
+  gameover: require('../assets/sfx/game-over.mp3'),
 };
 
 export const playSound = async (key: keyof typeof sounds) => {

@@ -36,6 +36,7 @@ const getStarRating = (score: number, maxScore: number) => {
 
   if (percentage >= 100) return 3;   // perfect score
   if (percentage >= 60) return 2;    // was 75, now more forgiving
+  if (percentage == 0) return 0;
   return 1;
 };
 

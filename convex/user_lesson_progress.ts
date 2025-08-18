@@ -40,6 +40,9 @@ export const saveProgress = mutation({
       )
       .unique();
 
+    const PASSING_STARS = 2;
+    const now = Date.now();
+
     if (existing) {
       const newBestScore = Math.max(existing.bestScore, score);
       const newBestStars = Math.max(existing.bestStars, stars);
@@ -47,8 +50,11 @@ export const saveProgress = mutation({
       await ctx.db.patch(existing._id, {
         bestScore: newBestScore,
         bestStars: newBestStars,
-        completedAt: Date.now(),
-        isCompleted: true,
+        isCompleted: newBestStars >= PASSING_STARS ? true : existing.isCompleted,
+        completedAt:
+          newBestStars >= PASSING_STARS
+            ? now
+            : existing.completedAt,
       });
     } else {
       await ctx.db.insert("user_lesson_progress", {
@@ -56,19 +62,21 @@ export const saveProgress = mutation({
         lessonId,
         bestScore: score,
         bestStars: stars,
-        firstAttemptAt: Date.now(),
-        completedAt: Date.now(),
-        isCompleted: true,
+        firstAttemptAt: now,
+        completedAt: stars >= PASSING_STARS ? now : undefined,
+        isCompleted: stars >= PASSING_STARS,
       });
     }
 
-    // Check if user now has completed all lessons
+    // ✅ Only count lessons with enough stars as completed
     const allLessons = await ctx.db
       .query("user_lesson_progress")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
 
-    const completedCount = allLessons.filter((l) => l.isCompleted).length;
+    const completedCount = allLessons.filter(
+      (l) => l.isCompleted && l.bestStars >= PASSING_STARS
+    ).length;
 
     if (completedCount >= TOTAL_LESSONS) {
       // Check if the user already has this achievement

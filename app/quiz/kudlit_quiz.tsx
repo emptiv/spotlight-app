@@ -330,7 +330,8 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
 
     const stars =
       totalPoints >= maxPoints ? 3 :
-      totalPoints >= maxPoints * 0.75 ? 2 : 1;
+      totalPoints >= maxPoints * 0.75 ? 2 : 
+      totalPoints === 0 ? 0 : 1;
 
     if (!user || !convexUserId || pastAttempts === undefined) return;
 
@@ -369,7 +370,6 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
     await updateXp({
       clerkId: user.id,
       totalXP: totalPoints,
-      lastActive: Date.now(),
     });
 
     router.replace({

@@ -177,6 +177,8 @@ export default function Quiz({
         ? 3
         : totalPoints >= maxPoints * 0.75
         ? 2
+        : totalPoints === 0
+        ? 0
         : 1;
 
     if (!user || !convexUserId || pastAttempts === undefined) return;
@@ -222,7 +224,6 @@ export default function Quiz({
     await updateXp({
       clerkId: user.id,
       totalXP: totalPoints,
-      lastActive: Date.now(),
     });
 
     router.replace({
