@@ -127,4 +127,34 @@ typing_challenges: defineTable({
     earnedAt: v.number(),    // timestamp
     lessonId: v.optional(v.string()),
   }).index("by_user", ["userId"]),
+
+survey_questions: defineTable({
+  surveyId: v.string(),       // allows grouping into a survey
+  questionId: v.string(),     // unique within survey
+  text: v.object({            // multilingual support
+    en: v.string(),
+    fil: v.string(),
+  }),
+  type: v.union(
+    v.literal("likert"),
+    v.literal("open")
+  ),
+  order: v.number(),          // ordering of questions in UI
+}).index("by_survey", ["surveyId"]),
+
+user_feedback: defineTable({
+  userId: v.string(),         // who answered
+  surveyId: v.string(),       // which survey
+  responses: v.array(
+    v.object({
+      questionId: v.string(),
+      value: v.optional(v.number()),   // for likert (1–4)
+      response: v.optional(v.string()) // for open-ended
+    })
+  ),
+  createdAt: v.number(),
+}).index("by_user", ["userId"])
+  .index("by_survey", ["surveyId"]),
+
+
 });

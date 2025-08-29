@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Alert,
   BackHandler,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -429,6 +430,16 @@ export default function SpellingQuizScreen() {
       )}
 
       <BaybayinKeyboard onKeyPress={handleKeyPress} resetSignal={resetSignal} />
+
+      {streak >= 3 && (
+        <View style={styles.overlayContainer}>
+          <Image
+            source={require("@/assets/ming/fire.png")}
+            style={styles.overlayImage}
+            resizeMode="contain"
+          />
+    </View>
+      )}
     </View>
   );
 }
@@ -557,5 +568,18 @@ streakText: {
   color: "#FF6B00",
   marginLeft: 6,
 },
+overlayContainer: {
+  position: "absolute",
+  top: "48%",
+  left: 0,
+  right: 0,
+  alignItems: "center",
+  opacity: 1, // semi-transparent
+  zIndex: 50,
+},
+overlayImage: {
+  width: 200,
+  height: 200,
 
+},
 });

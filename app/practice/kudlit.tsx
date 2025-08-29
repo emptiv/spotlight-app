@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   BackHandler,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -412,38 +413,41 @@ const renderDragPage = (page: DragPage) => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.scrollContent}>
-          <AnimatedLessonText>
-            {lang === "en"
-              ? "Well done! You’ve finished the kudlit lesson.\n\nPress Continue when you’re ready for the quiz."
-              : "Magaling! Natapos mo na ang aralin sa kudlit.\n\nPindutin ang Magpatuloy kapag handa ka na sa pagsusulit."}
-          </AnimatedLessonText>
+          <Text style={styles.title}>Study Session Finished!</Text>
 
-          <View style={{ flexDirection: "row", justifyContent: "center", gap: 20 }}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={async () => {
-                await playSound("click");
-                resetLesson();
-              }}
-            >
-              <Text style={styles.buttonText}>
-                {lang === "en" ? "Retry" : "Ulitin"}
-              </Text>
-            </TouchableOpacity>
+          <Image 
+            source={require('@/assets/ming/heart.png')} 
+            style={styles.image} 
+            resizeMode="contain"
+          />
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={async () => {
-                await playSound("click");
-                router.replace(`/lessons/lesson7`);
-              }}
-            >
-              <Text style={styles.buttonText}>
-                {lang === "en" ? "Continue" : "Magpatuloy"}
-              </Text>
-            </TouchableOpacity>
+          {/* Orange bordered box */}
+          <View style={styles.messageBox}>
+            <Text style={styles.messageText}>
+              Job well done, kaibigan!{"\n"}Keep it up!
+            </Text>
           </View>
-        </View>
+
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={async () => {
+              await playSound('click');
+              resetLesson();
+            }}
+          >
+            <Text style={styles.buttonText}>Retry</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={async () => {
+              await playSound('click');
+              router.replace(`/lessons/lesson7}` as any);
+            }}
+          >
+            <Text style={styles.buttonText}>Continue</Text>
+          </TouchableOpacity>
+          </View>
       </SafeAreaView>
     );
   }
@@ -612,16 +616,17 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   button: {
-    marginTop: 40,
-    backgroundColor: Colors.PRIMARY,
+    marginTop: 20,
+    width: '65%',
+    alignSelf: 'center',
+    backgroundColor: Colors.SECONDARY,
     paddingVertical: 14,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    alignSelf: "center",
+    borderRadius: 25,
+    alignItems: "center",
   },
   buttonDisabled: { opacity: 0.4 },
   buttonText: {
-    color: Colors.WHITE,
+    color: Colors.PRIMARY,
     fontSize: 16,
     fontFamily: "outfit-bold",
   },
@@ -652,5 +657,34 @@ backButton: {
   shadowRadius: 4,
   elevation: 3,
 },
-
+  image: {
+    width: 300,
+    height: 300,
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  messageBox: {
+    borderWidth: 2,
+    borderColor: Colors.PRIMARY, // orange border
+    borderRadius: 20,
+    width: '80%',
+    alignSelf: 'center',
+    padding: 12,
+    marginVertical: 16,
+    backgroundColor: Colors.WHITE, // light background to make it stand out
+    alignItems: "center",
+  },
+  messageText: {
+    fontSize: 17,
+    fontFamily: "outfit",
+    color: Colors.PRIMARY, // darker orange text
+    textAlign: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontFamily: "outfit-bold",
+    marginBottom: 24,
+    color: Colors.PRIMARY,
+    textAlign: "center",
+  },
 });

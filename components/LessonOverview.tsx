@@ -80,8 +80,7 @@ export default function LessonOverviewScreen({
           columnWrapperStyle={styles.charRow}
           contentContainerStyle={styles.charList}
         />
-
-        <View style={styles.buttonRow}>
+        <View style={{ marginTop: "auto", marginBottom: 40 }}>
           <TouchableOpacity 
             style={styles.button} 
             onPress={async () => {
@@ -182,13 +181,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
   },
   button: {
-    backgroundColor: Colors.PRIMARY,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 10,
+    marginTop: 20,
+    width: '65%',
+    alignSelf: 'center',
+    backgroundColor: Colors.SECONDARY,
+    paddingVertical: 14,
+    borderRadius: 25,
+    alignItems: "center",
   },
   buttonText: {
-    color: Colors.WHITE,
+    color: Colors.PRIMARY,
     fontSize: 16,
     fontFamily: "outfit-bold",
   },

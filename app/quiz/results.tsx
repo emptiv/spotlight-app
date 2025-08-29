@@ -41,17 +41,15 @@ export default function QuizResults() {
     : [];
 
   const badgeImages: Record<string, any> = {
-  challenger: require('@/assets/badges/challenger.png'),
-  perfectionist: require('@/assets/badges/perfectionist.png'),
-  'su-su-supernova': require('@/assets/badges/supernova.png'),
-};
+    challenger: require('@/assets/badges/challenger.png'),
+    perfectionist: require('@/assets/badges/perfectionist.png'),
+    'su-su-supernova': require('@/assets/badges/supernova.png'),
+  };
 
-  // For overlay animation
+  // ✅ Game Over overlay animation
   const [showOverlay, setShowOverlay] = useState(gameOver === "true");
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-
-  // ✅ Play sound once when screen loads
   useEffect(() => {
     if (gameOver === "true") {
       setShowOverlay(true);
@@ -80,6 +78,31 @@ export default function QuizResults() {
     });
   };
 
+  // ✅ Badge overlay animation
+  const [showBadgeOverlay, setShowBadgeOverlay] = useState(parsedBadges.length > 0);
+  const badgeFadeAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (parsedBadges.length > 0) {
+      setShowBadgeOverlay(true);
+      playSound("success");
+      const timer = setTimeout(() => {
+        fadeOutBadgeOverlay();
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const fadeOutBadgeOverlay = () => {
+    Animated.timing(badgeFadeAnim, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowBadgeOverlay(false);
+    });
+  };
+
   const numericStars = Math.max(0, Math.min(3, Number(stars)));
   const totalPoints = Number(score);
 
@@ -87,12 +110,20 @@ export default function QuizResults() {
     ? JSON.parse(decodeURIComponent(answers))
     : [];
 
-  const message =
-    numericStars === 3
-      ? "Excellent! Perfect score!"
-      : numericStars === 2
-      ? "Great work! You're almost there."
-      : "Keep practicing! Try again for a better score.";
+  // ✅ Message + image mapping
+  let message = "";
+  let messageImage = require("@/assets/ming/default.png");
+
+  if (numericStars === 3) {
+    message = "Excellent, kaibigan!\nPerfect score!";
+    messageImage = require("@/assets/ming/heart.png");
+  } else if (numericStars === 2) {
+    message = "You did well! You’re almost there!\nPractice makes perfect.";
+    messageImage = require("@/assets/ming/default.png");
+  } else {
+    message = "It’s okay, you can try again.\nI’m sure this time you will succeed.";
+    messageImage = require("@/assets/ming/fire.png");
+  }
 
   return (
     <>
@@ -111,35 +142,18 @@ export default function QuizResults() {
         </View>
 
         <Text style={styles.score}>You earned {totalPoints} points</Text>
-        <Text style={styles.message}>{message}</Text>
 
-{/* ✅ Badge display */}
-{parsedBadges.length > 0 && (
-  <View style={styles.badgesContainer}>
-    <Text style={styles.badgesTitle}>New Badges Earned</Text>
-    {parsedBadges.map((badge, idx) => (
-      <TouchableOpacity 
-        key={idx} 
-        style={styles.badgeCard}
-        onPress={async () => {
-          await playSound("click"); // optional click sound
-          router.push("/dashb/achievements"); // navigate to achievements screen
-        }}
-        >
-        {badgeImages[badge.toLowerCase()] ? (
-          <Image
-            source={badgeImages[badge.toLowerCase()]}
-            style={{ width: 32, height: 32, marginRight: 8, borderRadius: 100 }}
+        {/* ✅ Message with image outside */}
+        <View style={styles.messageRow}>
+          <Image 
+            source={messageImage} 
+            style={styles.messageImage} 
+            resizeMode="contain"
           />
-        ) : (
-          <Ionicons name="ribbon" size={22} color={Colors.PRIMARY} />
-        )}
-        <Text style={styles.badgeText}>{badge}</Text>
-      </TouchableOpacity>
-    ))}
-  </View>
-)}
-
+          <View style={styles.messageBubble}>
+            <Text style={styles.messageText}>{message}</Text>
+          </View>
+        </View>
 
         <TouchableOpacity
           style={styles.toggleButton}
@@ -175,8 +189,7 @@ export default function QuizResults() {
                       style={styles.cardIcon}
                     />
                     <Text style={styles.answerText}>
-                      [{ans.type}] {ans.symbol} ({ans.label}) →{" "}
-                      {ans.result.toUpperCase()} +{ans.pointsEarned}
+                      [{ans.type}] {ans.symbol} ({ans.label}) → {ans.result.toUpperCase()} +{ans.pointsEarned}
                     </Text>
                   </View>
                 );
@@ -191,14 +204,14 @@ export default function QuizResults() {
             onPress={async () => {
               await playSound("click");
               router.replace("/");
-              }}
+            }}
           >
             <Text style={styles.buttonText}>Back to Home</Text>
           </TouchableOpacity>
 
           {lessonRoute && (
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: Colors.GRAY }]}
+              style={[styles.button]}
               onPress={async () => {
                 await playSound("click");
                 router.replace(`/quiz/${lessonRoute}` as any);
@@ -210,6 +223,7 @@ export default function QuizResults() {
         </View>
       </ScrollView>
 
+      {/* ✅ Game Over overlay */}
       {showOverlay && (
         <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
           <TouchableOpacity
@@ -220,6 +234,38 @@ export default function QuizResults() {
             <Ionicons name="close-circle" size={64} color={Colors.PRIMARY} />
             <Text style={styles.gameOverText}>Game Over</Text>
             <Text style={styles.gameOverSubtext}>You ran out of hearts!</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+
+      {/* ✅ New Badges overlay */}
+      {showBadgeOverlay && (
+        <Animated.View style={[styles.overlay, { opacity: badgeFadeAnim }]}>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.overlayTouchable}
+            onPress={fadeOutBadgeOverlay}
+          >
+            <Ionicons name="ribbon" size={64} color={Colors.PRIMARY} />
+            <Text style={styles.gameOverText}>
+              New Badge{parsedBadges.length > 1 ? "s" : ""} Earned!
+            </Text>
+
+            {parsedBadges.map((badge, idx) => (
+              <View key={idx} style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+                {badgeImages[badge.toLowerCase()] ? (
+                  <Image
+                    source={badgeImages[badge.toLowerCase()]}
+                    style={{ width: 40, height: 40, marginRight: 8, borderRadius: 100 }}
+                  />
+                ) : (
+                  <Ionicons name="ribbon" size={28} color={Colors.PRIMARY} style={{ marginRight: 8 }} />
+                )}
+                <Text style={styles.badgeText}>{badge}</Text>
+              </View>
+            ))}
+
+            <Text style={styles.gameOverSubtext}>Check Achievements for details</Text>
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -236,6 +282,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontFamily: "outfit-bold",
+    color: Colors.PRIMARY,
     marginBottom: 16,
   },
   starsContainer: {
@@ -244,36 +291,37 @@ const styles = StyleSheet.create({
   },
   score: {
     fontSize: 20,
-    fontFamily: "outfit",
+    fontFamily: "outfit-bold",
+    color: Colors.PRIMARY,
     marginBottom: 12,
   },
-  message: {
-    fontSize: 16,
-    fontFamily: "outfit",
-    color: Colors.GRAY,
-    marginBottom: 24,
-    textAlign: "center",
-  },
-  badgesContainer: {
-    marginBottom: 20,
-    alignItems: "center",
-    width: "100%",
-  },
-  badgesTitle: {
-    fontFamily: "outfit-bold",
-    fontSize: 18,
-    marginBottom: 10,
-    color: Colors.PRIMARY,
-  },
-  badgeCard: {
+  messageRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f1f8ff",
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginBottom: 8,
-    width: "100%",
+    marginBottom: 24,
+  },
+  messageBubble: {
+    backgroundColor: Colors.WHITE,
+    borderColor: Colors.PRIMARY,
+    borderWidth: 2,
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    width: "65%",
+    alignItems: "center",
+  },
+  messageImage: {
+    width: 100,
+    height: 100,
+    marginRight: -10,
+  },
+  messageText: {
+    fontSize: 16,
+    fontFamily: "outfit",
+    color: Colors.PRIMARY,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    textAlign: "center",
   },
   badgeText: {
     fontFamily: "outfit",
@@ -282,16 +330,19 @@ const styles = StyleSheet.create({
     color: Colors.PRIMARY,
   },
   toggleButton: {
+    marginTop: 20,
     marginBottom: 16,
-    backgroundColor: Colors.GRAY,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    width: '65%',
+    alignSelf: 'center',
+    backgroundColor: Colors.SECONDARY,
+    paddingVertical: 14,
+    borderRadius: 25,
+    alignItems: "center",
   },
   toggleButtonText: {
-    fontFamily: "outfit-bold",
+    color: Colors.PRIMARY,
     fontSize: 16,
-    color: Colors.WHITE,
+    fontFamily: "outfit-bold",
   },
   answersBox: {
     width: "100%",
@@ -328,15 +379,18 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   button: {
-    padding: 16,
-    borderRadius: 10,
-    backgroundColor: Colors.PRIMARY,
+    marginTop: 20,
+    width: '65%',
+    alignSelf: 'center',
+    backgroundColor: Colors.SECONDARY,
+    paddingVertical: 14,
+    borderRadius: 25,
     alignItems: "center",
   },
   buttonText: {
-    color: Colors.WHITE,
-    fontFamily: "outfit-bold",
+    color: Colors.PRIMARY,
     fontSize: 16,
+    fontFamily: "outfit-bold",
   },
   overlay: {
     position: "absolute",
@@ -371,27 +425,4 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
-badgesRow: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  justifyContent: "center",
-  gap: 12,
-},
-badgeCircle: {
-  width: 80,
-  height: 80,
-  borderRadius: 40, // makes it circular
-  backgroundColor: "#f1f8ff",
-  justifyContent: "center",
-  alignItems: "center",
-  padding: 8,
-},
-badgeTextCircle: {
-  fontFamily: "outfit",
-  fontSize: 12,
-  color: Colors.PRIMARY,
-  marginTop: 4,
-  textAlign: "center",
-},
-
 });

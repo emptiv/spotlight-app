@@ -5,12 +5,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  Image,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
 
 
 type CharacterData = {
@@ -104,7 +106,22 @@ export default function StudyScreen({
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
+
           <Text style={styles.title}>Study Session Finished!</Text>
+
+          <Image 
+            source={require('@/assets/ming/heart.png')} 
+            style={styles.image} 
+            resizeMode="contain"
+          />
+
+          {/* Orange bordered box */}
+          <View style={styles.messageBox}>
+            <Text style={styles.messageText}>
+              Job well done, kaibigan!{"\n"}Keep it up!
+            </Text>
+          </View>
+
           <TouchableOpacity 
             style={styles.button} 
             onPress={async () => {
@@ -128,6 +145,7 @@ export default function StudyScreen({
       </SafeAreaView>
     );
   }
+
 
   const showGuide =
     step === "guide" || (step === "no-guide" && tries >= 3);
@@ -208,28 +226,52 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-    backgroundColor: Colors.PRIMARY,
+    width: '65%',
+    alignSelf: 'center',
+    backgroundColor: Colors.SECONDARY,
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 25,
     alignItems: "center",
   },
   buttonText: {
-    color: Colors.WHITE,
+    color: Colors.PRIMARY,
     fontSize: 16,
     fontFamily: "outfit-bold",
   },
-backButton: {
-  position: "absolute",
-  top: 16,
-  left: 16,
-  zIndex: 10,
-  backgroundColor: Colors.WHITE,
-  borderRadius: 20,
-  padding: 8,
-  shadowColor: "#000",
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-  elevation: 3,
-},
-
+  backButton: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    zIndex: 10,
+    backgroundColor: Colors.WHITE,
+    borderRadius: 20,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  image: {
+    width: 300,
+    height: 300,
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  messageBox: {
+    borderWidth: 2,
+    borderColor: Colors.PRIMARY, // orange border
+    borderRadius: 20,
+    width: '80%',
+    alignSelf: 'center',
+    padding: 12,
+    marginVertical: 16,
+    backgroundColor: Colors.WHITE, // light background to make it stand out
+    alignItems: "center",
+  },
+  messageText: {
+    fontSize: 17,
+    fontFamily: "outfit",
+    color: Colors.PRIMARY, // darker orange text
+    textAlign: "center",
+  },
 });

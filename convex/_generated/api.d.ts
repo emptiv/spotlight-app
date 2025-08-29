@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as community from "../community.js";
+import type * as feedback from "../feedback.js";
 import type * as getWords from "../getWords.js";
 import type * as get_dashboard_data from "../get_dashboard_data.js";
 import type * as http from "../http.js";
@@ -35,6 +36,7 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   community: typeof community;
+  feedback: typeof feedback;
   getWords: typeof getWords;
   get_dashboard_data: typeof get_dashboard_data;
   http: typeof http;

@@ -101,17 +101,17 @@ export default function DrawerLayout() {
               }}
               style={{ marginRight: 16 }}
             >
-              <Ionicons name="help-circle-outline" size={24} color={Colors.BLACK} />
+              <Ionicons name="help-circle" size={30} color={Colors.BLACK} />
             </Pressable>
 
             {/* Feedback Button */}
             <Pressable
               onPress={async () => {
                 await playSound('click');
-                router.push('/feedback');
+                router.push('/feedback/feedback');
               }}
             >
-              <Ionicons name="chatbubble-ellipses-outline" size={24} color={Colors.BLACK} />
+              <Ionicons name="chatbox-ellipses" size={26} color={Colors.BLACK} paddingTop={2.5} />
             </Pressable>
           </View>
         ),
