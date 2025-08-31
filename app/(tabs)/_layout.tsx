@@ -17,7 +17,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
   const isEnglish = lang === 'en';
 
   return (
-    <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
+    <DrawerContentScrollView {...props} contentContainerStyle={{ paddingVertical: 10 }}>
       <View style={{ flex: 1, justifyContent: 'space-between' }}>
         {/* Top content */}
         <View>
@@ -180,6 +180,160 @@ export default function DrawerLayout() {
           drawerIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),
+        }}
+      />
+      <Drawer.Screen
+        name="ming"
+        options={{
+          headerShown: false,
+          title: 'Ming',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="ming2"
+        options={{
+          headerShown: false,
+          title: 'Ming2',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/TourHomeO"
+        options={{
+          headerShown: false,
+          title: 'Home',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/TourMapO"
+        options={{
+          headerShown: false,
+          title: 'Map',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/TourPracticeO"
+        options={{
+          headerShown: false,
+          title: 'Practice',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/TourDashboardO"
+        options={{
+          headerShown: false,
+          title: 'Dashboard',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/TourGamesO"
+        options={{
+          headerShown: false,
+          title: 'Mini Games',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/TourBoardO"
+        options={{
+          headerShown: false,
+          title: 'Leaderboard',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/FakeMap"
+        options={{
+          headerShown: false,
+          title: 'Leaderboard',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/FakeHome"
+        options={{
+          headerShown: false,
+          title: 'Leaderboard',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/FakeGames"
+        options={{
+          headerShown: false,
+          title: 'Leaderboard',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/FakePractice"
+        options={{
+          headerShown: false,
+          title: 'Leaderboard',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/FakeDashboard"
+        options={{
+          headerShown: false,
+          title: 'Leaderboard',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
+        }}
+      />
+      <Drawer.Screen
+        name="tour/FakeLeaderboard"
+        options={{
+          headerShown: false,
+          title: 'Leaderboard',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          drawerItemStyle: { display: 'none' },
         }}
       />
     </Drawer>

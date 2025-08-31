@@ -86,10 +86,6 @@ export default function QuizResults() {
     if (parsedBadges.length > 0) {
       setShowBadgeOverlay(true);
       playSound("success");
-      const timer = setTimeout(() => {
-        fadeOutBadgeOverlay();
-      }, 10000);
-      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -211,7 +207,7 @@ export default function QuizResults() {
 
           {lessonRoute && (
             <TouchableOpacity
-              style={[styles.button]}
+              style={[styles.button, { marginTop: 6 }]}
               onPress={async () => {
                 await playSound("click");
                 router.replace(`/quiz/${lessonRoute}` as any);
@@ -265,7 +261,7 @@ export default function QuizResults() {
               </View>
             ))}
 
-            <Text style={styles.gameOverSubtext}>Check Achievements for details</Text>
+            <Text style={styles.gameOverSubtext}>{"\n"}Check Achievements for details</Text>
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -275,7 +271,10 @@ export default function QuizResults() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 0,
+    paddingTop: 60,
     padding: 24,
+    paddingBottom: 80,
     backgroundColor: Colors.WHITE,
     alignItems: "center",
   },
@@ -287,13 +286,13 @@ const styles = StyleSheet.create({
   },
   starsContainer: {
     flexDirection: "row",
-    marginBottom: 12,
+    marginBottom: 20,
   },
   score: {
     fontSize: 20,
     fontFamily: "outfit-bold",
     color: Colors.PRIMARY,
-    marginBottom: 12,
+    marginBottom: 28,
   },
   messageRow: {
     flexDirection: "row",
@@ -376,10 +375,9 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: "100%",
-    gap: 12,
+    gap: 10,
   },
   button: {
-    marginTop: 20,
     width: '65%',
     alignSelf: 'center',
     backgroundColor: Colors.SECONDARY,

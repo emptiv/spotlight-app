@@ -44,7 +44,7 @@ export default function Help() {
           style={previewStyles.backButton}
       onPress={async () => {
         await playSound('click');
-        router.back();
+        router.replace("/(tabs)");
       }}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
@@ -94,6 +94,7 @@ export default function Help() {
         <Text style={styles.subsection}>Quiz</Text>
         <InfoItem text="MCQ: Match Baybayin character to Latin letter" />
         <InfoItem text="Writing: Draw the correct Baybayin character" />
+        <InfoItem text="Drag and Drop: Drag and drop the correct position of the kudlit" />
       </View>
 
       <View style={styles.card}>
@@ -108,14 +109,8 @@ export default function Help() {
         <InfoItem text="Track accuracy for each character" />
         <View style={{ marginLeft: 16 }}>
           <InfoItem text="Correct vs Incorrect" />
-          <InfoItem text="Separate for MCQ and Writing" />
+          <InfoItem text="Separate for MCQ, Writing, and Drag and Drop" />
         </View>
-      </View>
-
-      <View style={styles.card}>
-        <IconTitle name="person" label="Me" />
-        <InfoItem text="Press Edit Name to change your username" />
-        <InfoItem text="Tap Sign Out to log out of your account" />
       </View>
 
       <View style={styles.card}>
@@ -186,12 +181,12 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   section: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "outfit-bold",
     color: COLORS.primary,
   },
   subsection: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: "outfit-bold",
     color: "#555",
     marginTop: 12,
@@ -216,7 +211,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontFamily: "outfit",
-    fontSize: 14,
+    fontSize: 16,
     color: "#333",
   },
   lessonStatusRow: {

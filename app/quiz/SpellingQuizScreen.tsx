@@ -12,11 +12,10 @@ import {
   ActivityIndicator,
   Alert,
   BackHandler,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import * as Progress from "react-native-progress";
 
@@ -431,15 +430,6 @@ export default function SpellingQuizScreen() {
 
       <BaybayinKeyboard onKeyPress={handleKeyPress} resetSignal={resetSignal} />
 
-      {streak >= 3 && (
-        <View style={styles.overlayContainer}>
-          <Image
-            source={require("@/assets/ming/fire.png")}
-            style={styles.overlayImage}
-            resizeMode="contain"
-          />
-    </View>
-      )}
     </View>
   );
 }

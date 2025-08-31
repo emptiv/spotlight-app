@@ -77,8 +77,8 @@ export default function LessonMap() {
     en: {
       chapter: "Chapter 1",
       subtitle: "The Letters of Baybayin",
-      prologue: "Prologue",
-      prologueSubtext: "The Moon God's Hope Descends",
+      prologue: "Onboarding Tour",
+      prologueSubtext: " The Kneow-ledgeable Cat",
       loading: "Loading map...",
       achievementTitle: "🎉 Supernova Badge Earned!",
       achievementDesc: "You completed all lessons. Well done!",
@@ -86,8 +86,8 @@ export default function LessonMap() {
     fil: {
       chapter: "Kabanata 1",
       subtitle: "Mga Titik ng Baybayin",
-      prologue: "Simula",
-      prologueSubtext: "Bumababa ang Pag-asa ng Diyosa ng Buwan",
+      prologue: "Gabay sa Pagsisimula",
+      prologueSubtext: "Ang Meow-alam na Pusa",
       loading: "Ikinakarga ang mapa...",
       achievementTitle: "🎉 Supernova Badge Nakuha!",
       achievementDesc: "Natapos mo na ang lahat ng aralin. Magaling!",
@@ -131,7 +131,7 @@ return (
       activeOpacity={0.8}
       onPress={async () => {
         await playSound('click');
-        router.push('./lessons');
+        router.push('../../ming');
       }}
     >
       <View style={styles.prologueTextWrapper}>

@@ -86,7 +86,7 @@ export default function SignUpScreen() {
 
       if (signUpAttempt.status === 'complete') {
         await setActive({ session: signUpAttempt.createdSessionId });
-        router.replace('/(tabs)');
+        router.replace('/(tabs)/ming');
       } else {
         console.warn('Verification not complete:', signUpAttempt);
       }

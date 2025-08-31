@@ -110,6 +110,44 @@ export default function ChaptersScreen() {
           </View>
         </View>
       </TouchableOpacity>
+      {/* Coming Soon Card */}
+      <View
+        style={[
+          styles.card,
+          styles.chapterCard,
+          { backgroundColor: Colors.LIGHT_GRAY, opacity: 0.5 }, // grayed out
+        ]}
+      >
+        <View style={styles.textColumn}>
+          <Text style={[styles.chapterName, { color: Colors.GRAY }]}>
+            {lang === 'en' ? 'Chapter 2' : 'Kabanata 2'}
+          </Text>
+          <View style={[styles.chapterButton, { backgroundColor: Colors.GRAY }]}>
+            <Text style={styles.buttonText}>
+              {lang === 'en' ? 'Coming Soon' : 'Paparating'}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.visualColumn}>
+          <Image
+            source={require("../../assets/images/feather.png")}
+            style={[styles.chapterImage, { tintColor: Colors.GRAY }]} // grayed out image
+            resizeMode="contain"
+          />
+          <View style={styles.progressContainer}>
+            <Svg width={PROGRESS_SIZE} height={PROGRESS_SIZE}>
+              <Circle
+                stroke={Colors.GRAY}
+                fill={Colors.LIGHT_GRAY}
+                cx={PROGRESS_SIZE / 2}
+                cy={PROGRESS_SIZE / 2}
+                r={RADIUS}
+                strokeWidth={STROKE_WIDTH}
+              />
+            </Svg>
+          </View>
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -139,7 +177,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     height: 140,
-    marginBottom: 16,
+    marginBottom: 40,
     position: 'relative',
     shadowColor: "#000",
     shadowOpacity: 0.05,
