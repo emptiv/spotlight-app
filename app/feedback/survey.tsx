@@ -67,7 +67,7 @@ export default function FeedbackSurvey() {
       await submitFeedback({ userId, surveyId, responses: formatted });
 
       Alert.alert("Thank you!", "Your feedback has been submitted.");
-      router.back();
+      router.replace("/(tabs)");
     } catch (err: any) {
       Alert.alert("Error", err.message);
     } finally {
@@ -87,7 +87,7 @@ export default function FeedbackSurvey() {
           style={styles.backButton}
           onPress={async () => {
             await playSound("click");
-            router.back();
+            router.replace("/(tabs)");
           }}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />

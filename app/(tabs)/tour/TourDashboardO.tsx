@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { playSound } from '@/constants/playClickSound';
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -98,7 +99,10 @@ export default function TourDashboardWithOverlay() {
         styles.overlay,
         currentLine === 4 ? { bottom: 220, zIndex: 30 } : {} // move higher for progress step
       ]}
-        onPress={handleNext}
+                  onPress={async () => {
+                    await playSound('click');
+                    handleNext();
+                  }}
         activeOpacity={0.8}
       >
         <View style={styles.dialogueBox}>

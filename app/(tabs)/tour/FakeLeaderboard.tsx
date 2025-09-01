@@ -49,6 +49,7 @@ export default function FakeLeaderboard() {
       </View>
 
       <ScrollView contentContainerStyle={styles.contentWrapper}>
+        <Text style={[styles.sectionTitle, { fontSize: 32 }]}>Leaderboard</Text>
         <LeaderboardSection title="Daily Top Players" users={dailyUsers} />
         <LeaderboardSection title="Weekly Top Players" users={weeklyUsers} />
       </ScrollView>

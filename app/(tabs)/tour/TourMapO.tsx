@@ -1,4 +1,5 @@
 // tourScreens/TourFakeMapWithOverlay.tsx
+import { playSound } from '@/constants/playClickSound';
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -106,7 +107,12 @@ export default function TourFakeMapWithOverlay() {
       )}
 
       {/* Clickable overlay content */}
-      <TouchableOpacity style={styles.overlay} onPress={handleNext} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.overlay} 
+                  onPress={async () => {
+                    await playSound('click');
+                    handleNext();
+                  }}
+      activeOpacity={0.8}>
         <View style={styles.dialogueBox}>
           <Image source={require("@/assets/ming/default.png")} style={styles.mingImage} />
           <Text style={styles.dialogueText}>{mapDialogue[currentLine]}</Text>

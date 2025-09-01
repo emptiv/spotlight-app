@@ -161,7 +161,7 @@ export default function HomeScreen() {
                 onPress={async () => {
                   setModalVisible(false);
                   router.push({
-                    pathname: "/feedback/survey",
+                    pathname: "/feedback/consent",
                     params: { userId: clerkUserId, surveyId: SURVEY_ID },
                   });
                 }}
@@ -197,13 +197,26 @@ const styles = StyleSheet.create({
   card2: { justifyContent: 'flex-start', alignItems: 'flex-start', height: 140, paddingBottom: 24, position: 'relative' },
   card2Image: { width: 200, height: 200, position: 'absolute', left: -40, top: -35 },
   card2Group: { marginTop: 68, marginLeft: 170, alignItems: 'center', justifyContent: 'center' },
-  card2Button: { backgroundColor: Colors.PRIMARY, paddingVertical: 3, paddingHorizontal: 17, borderRadius: 17, marginTop: 1 },
+  card2Button: {
+    backgroundColor: Colors.PRIMARY,
+    paddingVertical: 4,
+    paddingHorizontal: 20, // more breathing room
+    borderRadius: 17,
+    marginTop: 1,
+    alignSelf: "center",   // prevent stretching
+    minWidth: 120,         // ensure enough space on small devices
+  },
   card3: { justifyContent: 'flex-start', alignItems: 'flex-start', height: 140, paddingBottom: 24, position: 'relative' },
   card3Group: { marginTop: 41, marginLeft: -10, width: 160, height: 80, justifyContent: 'center', alignItems: 'center' },
   card3Button: { backgroundColor: Colors.PRIMARY, paddingVertical: 3, paddingHorizontal: 19, borderRadius: 17, marginTop: 1 },
   card3Image: { width: 180, height: 180, position: 'absolute', bottom: 23, right: -25 },
   topLabel: { fontSize: 20, fontFamily: 'outfit-bold', color: Colors.PRIMARY, marginBottom: 9, marginLeft: 1, textAlign: 'left' },
-  buttonText: { fontSize: 12, fontFamily: 'outfit-bold', color: Colors.WHITE },
+  buttonText: { 
+    fontSize: 13, 
+    fontFamily: 'outfit-bold', 
+    color: Colors.WHITE, 
+    textAlign: "center" 
+  },
 
   modalOverlay: {
     flex: 1,

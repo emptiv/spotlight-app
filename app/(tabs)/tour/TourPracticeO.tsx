@@ -1,3 +1,4 @@
+import { playSound } from '@/constants/playClickSound';
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -89,7 +90,10 @@ export default function TourPracticeWithOverlay() {
       {/* Clickable overlay dialogue */}
       <TouchableOpacity
         style={styles.overlay}
-        onPress={handleNext}
+                  onPress={async () => {
+                    await playSound('click');
+                    handleNext();
+                  }}
         activeOpacity={0.8}
       >
         <View style={styles.dialogueBox}>

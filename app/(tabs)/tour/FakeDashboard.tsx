@@ -45,7 +45,7 @@ export default function FakeDashboard() {
       {/* Fake Header */}
       <View style={styles.fakeHeader}>
         <Ionicons name="menu" size={28} color={Colors.BLACK} />
-        <Text style={styles.fakeHeaderTitle}>Home</Text>
+        <Text style={styles.fakeHeaderTitle}>Dashboard</Text>
         <View style={{ flexDirection: "row" }}>
           <Ionicons name="help-circle" size={30} color={Colors.BLACK} style={{ marginRight: 12 }} />
           <Ionicons name="chatbox-ellipses" size={26} color={Colors.BLACK} paddingTop={2.5} />
@@ -192,7 +192,8 @@ const styles = StyleSheet.create({
     fontFamily: "outfit-bold",
     fontSize: 20,
     color: Colors.BLACK,
-    paddingRight: 150,
+    marginLeft: 10, // offsets the menu icon width to center title properly
+    paddingRight: 120,
   },
   title: {
     fontSize: 28,

@@ -4,7 +4,7 @@
     "slug": "Plumatika",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/images/react-logo.png",
+    "icon": "./assets/images/react-logo2.png",
     "scheme": "spotlightapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,7 +14,7 @@
     "android": {
       "package": "com.example.plumatika",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/react-logo.png",
+        "foregroundImage": "./assets/images/react-logo2.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -33,14 +33,15 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/react-logo.png",
+          "image": "./assets/images/react-logo2.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
       ],
       "expo-audio",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

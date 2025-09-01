@@ -1,15 +1,15 @@
 import Colors from "@/constants/Colors";
 import { playSound } from "@/constants/playClickSound";
-import { api } from "@/convex/_generated/api"; // adjust path if needed
+import { api } from "@/convex/_generated/api";
 import { useAuth } from "@clerk/clerk-expo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "convex/react";
 import { useRouter } from "expo-router";
-import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const SURVEY_ID = "plumatika"; // <-- your surveyId
+const SURVEY_ID = "plumatika"; // <-- same as in Intro
 
-export default function FeedbackIntro() {
+export default function SurveyConsent() {
   const { userId } = useAuth();
   const router = useRouter();
 
@@ -22,12 +22,11 @@ export default function FeedbackIntro() {
   if (!userId) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Please log in to give feedback.</Text>
+        <Text style={styles.title}>Please log in to continue.</Text>
       </View>
     );
   }
 
-  // While loading
   if (hasSubmitted === undefined) {
     return (
       <View style={styles.container}>
@@ -37,28 +36,30 @@ export default function FeedbackIntro() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       {/* Back button */}
       <TouchableOpacity
         style={styles.backButton}
         onPress={async () => {
           await playSound("click");
-          router.back();
+          router.replace("/(tabs)");
         }}
       >
         <Ionicons name="arrow-back" size={24} color={Colors.PRIMARY} />
       </TouchableOpacity>
 
-      <Text style={styles.feedbackText}>Your feedback matters</Text>
+      <Text style={styles.title}>Survey Participation Notice</Text>
 
-      <Image
-        source={require("@/assets/ming/heart.png")}
-        style={styles.feedbackImage}
-        resizeMode="contain"
-      />
       <Text style={styles.description}>
-        We’d love to hear your thoughts about Plumatika. Your feedback helps us improve
-        and create a better learning experience for everyone.
+        By joining this short survey, you are helping us improve{" "}
+        <Text style={{ fontFamily: "outfit-bold" }}>Plumatika</Text>. Your answers are voluntary,
+        confidential, and used only for academic research in line with the{" "}
+        <Text style={{ fontFamily: "outfit-bold" }}>Data Privacy Act of 2012</Text>.
+      </Text>
+
+      <Text style={styles.description}>
+        You may stop anytime, and your responses will remain private. The survey only takes a few
+        minutes to complete. By continuing, you agree to participate voluntarily.
       </Text>
 
       {hasSubmitted ? (
@@ -71,21 +72,21 @@ export default function FeedbackIntro() {
           onPress={async () => {
             await playSound("click");
             router.push({
-              pathname: "/feedback/consent",
+              pathname: "/feedback/survey",
               params: { userId, surveyId: SURVEY_ID },
             });
           }}
         >
-          <Text style={styles.buttonText}>Start Survey</Text>
+          <Text style={styles.buttonText}>I Agree, Continue</Text>
         </TouchableOpacity>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
@@ -105,10 +106,10 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontFamily: "outfit-bold",
     color: Colors.PRIMARY,
-    marginBottom: 16,
+    marginBottom: 24,
     textAlign: "center",
   },
   description: {
@@ -116,8 +117,8 @@ const styles = StyleSheet.create({
     fontFamily: "outfit",
     color: "#444",
     textAlign: "center",
-    marginBottom: 32,
-    lineHeight: 24,
+    marginBottom: 20,
+    lineHeight: 22,
   },
   button: {
     backgroundColor: Colors.PRIMARY,
@@ -125,24 +126,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 10,
     elevation: 3,
+    marginTop: 16,
   },
   buttonText: {
     fontSize: 18,
     fontFamily: "outfit-bold",
     color: Colors.WHITE,
   },
-feedbackImage: {
-  width: 250,
-  height: 250,
-  marginTop: 12,
-  alignSelf: "center",
-},
-feedbackText: {
-  fontSize: 24,
-  fontFamily: "outfit-bold",
-  textAlign: "center",
-  marginTop: 20,
-  color: Colors.PRIMARY,
-},
-
 });

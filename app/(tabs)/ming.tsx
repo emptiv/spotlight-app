@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors"; // adjust path
+import { playSound } from '@/constants/playClickSound';
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -90,7 +91,11 @@ export default function MingTourScreen() {
         </View>
 
         {/* Next button */}
-        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+        <TouchableOpacity style={styles.nextButton} 
+                  onPress={async () => {
+                    await playSound('click');
+                    handleNext();
+                  }}>
           <Ionicons
             name="arrow-forward-circle"
             size={52}
