@@ -72,7 +72,7 @@ export default function SurveyConsent() {
           onPress={async () => {
             await playSound("click");
             router.push({
-              pathname: "/feedback/survey",
+              pathname: "/feedback/userinfo",
               params: { userId, surveyId: SURVEY_ID },
             });
           }}

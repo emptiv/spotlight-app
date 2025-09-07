@@ -6,19 +6,37 @@ import { useMutation, useQuery } from 'convex/react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
-  KeyboardAvoidingView,
+  Alert, Image, KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-} from 'react-native';
+  View
+} from "react-native";
+
+const likertImagesBW: Record<number, any> = {
+  1: require("@/assets/likert/1-bw.png"),
+  2: require("@/assets/likert/2-bw.png"),
+  3: require("@/assets/likert/3-bw.png"),
+  4: require("@/assets/likert/4-bw.png"),
+};
+
+const likertImagesColor: Record<number, any> = {
+  1: require("@/assets/likert/1.png"),
+  2: require("@/assets/likert/2.png"),
+  3: require("@/assets/likert/3.png"),
+  4: require("@/assets/likert/4.png"),
+};
 
 export default function FeedbackSurvey() {
-  const { userId } = useLocalSearchParams<{ userId: string }>(); 
+  const { userId, name, course, year } = useLocalSearchParams<{
+    userId: string;
+    name?: string;
+    course: string;
+    year: string;
+  }>();
   const router = useRouter();
   const surveyId = "plumatika";
 
@@ -64,7 +82,16 @@ export default function FeedbackSurvey() {
         response: r.response,
       }));
 
-      await submitFeedback({ userId, surveyId, responses: formatted });
+      await submitFeedback({
+        userId,
+        surveyId,
+        userInfo: {
+          name: name || "",  // optional
+          course,
+          year,
+        },
+        responses: formatted,
+      });
 
       Alert.alert("Thank you!", "Your feedback has been submitted.");
       router.replace("/(tabs)");
@@ -103,24 +130,53 @@ export default function FeedbackSurvey() {
             Your feedback helps us improve and make your learning experience even better.
           </Text>
 
-          {/* ✅ Rating Guide Section */}
-          <View style={styles.guideBox}>
-            <Text style={styles.guideTitle}>
-              Please evaluate the system using the scale below:
-            </Text>
-            <Text style={styles.guideSubtitle}>
-              (Suriin ang sistema gamit ang ibinigay na sukat)
-            </Text>
+        {/* ✅ Rating Guide Section */}
+        <View style={styles.guideBox}>
+          <Text style={styles.guideTitle}>
+            Please evaluate the system using the scale below:
+          </Text>
+          <Text style={styles.guideSubtitle}>
+            (Suriin ang sistema gamit ang ibinigay na sukat)
+          </Text>
 
-            <View style={styles.ratingRow}>
-              <Text style={styles.ratingText}>4 - Excellent (Mahusay)</Text>
-              <Text style={styles.ratingText}>3 - Good (Maganda)</Text>
+          <View style={styles.guideRow}>
+            <View style={styles.guideItem}>
+              <Image
+                source={likertImagesColor[4]}
+                style={styles.guideImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.ratingText}>Excellent{"\n"}(Mahusay)</Text>
             </View>
-            <View style={styles.ratingRow}>
-              <Text style={styles.ratingText}>2 - Fair (Katamtaman)</Text>
-              <Text style={styles.ratingText}>1 - Poor (Mahina)</Text>
+
+            <View style={styles.guideItem}>
+              <Image
+                source={likertImagesColor[3]}
+                style={styles.guideImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.ratingText}>Good{"\n"}(Maganda)</Text>
+            </View>
+
+            <View style={styles.guideItem}>
+              <Image
+                source={likertImagesColor[2]}
+                style={styles.guideImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.ratingText}>Fair{"\n"}(Katamtaman)</Text>
+            </View>
+
+            <View style={styles.guideItem}>
+              <Image
+                source={likertImagesColor[1]}
+                style={styles.guideImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.ratingText}>Poor{"\n"}(Mahina)</Text>
             </View>
           </View>
+        </View>
 
           {/* ✅ Survey Questions */}
           {questions.map((q) => (
@@ -130,18 +186,23 @@ export default function FeedbackSurvey() {
 
               {q.type === "likert" ? (
                 <View style={styles.likertRow}>
-                  {[1, 2, 3, 4].map((n) => (
+                {[4, 3, 2, 1].map((n) => {
+                  const isSelected = responses[q.questionId]?.value === n;
+                  return (
                     <TouchableOpacity
                       key={n}
-                      style={[
-                        styles.likertCircle,
-                        responses[q.questionId]?.value === n && styles.likertSelected,
-                      ]}
+                      style={styles.likertCircle}
                       onPress={() => handleLikert(q.questionId, n)}
                     >
-                      <Text style={styles.likertLabel}>{n}</Text>
+                      <Image
+                        source={isSelected ? likertImagesColor[n] : likertImagesBW[n]}
+                        style={styles.likertImage}
+                        resizeMode="contain"
+                      />
                     </TouchableOpacity>
-                  ))}
+                  );
+                })}
+
                 </View>
               ) : (
                 <TextInput
@@ -236,7 +297,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   ratingText: {
-    fontSize: 14,
+    textAlign: "center",
+    fontSize: 10,
     fontFamily: "outfit",
     color: "#444",
   },
@@ -305,11 +367,29 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: "#333",
   },
+  likertImage: {
+    width: 32,
+    height: 32,
+  },
   qTextFil: {
     fontSize: 14,
     fontFamily: "outfit",
     fontStyle: "italic",
     color: "#555",
     marginBottom: 16,
+  },
+  guideRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 12,
+  },
+  guideItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  guideImage: {
+    width: 36,
+    height: 36,
+    marginBottom: 6,
   },
 });

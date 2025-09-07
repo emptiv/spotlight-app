@@ -145,6 +145,11 @@ survey_questions: defineTable({
 user_feedback: defineTable({
   userId: v.string(),         // who answered
   surveyId: v.string(),       // which survey
+  userInfo: v.object({
+    name: v.optional(v.string()),
+    course: v.string(),
+    year: v.string(),
+  }),
   responses: v.array(
     v.object({
       questionId: v.string(),

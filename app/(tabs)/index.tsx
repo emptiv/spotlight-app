@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   card1Image: { width: 200, height: 200, position: 'absolute', bottom: -40, right: -25 },
   card2: { justifyContent: 'flex-start', alignItems: 'flex-start', height: 140, paddingBottom: 24, position: 'relative' },
   card2Image: { width: 200, height: 200, position: 'absolute', left: -40, top: -35 },
-  card2Group: { marginTop: 68, marginLeft: 170, alignItems: 'center', justifyContent: 'center' },
+  card2Group: { marginTop: 68, marginLeft: 153, alignItems: 'center', justifyContent: 'center' },
   card2Button: {
     backgroundColor: Colors.PRIMARY,
     paddingVertical: 4,

@@ -18,6 +18,11 @@ export const submitFeedback = mutation({
   args: {
     userId: v.string(),
     surveyId: v.string(),
+    userInfo: v.object({
+      name: v.optional(v.string()),
+      course: v.string(),
+      year: v.string(),
+    }),
     responses: v.array(
       v.object({
         questionId: v.string(),
@@ -40,6 +45,7 @@ export const submitFeedback = mutation({
     return await ctx.db.insert("user_feedback", {
       userId: args.userId,
       surveyId: args.surveyId,
+      userInfo: args.userInfo,
       responses: args.responses,
       createdAt: Date.now(),
     });
