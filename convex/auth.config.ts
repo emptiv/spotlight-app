@@ -1,7 +1,7 @@
 export default {
   providers: [
     {
-      domain: "https://fair-unicorn-87.clerk.accounts.dev",
+      domain: "https://clerk.plumatika.xyz",
       applicationID: "convex",
     },
   ]
