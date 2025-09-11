@@ -319,9 +319,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
   },
   likertCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     borderWidth: 1,
     borderColor: "#ccc",
     justifyContent: "center",
@@ -368,8 +368,8 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   likertImage: {
-    width: 32,
-    height: 32,
+    width: 45,
+    height: 45,
   },
   qTextFil: {
     fontSize: 14,
@@ -388,8 +388,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   guideImage: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     marginBottom: 6,
   },
 });

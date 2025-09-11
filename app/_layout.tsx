@@ -19,35 +19,42 @@ export default function RootLayout() {
   const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
       setIsOffline(!state.isConnected);
     });
 
     return () => unsubscribe();
   }, []);
 
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <ClerkAndConvexProvider>
-        <LanguageProvider>
-          <SafeAreaProvider>
-            <SafeAreaView style={styles.container}>
-              {isOffline && (
-                <View style={styles.offlineBanner}>
-                  <Text style={styles.offlineText}>Offline Mode</Text>
-                </View>
-              )}
-              {isOffline ? (
-                <CardsPractice />
-              ) : (
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.container}>
+          {isOffline && (
+            <View style={styles.offlineBanner}>
+              <Text style={styles.offlineText}>Offline Mode</Text>
+            </View>
+          )}
+
+          {isOffline ? (
+            <CardsPractice />
+          ) : (
+            <ClerkAndConvexProvider>
+              <LanguageProvider>
                 <Stack screenOptions={{ headerShown: false }} />
-              )}
-            </SafeAreaView>
-          </SafeAreaProvider>
-        </LanguageProvider>
-      </ClerkAndConvexProvider>
+              </LanguageProvider>
+            </ClerkAndConvexProvider>
+          )}
+        </SafeAreaView>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

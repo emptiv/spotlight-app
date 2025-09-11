@@ -9,10 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.meow.plumatika"
     },
     "android": {
-      "package": "com.example.plumatika",
+      "package": "com.meow.plumatika",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/react-logo2.png",
         "backgroundColor": "#ffffff"
