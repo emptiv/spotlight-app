@@ -18,9 +18,10 @@ export default function ChaptersScreen() {
   const { userId: clerkUserId } = useAuth();
   const { lang } = useLanguage();
 
-  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
-    clerkId: clerkUserId ?? "",
-  });
+  const convexUserId = useQuery(
+    api.users.getConvexUserIdByClerkId,
+    clerkUserId ? { clerkId: clerkUserId } : "skip"
+  );
 
   const completedLessons = useQuery(api.user_lesson_progress.getCompletedLessons, {
     userId: convexUserId ?? "",

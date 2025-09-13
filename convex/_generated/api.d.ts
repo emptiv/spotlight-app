@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as auth from "../auth.js";
 import type * as community from "../community.js";
 import type * as feedback from "../feedback.js";
 import type * as getWords from "../getWords.js";
@@ -35,6 +36,7 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   community: typeof community;
   feedback: typeof feedback;
   getWords: typeof getWords;

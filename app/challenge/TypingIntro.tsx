@@ -44,9 +44,10 @@ export default function FlashcardIntroScreen() {
     },
   };
 
-  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
-    clerkId: user?.id ?? "",
-  });
+  const convexUserId = useQuery(
+    api.users.getConvexUserIdByClerkId,
+    user?.id ? { clerkId: user.id } : "skip"
+  );
 
   const bestPerformances = useQuery(api.typing.getBestPerformancesByType, {
     userId: convexUserId ?? "",

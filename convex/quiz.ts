@@ -59,7 +59,7 @@ export const recordQuizAttempt = mutation({
       .collect();
 
     if (!existingBadges.some((a) => a.badge === "Challenger")) {
-      const firstLessonId = "jx72aewjef2n2jzw5ajht6b32s7jb6bm";
+      const firstLessonId = "kd78w1b0ydkpt1wcppqwabwxc17qcm1d";
       if (args.lessonId === firstLessonId) {
         await ctx.db.insert("user_achievements", {
           userId: args.userId,

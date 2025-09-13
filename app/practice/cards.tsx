@@ -58,7 +58,7 @@ const basicConsonants: Flashcard[] = [
 ];
 
 const kudlit: Flashcard[] = basicConsonants.flatMap(({ front, back }) => {
-  const base = back.split("/")[0][0];
+  const base = back.split("/")[0].slice(0, -1);
   return [
     { front: front + kudlitMarks.I, back: `${base}E/${base}I` },
     { front: front + kudlitMarks.O, back: `${base}O/${base}U` },
@@ -66,7 +66,7 @@ const kudlit: Flashcard[] = basicConsonants.flatMap(({ front, back }) => {
 });
 
 const krusKudlit: Flashcard[] = basicConsonants.map(({ front, back }) => {
-  const base = back.split("/")[0][0];
+  const base = back.split("/")[0].slice(0, -1);
   return {
     front: front + virama,
     back: `${base}`,

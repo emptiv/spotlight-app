@@ -44,9 +44,10 @@ export default function SpellingQuizScreen() {
   const router = useRouter();
   const { user } = useUser();
 
-  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
-    clerkId: user?.id || "",
-  });
+  const convexUserId = useQuery(
+    api.users.getConvexUserIdByClerkId,
+    user?.id ? { clerkId: user.id } : "skip"
+  );
 
   const [answers, setAnswers] = useState<any[]>([]);
   const [isSetup, setIsSetup] = useState(true);
@@ -193,6 +194,7 @@ export default function SpellingQuizScreen() {
 
 
   const insertChallenge = useMutation(api.typing.insertTypingChallenge);
+  const updateUserStats = useMutation(api.users.updateUserStats);
 
   const handleNext = async (forceFinish = false, isGameOver = false) => {
     if (currentIndex + 1 === words.length || forceFinish) {
@@ -227,6 +229,13 @@ export default function SpellingQuizScreen() {
           difficulty,
           heartsUsed: heartsUsedCount,
         });
+
+        if (user?.id) {
+          await updateUserStats({
+            clerkId: user.id,
+            totalXP: score,
+          });
+        }
 
         router.replace({
           pathname: "/quiz/results",

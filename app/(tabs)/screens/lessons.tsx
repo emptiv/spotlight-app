@@ -20,13 +20,13 @@ import Svg, { Circle, Path } from "react-native-svg";
 import { useLanguage } from "../../../components/LanguageContext";
 
 const LESSONS = [
-  { id: "jx72aewjef2n2jzw5ajht6b32s7jb6bm", title: "Lesson 1", path: "/lessons/lesson1", x: 100, y: 4 },
-  { id: "jx73gf6kgan5zd49zfjza2hyss7jamra", title: "Lesson 2", path: "/lessons/lesson2", x: 220, y: 140 },
-  { id: "jx7fgkbfxajnghpcgf9ebjhjdd7jb9s1", title: "Lesson 3", path: "/lessons/lesson3", x: 60, y: 240 },
-  { id: "jx75w094cp3g52bw137thd7fy57jbrn3", title: "Lesson 4", path: "/lessons/lesson4", x: 60, y: 400 },
-  { id: "jx7aznjdjmag8g7v2v7w7mavtn7jbf9p", title: "Lesson 5", path: "/lessons/lesson5", x: 220, y: 400 },
-  { id: "jx755h0x70cmbc38y6h4wjzss97jaae7", title: "Lesson 6", path: "/lessons/lesson6", x: 120, y: 560 },
-  { id: "jx71t9nq18esz01frqwe6af9xn7md24g", title: "Lesson 7", path: "/lessons/lesson7", x: 220, y: 720 },
+  { id: "kd78w1b0ydkpt1wcppqwabwxc17qcm1d", title: "Lesson 1", path: "/lessons/lesson1", x: 100, y: 4 },
+  { id: "kd7csv5619a75ebjzk8p94jnjn7qdd20", title: "Lesson 2", path: "/lessons/lesson2", x: 220, y: 140 },
+  { id: "kd7eyxaya8hpwm4gq111a3y1157qc6t5", title: "Lesson 3", path: "/lessons/lesson3", x: 60, y: 240 },
+  { id: "kd708pwrbfnwp35n5h1w7aygs57qdvfq", title: "Lesson 4", path: "/lessons/lesson4", x: 60, y: 400 },
+  { id: "kd7a48rr4r4a7mweebyefesd657qcazw", title: "Lesson 5", path: "/lessons/lesson5", x: 220, y: 400 },
+  { id: "kd779f8vcr3v51eqmznajxxcp97qd14b", title: "Lesson 6", path: "/lessons/lesson6", x: 120, y: 560 },
+  { id: "kd7bb00wws4frergaeem7mrgzn7qd1rb", title: "Lesson 7", path: "/lessons/lesson7", x: 220, y: 720 },
 ];
 
 const TILE_SIZE = 100;
@@ -43,9 +43,10 @@ export default function LessonMap() {
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
-    clerkId: clerkUserId ?? "",
-  });
+  const convexUserId = useQuery(
+    api.users.getConvexUserIdByClerkId,
+    clerkUserId ? { clerkId: clerkUserId } : "skip"
+  );
 
   const fetchCompletedLessons = useCallback(async () => {
     if (!convexUserId) return;

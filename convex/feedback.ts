@@ -7,7 +7,7 @@ export const getSurveyQuestions = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("survey_questions")
-      .withIndex("by_survey", (q) => q.eq("surveyId", args.surveyId))
+      .withIndex("by_survey_order", (q) => q.eq("surveyId", args.surveyId))
       .order("asc")
       .collect();
   },

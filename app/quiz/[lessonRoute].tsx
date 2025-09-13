@@ -13,7 +13,7 @@ const lessons: Record<
       { symbol: "ᜁ", expected: "e_i", label: "E/I", modelName: "lesson1" },
       { symbol: "ᜂ", expected: "o_u", label: "O/U", modelName: "lesson1" },
     ],
-    lessonId: "jx72aewjef2n2jzw5ajht6b32s7jb6bm",
+    lessonId: "kd78w1b0ydkpt1wcppqwabwxc17qcm1d",
   },
 
   lesson2: {
@@ -23,7 +23,7 @@ const lessons: Record<
       { symbol: "ᜃ", expected: "ka", label: "KA", modelName: "lesson2" },
       { symbol: "ᜈ", expected: "na", label: "NA", modelName: "lesson2" },
     ],
-    lessonId: "jx73gf6kgan5zd49zfjza2hyss7jamra",
+    lessonId: "kd7csv5619a75ebjzk8p94jnjn7qdd20",
   },
 
   lesson3: {
@@ -33,7 +33,7 @@ const lessons: Record<
       { symbol: "ᜊ", expected: "ba", label: "BA", modelName: "lesson3" },
       { symbol: "ᜄ", expected: "ga", label: "GA", modelName: "lesson3" },
     ],
-    lessonId: "jx7fgkbfxajnghpcgf9ebjhjdd7jb9s1",
+    lessonId: "kd7eyxaya8hpwm4gq111a3y1157qc6t5",
   },
 
   lesson4: {
@@ -43,7 +43,7 @@ const lessons: Record<
       { symbol: "ᜇ", expected: "da_ra", label: "DA/RA", modelName: "lesson4" },
       { symbol: "ᜆ", expected: "ta", label: "TA", modelName: "lesson4" },
     ],
-    lessonId: "jx75w094cp3g52bw137thd7fy57jbrn3",
+    lessonId: "kd708pwrbfnwp35n5h1w7aygs57qdvfq",
   },
 
   lesson5: {
@@ -53,7 +53,7 @@ const lessons: Record<
       { symbol: "ᜏ", expected: "wa", label: "WA", modelName: "lesson5" },
       { symbol: "ᜎ", expected: "la", label: "LA", modelName: "lesson5" },
     ],
-    lessonId: "jx7aznjdjmag8g7v2v7w7mavtn7jbf9p",
+    lessonId: "kd7a48rr4r4a7mweebyefesd657qcazw",
   },
 
   lesson6: {
@@ -62,7 +62,7 @@ const lessons: Record<
       { symbol: "ᜋ", expected: "ma", label: "MA", modelName: "lesson6" },
       { symbol: "ᜌ", expected: "ya", label: "YA", modelName: "lesson6" },
     ],
-    lessonId: "jx755h0x70cmbc38y6h4wjzss97jaae7",
+    lessonId: "kd779f8vcr3v51eqmznajxxcp97qd14b",
   },
 
 };

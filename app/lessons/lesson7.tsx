@@ -6,7 +6,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
-const LESSON_ID = "jx71t9nq18esz01frqwe6af9xn7md24g";
+const LESSON_ID = "kd7bb00wws4frergaeem7mrgzn7qd1rb";
 
 const characters = [
   { symbol: "ᜏᜒ", label: "KUDLIT (-E/I)" },
@@ -22,9 +22,10 @@ export default function Lesson7() {
   const { userId: clerkUserId } = useAuth();
   const convex = useConvex();
 
-  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
-    clerkId: clerkUserId ?? "",
-  });
+  const convexUserId = useQuery(
+    api.users.getConvexUserIdByClerkId,
+    clerkUserId ? { clerkId: clerkUserId } : "skip"
+  );
 
   const fetchProgress = useCallback(async () => {
     if (!convexUserId) return;

@@ -140,7 +140,7 @@ survey_questions: defineTable({
     v.literal("open")
   ),
   order: v.number(),          // ordering of questions in UI
-}).index("by_survey", ["surveyId"]),
+}).index("by_survey_order", ["surveyId", "order"]),
 
 user_feedback: defineTable({
   userId: v.string(),         // who answered

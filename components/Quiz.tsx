@@ -71,9 +71,10 @@ export default function Quiz({
   const updateXp = useMutation(api.users.updateUserStats);
   const deleteUnfinishedAnswers = useMutation(api.quiz.deleteUnfinishedAnswers);
 
-  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
-    clerkId: user?.id || "",
-  });
+  const convexUserId = useQuery(
+    api.users.getConvexUserIdByClerkId,
+    user?.id ? { clerkId: user.id } : "skip"
+  );
 
   const pastAttempts = useQuery(
     api.quiz.getAttemptsForLesson,
@@ -192,10 +193,10 @@ export default function Quiz({
     if (heartsUsedCount === 0) {
       newlyAwardedBadges.push("Perfectionist");
     }
-    if (lessonId === "jx72aewjef2n2jzw5ajht6b32s7jb6bm" && attemptNumber === 1 && !isGameOver) {
+    if (lessonId === "kd78w1b0ydkpt1wcppqwabwxc17qcm1d" && attemptNumber === 1 && !isGameOver) {
       newlyAwardedBadges.push("Challenger")
     }
-    if (lessonId === "jx71t9nq18esz01frqwe6af9xn7md24g" && attemptNumber === 1 && !isGameOver) {
+    if (lessonId === "kd7bb00wws4frergaeem7mrgzn7qd1rb" && attemptNumber === 1 && !isGameOver) {
       newlyAwardedBadges.push("Supernova");
     }
 

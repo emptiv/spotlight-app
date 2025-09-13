@@ -20,13 +20,13 @@ import { api } from '@/convex/_generated/api';
 const screenWidth = Dimensions.get('window').width;
 
 const lessonMap: Record<string, string> = {
-  jx72aewjef2n2jzw5ajht6b32s7jb6bm: 'Lesson 1',
-  jx73gf6kgan5zd49zfjza2hyss7jamra: 'Lesson 2',
-  jx7fgkbfxajnghpcgf9ebjhjdd7jb9s1: 'Lesson 3',
-  jx75w094cp3g52bw137thd7fy57jbrn3: 'Lesson 4',
-  jx7aznjdjmag8g7v2v7w7mavtn7jbf9p: 'Lesson 5',
-  jx755h0x70cmbc38y6h4wjzss97jaae7: 'Lesson 6',
-  jx71t9nq18esz01frqwe6af9xn7md24g: 'Lesson 7',
+  kd78w1b0ydkpt1wcppqwabwxc17qcm1d: 'Lesson 1',
+  kd7csv5619a75ebjzk8p94jnjn7qdd20: 'Lesson 2',
+  kd7eyxaya8hpwm4gq111a3y1157qc6t5: 'Lesson 3',
+  kd708pwrbfnwp35n5h1w7aygs57qdvfq: 'Lesson 4',
+  kd7a48rr4r4a7mweebyefesd657qcazw: 'Lesson 5',
+  kd779f8vcr3v51eqmznajxxcp97qd14b: 'Lesson 6',
+  kd7bb00wws4frergaeem7mrgzn7qd1rb: 'Lesson 7',
   typing: 'Spelling Challenge',
 };
 

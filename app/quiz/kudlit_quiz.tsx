@@ -184,13 +184,14 @@ export default function Quiz({
   const updateXp = useMutation(api.users.updateUserStats);
   const deleteUnfinishedAnswers = useMutation(api.quiz.deleteUnfinishedAnswers);
 
-  const convexUserId = useQuery(api.users.getConvexUserIdByClerkId, {
-    clerkId: user?.id || "",
-  });
+  const convexUserId = useQuery(
+    api.users.getConvexUserIdByClerkId,
+    user?.id ? { clerkId: user.id } : "skip"
+  );
 
   const pastAttempts = useQuery(
     api.quiz.getAttemptsForLesson,
-    convexUserId ? { userId: convexUserId, lessonId: "jx71t9nq18esz01frqwe6af9xn7md24g" } : "skip"
+    convexUserId ? { userId: convexUserId, lessonId: "kd7bb00wws4frergaeem7mrgzn7qd1rb" } : "skip"
   );
 
 useEffect(() => {
@@ -235,7 +236,7 @@ useEffect(() => {
             if (convexUserId) {
               await deleteUnfinishedAnswers({
                 userId: convexUserId,
-                lessonId: "jx71t9nq18esz01frqwe6af9xn7md24g",
+                lessonId: "kd7bb00wws4frergaeem7mrgzn7qd1rb",
                 sessionId,
               });
             }
@@ -280,7 +281,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
     if (user && convexUserId) {
       await recordSingleAnswer({
         userId: convexUserId,
-        lessonId: "jx71t9nq18esz01frqwe6af9xn7md24g",
+        lessonId: "kd7bb00wws4frergaeem7mrgzn7qd1rb",
         sessionId,
         ...answer,
         createdAt: Date.now(),
@@ -347,7 +348,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
 
     await recordAttempt({
       userId: convexUserId,
-      lessonId: "jx71t9nq18esz01frqwe6af9xn7md24g",
+      lessonId: "kd7bb00wws4frergaeem7mrgzn7qd1rb",
       score: totalPoints,
       totalQuestions: finalLog.length,
       correctAnswers,
@@ -362,7 +363,7 @@ const generateMCQOptions = (answer: string, pool: CharacterData[]): string[] => 
 
     await saveProgress({
       userId: convexUserId,
-      lessonId: "jx71t9nq18esz01frqwe6af9xn7md24g",
+      lessonId: "kd7bb00wws4frergaeem7mrgzn7qd1rb",
       score: totalPoints,
       stars,
     });
