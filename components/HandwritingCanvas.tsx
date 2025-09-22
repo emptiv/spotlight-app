@@ -49,19 +49,26 @@ export default function HandwritingCanvas({
   const [currentPath, setCurrentPath] = useState<string>("");
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<string | null>(null);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null); // <-- new state for visual feedback
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showGuideGIF, setShowGuideGIF] = useState(true);
   const canvasRef = useCanvasRef();
   const [strokeHistory, setStrokeHistory] = useState<Array<Array<{ x: number, y: number }>>>([]);
   const [strokeTimings, setStrokeTimings] = useState<Array<{ start: number, end: number }>>([]);
 
   const strokeStartRef = useRef<number>(0);
-
-  const currentStrokeRef = useRef<Array<{ x: number, y: number }>>([]); 
+  const currentStrokeRef = useRef<Array<{ x: number, y: number }>>([]);
 
   useEffect(() => {
-    setShowGuideGIF(true); // reset GIF on character change
+    setShowGuideGIF(true);
   }, [guideGIF]);
+
+  // auto-hide GIF after gifDuration
+  useEffect(() => {
+    if (guideGIF && showGuideGIF) {
+      const timer = setTimeout(() => setShowGuideGIF(false), gifDuration);
+      return () => clearTimeout(timer);
+    }
+  }, [guideGIF, showGuideGIF, gifDuration]);
 
   const playCharacterAudio = async () => {
     if (!character) {
@@ -112,9 +119,6 @@ export default function HandwritingCanvas({
     const strokeCount = strokeHistory.length;
     const totalDuration = strokeTimings.reduce((sum, { start, end }) => sum + (end - start), 0);
 
-    console.log("Stroke count:", strokeCount);
-    console.log("Duration:", totalDuration);
-
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     strokeHistory.flat().forEach(({ x, y }) => {
       minX = Math.min(minX, x);
@@ -127,9 +131,6 @@ export default function HandwritingCanvas({
     const boxHeight = maxY - minY;
     const boxArea = boxWidth * boxHeight;
     const areaRatio = boxArea / (CANVAS_SIZE * CANVAS_SIZE);
-
-    console.log("Bounding box area ratio:", areaRatio.toFixed(4));
-    console.log("Box size:", boxWidth.toFixed(2), "×", boxHeight.toFixed(2));
 
     if (boxArea === 0 || areaRatio < 0.08) {
       Alert.alert("Invalid input", "Try again.");
@@ -209,25 +210,18 @@ export default function HandwritingCanvas({
       setPrediction(result);
       onPrediction?.(result);
 
-      console.log(`Result: "${result}"`);
-      console.log(`Character: "${character}"`);
-
-      if (!character) {
-        console.warn("Character is undefined");
-        return;
-      }
+      if (!character) return;
 
       const normalizedResult = result.trim().toLowerCase();
       const normalizedCharacter = character.trim().toLowerCase();
 
       if (normalizedResult === normalizedCharacter) {
-        setIsCorrect(true); 
+        setIsCorrect(true);
         playSound('correct');
       } else {
         setIsCorrect(false);
         playSound('wrong');
       }
-
     } catch (err) {
       console.error("Submission error:", err);
       Alert.alert("Error", "Failed to submit handwriting.");
@@ -256,49 +250,48 @@ export default function HandwritingCanvas({
               />
             )}
             {guideGIF && showGuideGIF && (
-              <WebView
-                originWhitelist={["*"]}
-                source={{
-                  html: `
-                    <!DOCTYPE html>
-                    <html>
-                      <head>
-                        <style>
-                          html, body {
-                            margin: 0;
-                            padding: 0;
-                            background: transparent;
-                          }
-                          img {
-                            width: 100%;
-                            height: 100%;
-                            object-fit: contain;
-                          }
-                        </style>
-                      </head>
-                      <body>
-                        <img src="${Image.resolveAssetSource(guideGIF).uri}" />
-                        <script>
-                          setTimeout(() => {
-                            window.ReactNativeWebView.postMessage("done");
-                          }, ${gifDuration});
-                        </script>
-                      </body>
-                    </html>
-                  `,
-                }}
-                javaScriptEnabled
-                onMessage={(event) => {
-                  if (event.nativeEvent.data === "done") {
-                    setShowGuideGIF(false);
-                  }
-                }}
-                style={styles.guideOverlay}
-                scrollEnabled={false}
-                scalesPageToFit={false}
-                automaticallyAdjustContentInsets={false}
-                mixedContentMode="always"
-              />
+              __DEV__ ? (
+                // Expo Go: use WebView
+                <WebView
+                  originWhitelist={["*"]}
+                  source={{
+                    html: `
+                      <!DOCTYPE html>
+                      <html>
+                        <head>
+                          <style>
+                            html, body {
+                              margin: 0;
+                              padding: 0;
+                              background: transparent;
+                            }
+                            img {
+                              width: 100%;
+                              height: 100%;
+                              object-fit: contain;
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          <img src="${Image.resolveAssetSource(guideGIF).uri}" />
+                        </body>
+                      </html>
+                    `,
+                  }}
+                  style={styles.guideOverlay}
+                  scrollEnabled={false}
+                  scalesPageToFit={false}
+                  automaticallyAdjustContentInsets={false}
+                  mixedContentMode="always"
+                />
+              ) : (
+                // Production build: use Image
+                <Image
+                  source={guideGIF}
+                  resizeMode="contain"
+                  style={styles.guideOverlay}
+                />
+              )
             )}
           </>
         )}
@@ -314,6 +307,8 @@ export default function HandwritingCanvas({
                 color="#000"
                 style="stroke"
                 strokeWidth={8}
+                strokeCap="round"   // <--- makes the ends of strokes rounded
+                strokeJoin="round"  // <--- makes corners smooth instead of sharp
               />
             ))}
         </Canvas>

@@ -1,11 +1,12 @@
 import { playSound } from '@/constants/playClickSound';
 import { useSignUp } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import {
-  Alert,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -25,20 +26,17 @@ export default function SignUpScreen() {
   const [pendingVerification, setPendingVerification] = React.useState(false);
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = React.useState(false);
 
-  const onSignUpPress = async () => {
+  const handleProceed = async () => {
+    setShowPrivacyModal(false);
+
     if (!isLoaded) return;
-
     setError(null);
-
-    if (!emailAddress || !password) {
-      setError('Please fill in all fields.');
-      return;
-    }
 
     try {
       await playSound('click');
-
       await signUp.create({
         emailAddress,
         password,
@@ -55,24 +53,20 @@ export default function SignUpScreen() {
         message.includes('already in use') ||
         message.includes('already exists')
       ) {
-        Alert.alert(
-          'Account exists',
-          'An account with this email already exists. Would you like to sign in instead?',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Sign In',
-              onPress: async () => {
-                await playSound('click');
-                router.replace('/(auth)/sign-in');
-              },
-            },
-          ]
-        );
+        setShowPrivacyModal(false);
+        router.replace('/(auth)/sign-in');
       }
 
       console.error(JSON.stringify(err, null, 2));
     }
+  };
+
+  const onSignUpPress = async () => {
+    if (!emailAddress || !password) {
+      setError('Please fill in all fields.');
+      return;
+    }
+    setShowPrivacyModal(true); // 👈 show modal instead of Alert
   };
 
   const onVerifyPress = async () => {
@@ -163,15 +157,27 @@ export default function SignUpScreen() {
           />
 
           <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            autoCapitalize="none"
-            placeholder="8-32 chars, include letters and numbers"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-            placeholderTextColor="#aaa"
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              autoCapitalize="none"
+              placeholder="8-32 chars, letters and numbers"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+              placeholderTextColor="#aaa"
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.eyeIcon}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={22}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity style={styles.buttonDark} onPress={onSignUpPress}>
             <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Sign Up</Text>
@@ -191,14 +197,46 @@ export default function SignUpScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Privacy Notice Modal */}
+      <Modal
+        transparent={true}
+        visible={showPrivacyModal}
+        animationType="fade"
+        onRequestClose={() => setShowPrivacyModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Data Privacy Notice</Text>
+            <Text style={styles.modalText}>
+              By proceeding, you consent to your data being used for academic and research purposes.
+              Your information will be handled securely and responsibly.
+            </Text>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: '#ccc' }]}
+                onPress={() => setShowPrivacyModal(false)}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: Colors.SECONDARY }]}
+                onPress={handleProceed}
+              >
+                <Text style={[styles.modalButtonText, { color: Colors.PRIMARY }]}>Proceed</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-  },
+  scrollContainer: { flexGrow: 1 },
   container: {
     paddingTop: 40,
     padding: 24,
@@ -220,11 +258,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     marginBottom: 24,
   },
-  image: {
-    width: '100%',
-    height: 250,
-    marginBottom: 24,
-  },
+  image: { width: '100%', height: 250, marginBottom: 24 },
   label: {
     fontSize: 15,
     fontFamily: 'outfit-bold',
@@ -241,11 +275,31 @@ const styles = StyleSheet.create({
     color: Colors.BLACK,
     fontFamily: 'outfit',
   },
-  button: {
-    padding: 16,
-    borderRadius: 10,
-    marginTop: 10,
+  passwordContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingRight: 10,
+    backgroundColor: '#fff',
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+    padding: 14,
+    color: Colors.BLACK,
+    fontFamily: 'outfit',
+  },
+  eyeIcon: { paddingLeft: 8 },
+  buttonDark: {
+    marginTop: 10,
+    padding: 15,
+    backgroundColor: Colors.SECONDARY,
+    borderRadius: 25,
+    width: '65%',
+    alignSelf: 'center',
   },
   buttonText: {
     fontSize: 18,
@@ -258,17 +312,45 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'outfit',
   },
-  linkRow: {
-    flexDirection: 'row',
+  linkRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
-    marginTop: 24,
+    alignItems: 'center',
   },
-  buttonDark: {
-    marginTop: 10,
-    padding: 15,
-    backgroundColor: Colors.SECONDARY,
-    borderRadius: 25,
-    width: '65%',
-    alignSelf: 'center',
+  modalBox: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 12,
+    width: '85%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'outfit-bold',
+    marginBottom: 12,
+    color: Colors.PRIMARY,
+  },
+  modalText: {
+    fontSize: 15,
+    fontFamily: 'outfit',
+    color: '#333',
+    marginBottom: 20,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+  },
+  modalButtonText: {
+    fontSize: 15,
+    fontFamily: 'outfit-bold',
   },
 });

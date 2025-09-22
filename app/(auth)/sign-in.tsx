@@ -1,5 +1,6 @@
 import { playSound } from '@/constants/playClickSound';
 import { useSignIn } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
@@ -25,6 +26,8 @@ export default function SignInScreen() {
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
   const [stage, setStage] = React.useState<'signIn' | 'requestReset' | 'resetPassword'>('signIn');
+
+  const [showPassword, setShowPassword] = React.useState(false);
 
   // --- Sign In flow ---
   const onSignInPress = async () => {
@@ -96,7 +99,6 @@ export default function SignInScreen() {
     }
   };
 
-
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'android' ? 'height' : undefined}>
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
@@ -132,14 +134,26 @@ export default function SignInScreen() {
           {stage === 'signIn' && (
             <>
               <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                placeholderTextColor="#aaa"
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Password"
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholderTextColor="#aaa"
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeIcon}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={22}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity
                 onPress={async () => {
                   await playSound('click');
@@ -170,14 +184,26 @@ export default function SignInScreen() {
                 placeholderTextColor="#aaa"
               />
               <Text style={styles.label}>New Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="New password"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                placeholderTextColor="#aaa"
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="New password"
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholderTextColor="#aaa"
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeIcon}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={22}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity style={styles.buttonDark} onPress={resetPassword}>
                 <Text style={[styles.buttonText, { color: Colors.PRIMARY }]}>Reset Password</Text>
               </TouchableOpacity>
@@ -270,6 +296,26 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: Colors.BLACK,
     fontFamily: 'outfit',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingRight: 10,
+    backgroundColor: '#fff',
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+    padding: 14,
+    color: Colors.BLACK,
+    fontFamily: 'outfit',
+  },
+  eyeIcon: {
+    paddingLeft: 8,
   },
   forgotPassword: {
     fontFamily: 'outfit',

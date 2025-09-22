@@ -78,8 +78,11 @@ export default function DrawerLayout() {
           width: 200,
           backgroundColor: '#fff',
         },
-        drawerActiveTintColor: Colors.PRIMARY,
+        drawerActiveTintColor: '#FF6C32',
         drawerInactiveTintColor: Colors.GRAY,
+        drawerItemStyle: {
+          marginVertical: 6, // 👈 spacing between page labels
+        },
         headerStyle: {
           backgroundColor: Colors.SECONDARY,
           height: 90,
@@ -172,6 +175,7 @@ export default function DrawerLayout() {
         }}
       />
 
+      {/* Hidden Screens */}
       <Drawer.Screen
         name="screens/lessons"
         options={{
