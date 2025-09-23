@@ -442,7 +442,7 @@ const renderDragPage = (page: DragPage) => {
             style={styles.button}
             onPress={async () => {
               await playSound('click');
-              router.replace(`/lessons/lesson7}` as any);
+              router.replace("/lessons/lesson7");
             }}
           >
             <Text style={styles.buttonText}>Continue</Text>
