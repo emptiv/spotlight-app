@@ -17,6 +17,8 @@ import {
 } from 'react-native';
 import Colors from '../../constants/Colors';
 
+const ADMIN_EMAIL = "plumatika.ming@gmail.com";
+
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
   const router = useRouter();
@@ -26,7 +28,6 @@ export default function SignInScreen() {
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
   const [stage, setStage] = React.useState<'signIn' | 'requestReset' | 'resetPassword'>('signIn');
-
   const [showPassword, setShowPassword] = React.useState(false);
 
   // --- Sign In flow ---
@@ -43,7 +44,13 @@ export default function SignInScreen() {
 
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId });
-        router.replace('/(tabs)');
+
+        // ✅ Use the typed-in email for admin check
+        if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+          router.replace('../admin'); // go to admin dashboard
+        } else {
+          router.replace('/(tabs)'); // go to normal user tabs
+        }
       } else {
         console.warn('Further steps required:', signInAttempt);
       }
@@ -88,7 +95,13 @@ export default function SignInScreen() {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        router.replace('/(tabs)');
+
+        // ✅ Same admin check after password reset
+        if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+          router.replace('../admin');
+        } else {
+          router.replace('/(tabs)');
+        }
       } else {
         console.warn('Further steps required:', result);
       }

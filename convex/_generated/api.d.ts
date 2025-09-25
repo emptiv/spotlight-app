@@ -13,6 +13,12 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as adm_achievements from "../adm_achievements.js";
+import type * as adm_analytics from "../adm_analytics.js";
+import type * as adm_lessons from "../adm_lessons.js";
+import type * as adm_quiz from "../adm_quiz.js";
+import type * as adm_surveys from "../adm_surveys.js";
+import type * as adm_users from "../adm_users.js";
 import type * as auth from "../auth.js";
 import type * as community from "../community.js";
 import type * as feedback from "../feedback.js";
@@ -36,6 +42,12 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  adm_achievements: typeof adm_achievements;
+  adm_analytics: typeof adm_analytics;
+  adm_lessons: typeof adm_lessons;
+  adm_quiz: typeof adm_quiz;
+  adm_surveys: typeof adm_surveys;
+  adm_users: typeof adm_users;
   auth: typeof auth;
   community: typeof community;
   feedback: typeof feedback;

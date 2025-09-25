@@ -56,18 +56,6 @@ export default defineSchema({
     heartsUsed: v.optional(v.number()),
   }).index("by_user_lesson", ["userId", "lessonId"]),
 
-  user_difficulties: defineTable({
-    userId: v.string(),
-    symbol: v.string(),
-    label: v.string(),
-    expected: v.string(),
-    type: v.union(v.literal("mcq"), v.literal("writing"), v.literal("drag")),
-    attempts: v.number(),
-    totalPoints: v.number(),
-    wasDifficult: v.boolean(),
-    lastAttempt: v.number(),
-  }).index("by_user", ["userId"]),
-
   user_lesson_progress: defineTable({
     userId: v.string(),
     lessonId: v.string(),
