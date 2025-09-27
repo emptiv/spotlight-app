@@ -28,7 +28,11 @@ export default function AdminDashboard() {
     !activeUsers ||
     !xpLeaderboard
   )
-    return <Text style={{ padding: 20 }}>Loading...</Text>;
+    return (
+      <View style={styles.center}>
+        <Text>Loading analytics...</Text>
+      </View>
+    );
 
   // --- Prepare Charts ---
   const lessonLabels = lessonsCompleted.map((l: any) => l.title);
@@ -47,62 +51,67 @@ export default function AdminDashboard() {
     <FlatList
       data={xpLeaderboard}
       keyExtractor={(item) => item.userId}
-      contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+      contentContainerStyle={styles.container}
       ListHeaderComponent={
         <>
-          <Text style={styles.header}>Analytics Dashboard</Text>
+          <Text style={styles.pageTitle}>Analytics Dashboard</Text>
 
-          {/* Most Completed Lessons */}
+          {/* --- Most Completed Lessons --- */}
           <Text style={styles.sectionTitle}>Most Completed Lessons</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <BarChart
-              data={{
-              labels: lessonLabels.map((title: string) => {
-                const chunks = title.length > 10 ? title.match(/.{1,10}/g) : [title];
-                return chunks ? chunks.join("\n") : ""; // fallback
-              }),
-                datasets: [{ data: lessonCounts }],
-              }}
-              width={Math.max(screenWidth, lessonLabels.length * 100)}
-              height={220}
-              yAxisLabel=""
-              yAxisSuffix=""
-              chartConfig={chartConfig}
-              verticalLabelRotation={0} // keep 0 since we split into lines
-              style={styles.chart}
-            />
-          </ScrollView>
+          <View style={styles.card}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <BarChart
+                data={{
+                  labels: lessonLabels.map((title: string) => {
+                    const chunks = title.length > 10 ? title.match(/.{1,10}/g) : [title];
+                    return chunks ? chunks.join("\n") : "";
+                  }),
+                  datasets: [{ data: lessonCounts }],
+                }}
+                width={Math.max(screenWidth, lessonLabels.length * 100)}
+                height={220}
+                yAxisLabel=""
+                yAxisSuffix=""
+                chartConfig={chartConfig}
+                verticalLabelRotation={0}
+                style={styles.chart}
+              />
+            </ScrollView>
+          </View>
 
-
-          {/* Average Quiz Scores */}
+          {/* --- Average Quiz Scores --- */}
           <Text style={styles.sectionTitle}>Average Quiz Scores per Lesson (%)</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <LineChart
-              data={{ labels: scoreLabels, datasets: [{ data: scoreData }] }}
-              width={Math.max(screenWidth, scoreLabels.length * 100)}
+          <View style={styles.card}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <LineChart
+                data={{ labels: scoreLabels, datasets: [{ data: scoreData }] }}
+                width={Math.max(screenWidth, scoreLabels.length * 100)}
+                height={220}
+                chartConfig={chartConfig}
+                style={styles.chart}
+              />
+            </ScrollView>
+          </View>
+
+          {/* --- Quiz Attempt Types --- */}
+          <Text style={styles.sectionTitle}>Quiz Attempt Types Distribution</Text>
+          <View style={styles.card}>
+            <PieChart
+              data={pieData}
+              width={screenWidth - 64}
               height={220}
               chartConfig={chartConfig}
+              accessor="count"
+              backgroundColor="transparent"
+              paddingLeft="15"
+              absolute
               style={styles.chart}
             />
-          </ScrollView>
+          </View>
 
-          {/* Quiz Attempt Types */}
-          <Text style={styles.sectionTitle}>Quiz Attempt Types Distribution</Text>
-          <PieChart
-            data={pieData}
-            width={screenWidth - 32}
-            height={220}
-            chartConfig={chartConfig}
-            accessor="count"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            absolute
-            style={styles.chart}
-          />
-
-          {/* Active Users */}
+          {/* --- Active Users --- */}
           <Text style={styles.sectionTitle}>Active Users</Text>
-          <View style={styles.statsRow}>
+          <View style={styles.cardRow}>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Daily</Text>
               <Text style={styles.statValue}>{activeUsers.daily}</Text>
@@ -113,7 +122,7 @@ export default function AdminDashboard() {
             </View>
           </View>
 
-          {/* Leaderboard Header */}
+          {/* --- Leaderboard --- */}
           <Text style={styles.sectionTitle}>Top 10 Learners (XP)</Text>
         </>
       }
@@ -133,41 +142,64 @@ const chartConfig = {
   decimalPlaces: 0,
   color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
   labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
-  style: { borderRadius: 16 },
+  style: { borderRadius: 12 },
   propsForDots: { r: "6", strokeWidth: "2", stroke: "#007AFF" },
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f9f9f9" },
-  header: { fontSize: 28, fontWeight: "bold", marginBottom: 16, color: "#333" },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", marginTop: 16, marginBottom: 8 },
-  chart: { marginVertical: 8, borderRadius: 16 },
-  statsRow: { flexDirection: "row", justifyContent: "space-between" },
+  container: { paddingTop: 20, padding: 24, paddingBottom: 100, backgroundColor: "#f9f9f9" },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+
+  pageTitle: { fontSize: 32, fontWeight: "bold", color: "#007AFF", marginBottom: 24 },
+
+  sectionTitle: { fontSize: 20, fontWeight: "bold", color: "#007AFF", marginBottom: 12, marginTop: 16 },
+
+  // Cards
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  cardRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 16 },
+
+  // Stats
   statCard: {
     flex: 1,
-    backgroundColor: "#fff",
-    margin: 4,
-    padding: 12,
+    backgroundColor: "#f1f5f9",
     borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 6,
     alignItems: "center",
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 3,
+    elevation: 2,
   },
-  statLabel: { fontSize: 14, color: "#777" },
-  statValue: { fontSize: 22, fontWeight: "bold", color: "#007AFF" },
+  statLabel: { fontSize: 14, color: "#555" },
+  statValue: { fontSize: 20, fontWeight: "bold", color: "#007AFF" },
+
+  // Charts
+  chart: { marginTop: 12, borderRadius: 12 },
+
+  // Leaderboard
   leaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
     backgroundColor: "#fff",
     borderRadius: 12,
     marginBottom: 6,
   },
-  leaderName: { fontSize: 16, fontWeight: "bold" },
+  leaderName: { fontSize: 16, fontWeight: "bold", color: "#333" },
   leaderXP: { fontSize: 16, fontWeight: "bold", color: "#007AFF" },
 });

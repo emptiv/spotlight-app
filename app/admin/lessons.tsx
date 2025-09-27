@@ -40,11 +40,14 @@ export default function AdminLessons() {
 
   return (
     <View style={styles.container}>
+      {/* Page Title */}
+      <Text style={styles.pageTitle}>Lessons Management</Text>
+
       {/* Quick Stats */}
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>{stats.totalLessons}</Text>
-          <Text style={styles.statLabel}>Total Lessons</Text>
+          <Text style={styles.statLabel}>Lessons</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>{stats.totalChapters}</Text>
@@ -105,7 +108,7 @@ export default function AdminLessons() {
                 style={[styles.actionBtn, styles.editBtn]}
                 onPress={() =>
                   updateLesson({
-                    id: item._id,   // ✅ matches backend
+                    id: item._id,
                     title: item.title,
                     description: item.description,
                     chapter: item.chapter,
@@ -124,8 +127,8 @@ export default function AdminLessons() {
             </View>
           </View>
         )}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        contentContainerStyle={{ paddingBottom: 60 }}
       />
     </View>
   );
@@ -135,41 +138,59 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
   loading: { textAlign: "center", marginTop: 50, fontSize: 16 },
 
+  // Title
+  pageTitle: { fontSize: 28, fontWeight: "bold", color: "#007AFF", marginBottom: 20 },
+
   // Stats
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   statCard: {
     flex: 1,
     backgroundColor: "#fff",
-    marginHorizontal: 4,
-    padding: 12,
+    marginHorizontal: 6,
+    padding: 14,
     borderRadius: 12,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
     elevation: 2,
   },
   statValue: { fontSize: 18, fontWeight: "bold", color: "#007AFF" },
   statLabel: { fontSize: 12, color: "#666", marginTop: 4 },
 
   // Form
-  form: { marginBottom: 20 },
+  form: {
+    marginBottom: 24,
+    padding: 12,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+    elevation: 1,
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
-    backgroundColor: "#fff",
+    backgroundColor: "#fafafa",
   },
   addBtn: {
     backgroundColor: "#007AFF",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
+    marginTop: 4,
   },
-  addBtnText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  addBtnText: { color: "#fff", fontWeight: "bold", fontSize: 15 },
 
   // Lessons
   lessonCard: {
@@ -177,15 +198,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 12,
+    padding: 14,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 3,
     elevation: 1,
   },
   lessonTitle: { fontSize: 16, fontWeight: "600", color: "#333" },
   lessonDesc: { fontSize: 13, color: "#666", marginTop: 2 },
   lessonMeta: { fontSize: 12, color: "#999", marginTop: 4 },
 
-  actions: { flexDirection: "row", gap: 8 },
+  actions: { flexDirection: "row", gap: 8, marginLeft: 10 },
   actionBtn: {
     paddingVertical: 6,
     paddingHorizontal: 12,

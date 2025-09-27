@@ -6,7 +6,7 @@ import {
   FlatList,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 
 const screenWidth = Dimensions.get("window").width;
@@ -17,8 +17,9 @@ export default function QuizMonitoring() {
   const commonMistakes = useQuery(api.adm_quiz.mostCommonMistakes);
   const hardestSymbols = useQuery(api.adm_quiz.hardestSymbolsByType);
 
-  if (!recentQuizzes || !typingStats || !commonMistakes || !hardestSymbols)
-    return <Text style={{ padding: 20 }}>Loading...</Text>;
+  if (!recentQuizzes || !typingStats || !commonMistakes || !hardestSymbols) {
+    return <Text style={styles.loading}>Loading...</Text>;
+  }
 
   const getAccuracyColor = (accuracy: number) => {
     if (accuracy >= 90) return "#4caf50";
@@ -36,35 +37,10 @@ export default function QuizMonitoring() {
     <FlatList
       data={commonMistakes}
       keyExtractor={(item, idx) => `${item.symbol}-${idx}`}
-      contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+      contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
       ListHeaderComponent={
         <>
-          <Text style={styles.header}>Quiz & Challenge Monitoring</Text>
-
-          {/* Recent Quiz Attempts */}
-          <Text style={styles.sectionTitle}>Recent Quiz Attempts</Text>
-          <FlatList
-            data={recentQuizzes}
-            keyExtractor={(item) => item.attemptId}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 4, marginBottom: 16 }}
-            renderItem={({ item }) => (
-              <View style={styles.quizCard}>
-                <Text style={styles.user}>{item.userName}</Text>
-                <Text style={styles.info}>{item.lessonTitle}</Text>
-                <Text style={[styles.accuracy, { color: getAccuracyColor(Math.round((item.correctAnswers / item.totalQuestions) * 100)) }]}>
-                  Accuracy: {Math.round((item.correctAnswers / item.totalQuestions) * 100)}%
-                </Text>
-                <Text style={[styles.stars, { color: getStarsColor(item.earnedStars) }]}>
-                  ⭐ {item.earnedStars}
-                </Text>
-                <Text style={styles.date}>
-                  {new Date(item.createdAt).toLocaleString()}
-                </Text>
-              </View>
-            )}
-          />
+          <Text style={styles.pageTitle}>Quiz Monitoring</Text>
 
           {/* Typing Challenge Summary */}
           <Text style={styles.sectionTitle}>Typing Challenge Summary</Text>
@@ -78,73 +54,161 @@ export default function QuizMonitoring() {
           </View>
 
           {/* Hardest Symbols by Type */}
-          <Text style={styles.sectionTitle}>Hardest Symbols by Type</Text>
+          <Text style={styles.sectionTitle}>Hardest Symbols</Text>
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>MCQ</Text>
-              <Text style={styles.statValue}>{hardestSymbols.mcq || "-"}</Text>
+              <Text style={styles.statValue}>
+                {hardestSymbols.mcq || "-"}
+              </Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Writing</Text>
-              <Text style={styles.statValue}>{hardestSymbols.writing || "-"}</Text>
+              <Text style={styles.statValue}>
+                {hardestSymbols.writing || "-"}
+              </Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Drag</Text>
-              <Text style={styles.statValue}>{hardestSymbols.drag || "-"}</Text>
+              <Text style={styles.statValue}>
+                {hardestSymbols.drag || "-"}
+              </Text>
             </View>
           </View>
+
+          {/* Recent Quiz Attempts */}
+          <Text style={styles.sectionTitle}>Recent Quiz Attempts</Text>
+          <FlatList
+            data={recentQuizzes}
+            keyExtractor={(item) => item.attemptId}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 2, marginBottom: 20 }}
+            renderItem={({ item }) => (
+              <View style={styles.quizCard}>
+                <Text style={styles.quizUser}>{item.userName}</Text>
+                <Text style={styles.quizLesson}>{item.lessonTitle}</Text>
+                <Text
+                  style={[
+                    styles.quizAccuracy,
+                    {
+                      color: getAccuracyColor(
+                        Math.round(
+                          (item.correctAnswers / item.totalQuestions) * 100
+                        )
+                      ),
+                    },
+                  ]}
+                >
+                  Accuracy:{" "}
+                  {Math.round(
+                    (item.correctAnswers / item.totalQuestions) * 100
+                  )}
+                  %
+                </Text>
+                <Text
+                  style={[
+                    styles.quizStars,
+                    { color: getStarsColor(item.earnedStars) },
+                  ]}
+                >
+                  ⭐ {item.earnedStars}
+                </Text>
+                <Text style={styles.quizDate}>
+                  {new Date(item.createdAt).toLocaleDateString()}
+                </Text>
+              </View>
+            )}
+          />
 
           <Text style={styles.sectionTitle}>Most Common Mistakes</Text>
         </>
       }
       renderItem={({ item }) => (
-        <View style={styles.row}>
-          <Text style={styles.user}>{item.symbol || "[blank]"}</Text>
-          <Text style={styles.info}>Mistakes: {item.count}</Text>
+        <View style={styles.mistakeCard}>
+          <Text style={styles.mistakeSymbol}>
+            {item.symbol || "[blank]"}
+          </Text>
+          <Text style={styles.mistakeInfo}>
+            Mistakes: {item.count}
+          </Text>
         </View>
       )}
+      ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
     />
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
-  header: { fontSize: 28, fontWeight: "bold", marginBottom: 16, color: "#333" },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", marginTop: 16, marginBottom: 8 },
+  loading: { textAlign: "center", marginTop: 50, fontSize: 16 },
 
+  // Titles
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#007AFF",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginTop: -5,
+    marginBottom: 8,
+    color: "#444",
+  },
+
+  // Stats
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "#fff",
+    marginHorizontal: 6,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  statLabel: { fontSize: 13, color: "#666", marginTop: 4 },
+  statValue: { fontSize: 20, fontWeight: "bold", color: "#007AFF" },
+
+  // Quiz Cards
   quizCard: {
     width: screenWidth * 0.7,
     marginHorizontal: 6,
     backgroundColor: "#fff",
-    padding: 12,
+    padding: 16,
     borderRadius: 12,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
   },
-  user: { fontSize: 16, fontWeight: "bold", color: "#007AFF" },
-  info: { fontSize: 14, color: "#555", marginTop: 2 },
-  accuracy: { fontSize: 14, marginTop: 4, fontWeight: "bold" },
-  stars: { fontSize: 16, marginTop: 4, fontWeight: "bold" },
-  date: { fontSize: 12, color: "#999", marginTop: 4 },
+  quizUser: { fontSize: 18, fontWeight: "600", color: "#333" },
+  quizLesson: { fontSize: 14, color: "#666", marginTop: 2 },
+  quizAccuracy: { fontSize: 14, marginTop: 6, fontWeight: "bold" },
+  quizStars: { fontSize: 16, marginTop: 4, fontWeight: "bold" },
+  quizDate: { fontSize: 12, color: "#999", marginTop: 6 },
 
-  statsRow: { flexDirection: "row", justifyContent: "space-between", marginVertical: 8 },
-  statCard: {
-    flex: 1,
+  // Mistakes
+  mistakeCard: {
+    padding: 16,
     backgroundColor: "#fff",
-    margin: 4,
-    padding: 12,
     borderRadius: 12,
-    alignItems: "center",
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+    elevation: 1,
   },
-  statLabel: { fontSize: 14, color: "#777" },
-  statValue: { fontSize: 22, fontWeight: "bold", color: "#007AFF" },
-
-  row: { padding: 12, backgroundColor: "#fff", borderRadius: 12, marginBottom: 8 },
+  mistakeSymbol: { fontSize: 29, fontWeight: "600", color: "#333" },
+  mistakeInfo: { fontSize: 13, color: "#666", marginTop: 4 },
 });

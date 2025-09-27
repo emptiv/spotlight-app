@@ -119,8 +119,8 @@ export default function AdminLayout() {
       <Drawer.Screen
         name="surveys"
         options={{
-          drawerLabel: "Surveys",
-          title: "Surveys",
+          drawerLabel: "Survey",
+          title: "Survey",
           headerRight: () => (
             <View style={styles.adminBadge}>
               <Text style={styles.adminBadgeText}>Admin Mode</Text>
@@ -135,7 +135,7 @@ export default function AdminLayout() {
 
 const styles = StyleSheet.create({
   signOutButton: {
-    backgroundColor: "#fff",
+    backgroundColor: "#ff4d4d",
     borderWidth: 1,
     borderColor: "#ccc",
     paddingVertical: 12,
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   signOutText: {
-    color: "#333",
+    color: "#ffffffff",
     fontSize: 16,
     fontWeight: "bold",
   },

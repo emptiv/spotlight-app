@@ -21,6 +21,8 @@ export default function AdminUsers() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.pageTitle}>User Management</Text>
+
       {/* Quick Stats */}
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
@@ -59,8 +61,9 @@ export default function AdminUsers() {
               >
                 {item.email}
               </Text>
+              <Text style={styles.userMeta}>XP: {item.totalXP ?? 0}</Text>
               <Text style={styles.userMeta}>
-                XP: {item.totalXP ?? 0} | Last Active:{" "}
+                Last Active:{" "}
                 {item.lastActive
                   ? new Date(item.lastActive).toLocaleDateString()
                   : "—"}
@@ -82,27 +85,31 @@ export default function AdminUsers() {
             </View>
           </View>
         )}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        contentContainerStyle={{ paddingBottom: 40 }}
       />
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
+  container: { flex: 1, paddingTop: 24, paddingHorizontal: 20, backgroundColor: "#f9f9f9" },
   loading: { textAlign: "center", marginTop: 50, fontSize: 16 },
+
+  pageTitle: { fontSize: 28, fontWeight: "bold", color: "#007AFF", marginBottom: 20 },
 
   // --- Stats ---
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   statCard: {
     flex: 1,
     backgroundColor: "#fff",
-    marginHorizontal: 4,
-    padding: 12,
+    marginHorizontal: 6,
+    padding: 16,
     borderRadius: 12,
     alignItems: "center",
     shadowColor: "#000",
@@ -111,17 +118,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  statValue: { fontSize: 18, fontWeight: "bold", color: "#007AFF" },
-  statLabel: { fontSize: 12, color: "#666", marginTop: 4 },
+  statValue: { fontSize: 20, fontWeight: "bold", color: "#007AFF" },
+  statLabel: { fontSize: 13, color: "#666", marginTop: 4 },
 
   // --- Search ---
   search: {
     borderWidth: 1,
     borderColor: "#ddd",
-    padding: 10,
-    marginBottom: 16,
-    borderRadius: 10,
+    padding: 12,
+    marginBottom: 20,
+    borderRadius: 12,
     backgroundColor: "#fff",
+    fontSize: 14,
   },
 
   // --- Users ---
@@ -130,7 +138,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 12,
+    padding: 16,
     alignItems: "center",
     shadowColor: "#000",
     shadowOpacity: 0.05,
@@ -138,17 +146,18 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 1,
   },
-  userInfo: { flex: 1, marginRight: 10 },
+  userInfo: { flex: 1, marginRight: 12 },
   userEmail: { fontSize: 16, fontWeight: "600", color: "#333" },
   userMeta: { fontSize: 13, color: "#666", marginTop: 2 },
 
+  // --- Actions ---
   actions: { flexDirection: "row", gap: 8 },
   actionBtn: {
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     borderRadius: 8,
   },
-  resetBtn: { backgroundColor: "#a09f9fff" },
+  resetBtn: { backgroundColor: "#a09f9f" },
   deleteBtn: { backgroundColor: "red" },
-  btnText: { color: "#fff", fontWeight: "bold" },
+  btnText: { color: "#fff", fontWeight: "bold", fontSize: 13 },
 });

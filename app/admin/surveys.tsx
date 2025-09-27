@@ -8,7 +8,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
@@ -19,7 +19,7 @@ function SurveyStats({ surveyId }: { surveyId: string }) {
   if (!stats) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="small" color="#6200ee" />
+        <ActivityIndicator size="small" color="#007AFF" />
       </View>
     );
   }
@@ -30,7 +30,7 @@ function SurveyStats({ surveyId }: { surveyId: string }) {
       details += ` • ${[u.course, u.year].filter(Boolean).join(", ")}`;
     }
     return (
-      <View key={u.id} style={styles.userRow}>
+      <View key={u.id} style={styles.userCard}>
         <Text style={styles.userName}>{u.name || "Unnamed"}</Text>
         <Text style={styles.userDetails}>{details}</Text>
       </View>
@@ -38,57 +38,58 @@ function SurveyStats({ surveyId }: { surveyId: string }) {
   };
 
   return (
-    <View style={styles.statsBlock}>
-      <Text style={styles.statsHeader}>📊 Survey Stats</Text>
+    <View style={styles.sectionBlock}>
+      <Text style={styles.sectionTitle}>Survey Stats</Text>
 
-      {/* Summary cards */}
-      <View style={styles.summaryRow}>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryNumber}>{stats.totalUsers}</Text>
-          <Text style={styles.summaryLabel}>Total</Text>
+      {/* Summary */}
+      <View style={styles.statsRow}>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{stats.totalUsers}</Text>
+          <Text style={styles.statLabel}>Total</Text>
         </View>
-        <View style={[styles.summaryCard, { backgroundColor: "#E6F4EA" }]}>
-          <Text style={[styles.summaryNumber, { color: "#2E7D32" }]}>
+        <View style={[styles.statCard, { backgroundColor: "#E6F4EA" }]}>
+          <Text style={[styles.statValue, { color: "#2E7D32" }]}>
             {stats.answeredCount}
           </Text>
-          <Text style={[styles.summaryLabel, { color: "#2E7D32" }]}>
+          <Text style={[styles.statLabel, { color: "#2E7D32" }]}>
             Answered
           </Text>
         </View>
-        <View style={[styles.summaryCard, { backgroundColor: "#FFEBEE" }]}>
-          <Text style={[styles.summaryNumber, { color: "#C62828" }]}>
+        <View style={[styles.statCard, { backgroundColor: "#FFEBEE" }]}>
+          <Text style={[styles.statValue, { color: "#C62828" }]}>
             {stats.notAnsweredCount}
           </Text>
-          <Text style={[styles.summaryLabel, { color: "#C62828" }]}>
+          <Text style={[styles.statLabel, { color: "#C62828" }]}>
             Not Answered
           </Text>
         </View>
       </View>
 
-      {/* Answered list */}
-      <Text style={styles.subHeader}>✅ Answered</Text>
+      {/* Answered */}
+      <Text style={styles.subHeader}>Answered</Text>
       {stats.answered.length > 0 ? (
         stats.answered.map((u: any) => renderUser(u, true))
       ) : (
-        <Text style={styles.emptyList}>No responses yet.</Text>
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyText}>No responses yet.</Text>
+        </View>
       )}
 
-      {/* Not answered list */}
-      <Text style={styles.subHeader}>❌ Not Answered</Text>
+      {/* Not answered */}
+      <Text style={styles.subHeader}>Not Answered</Text>
       {stats.notAnswered.length > 0 ? (
         stats.notAnswered.map((u: any) => renderUser(u, false))
       ) : (
-        <Text style={styles.emptyList}>Everyone has answered 🎉</Text>
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyText}>Everyone has answered</Text>
+        </View>
       )}
     </View>
   );
 }
 
-
-
 export default function SurveysScreen() {
   const surveys = useQuery(api.adm_surveys.getAll);
-
   const addQuestion = useMutation(api.adm_surveys.addQuestion);
   const updateQuestion = useMutation(api.adm_surveys.updateQuestion);
   const removeQuestion = useMutation(api.adm_surveys.removeQuestion);
@@ -99,24 +100,20 @@ export default function SurveysScreen() {
   const [editTextEn, setEditTextEn] = useState("");
   const [editTextFil, setEditTextFil] = useState("");
 
-  // Add new question
   const [newEn, setNewEn] = useState("");
   const [newFil, setNewFil] = useState("");
   const [newType, setNewType] = useState<"likert" | "open">("likert");
 
-  if (surveys === undefined) {
+  if (!surveys) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#6200ee" />
+        <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
   }
 
   const handleSave = async (id: Id<"survey_questions">) => {
-    await updateQuestion({
-      id,
-      text: { en: editTextEn, fil: editTextFil },
-    });
+    await updateQuestion({ id, text: { en: editTextEn, fil: editTextFil } });
     setEditingId(null);
     setEditTextEn("");
     setEditTextFil("");
@@ -142,247 +139,225 @@ export default function SurveysScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>📋 Manage Surveys</Text>
+    <FlatList
+      data={surveys}
+      keyExtractor={(s) => s._id.toString()}
+      contentContainerStyle={styles.container}
+      ListHeaderComponent={<Text style={styles.pageTitle}>Manage Survey</Text>}
+      renderItem={({ item: survey }) => (
+        <View style={styles.sectionBlock}>
 
-      <FlatList
-        data={surveys}
-        keyExtractor={(survey) => survey._id.toString()}
-        renderItem={({ item: survey }) => (
-          <View style={styles.surveyBlock}>
-            <Text style={styles.surveyTitle}>{survey.title}</Text>
-
-            {/* Add new question */}
-            <View style={styles.card}>
-              <TextInput
-                style={styles.input}
-                value={newEn}
-                onChangeText={setNewEn}
-                placeholder="New question (English)"
-              />
-              <TextInput
-                style={styles.input}
-                value={newFil}
-                onChangeText={setNewFil}
-                placeholder="New question (Filipino)"
-              />
-              <Picker
-                selectedValue={newType}
-                onValueChange={(val) => setNewType(val)}
-                style={styles.picker}
-              >
-                <Picker.Item label="Likert Scale" value="likert" />
-                <Picker.Item label="Open-ended" value="open" />
-              </Picker>
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => handleAdd(survey._id)}
-              >
-                <Text style={styles.addText}>+ Add Question</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* List questions */}
-            {survey.questions.map((q: any) => (
-              <View key={q._id.toString()} style={styles.card}>
-                {editingId === q._id ? (
-                  <>
-                    <TextInput
-                      style={styles.input}
-                      value={editTextEn}
-                      onChangeText={setEditTextEn}
-                      placeholder="Edit English text"
-                    />
-                    <TextInput
-                      style={styles.input}
-                      value={editTextFil}
-                      onChangeText={setEditTextFil}
-                      placeholder="Edit Filipino text"
-                    />
-                    <View style={styles.rowButtons}>
-                      <TouchableOpacity
-                        style={styles.saveButton}
-                        onPress={() => handleSave(q._id)}
-                      >
-                        <Text style={styles.saveText}>Save</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={() => {
-                          setEditingId(null);
-                          setEditTextEn("");
-                          setEditTextFil("");
-                        }}
-                      >
-                        <Text style={styles.cancelText}>Cancel</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                ) : (
-                  <>
-                    <Text style={styles.info}>
-                      <Text style={styles.bold}>EN:</Text> {q.text.en}
-                    </Text>
-                    <Text style={styles.info}>
-                      <Text style={styles.bold}>FIL:</Text> {q.text.fil}
-                    </Text>
-                    <Text style={styles.type}>
-                      Type: {q.type === "likert" ? "Likert Scale" : "Open-ended"}
-                    </Text>
-                    <View style={styles.rowButtons}>
-                      <TouchableOpacity
-                        style={styles.editButton}
-                        onPress={() => {
-                          setEditingId(q._id);
-                          setEditTextEn(q.text.en);
-                          setEditTextFil(q.text.fil);
-                        }}
-                      >
-                        <Text style={styles.editText}>Edit</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.deleteButton}
-                        onPress={() => removeQuestion({ id: q._id })}
-                      >
-                        <Text style={styles.deleteText}>Delete</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                )}
-              </View>
-            ))}
-
-            {/* Stats */}
-            <SurveyStats surveyId={survey._id} />
+          {/* Add new question */}
+          <View style={styles.card}>
+            <TextInput
+              style={styles.input}
+              value={newEn}
+              onChangeText={setNewEn}
+              placeholder="New question (English)"
+            />
+            <TextInput
+              style={styles.input}
+              value={newFil}
+              onChangeText={setNewFil}
+              placeholder="New question (Filipino)"
+            />
+            <Picker
+              selectedValue={newType}
+              onValueChange={(val) => setNewType(val)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Likert Scale" value="likert" />
+              <Picker.Item label="Open-ended" value="open" />
+            </Picker>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => handleAdd(survey._id)}
+            >
+              <Text style={styles.addText}>+ Add Question</Text>
+            </TouchableOpacity>
           </View>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.empty}>No surveys found.</Text>
-        }
-      />
-    </View>
+
+          {/* Questions */}
+          {survey.questions.map((q: any) => (
+            <View key={q._id.toString()} style={styles.card}>
+              {editingId === q._id ? (
+                <>
+                  <TextInput
+                    style={styles.input}
+                    value={editTextEn}
+                    onChangeText={setEditTextEn}
+                    placeholder="Edit English text"
+                  />
+                  <TextInput
+                    style={styles.input}
+                    value={editTextFil}
+                    onChangeText={setEditTextFil}
+                    placeholder="Edit Filipino text"
+                  />
+                  <View style={styles.rowButtons}>
+                    <TouchableOpacity
+                      style={styles.saveButton}
+                      onPress={() => handleSave(q._id)}
+                    >
+                      <Text style={styles.saveText}>Save</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      onPress={() => {
+                        setEditingId(null);
+                        setEditTextEn("");
+                        setEditTextFil("");
+                      }}
+                    >
+                      <Text style={styles.cancelText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.info}>
+                    <Text style={styles.bold}>EN:</Text> {q.text.en}
+                  </Text>
+                  <Text style={styles.info}>
+                    <Text style={styles.bold}>FIL:</Text> {q.text.fil}
+                  </Text>
+                  <Text style={styles.type}>
+                    Type: {q.type === "likert" ? "Likert Scale" : "Open-ended"}
+                  </Text>
+                  <View style={styles.rowButtons}>
+                    <TouchableOpacity
+                      style={styles.editButton}
+                      onPress={() => {
+                        setEditingId(q._id);
+                        setEditTextEn(q.text.en);
+                        setEditTextFil(q.text.fil);
+                      }}
+                    >
+                      <Text style={styles.editText}>Edit</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => removeQuestion({ id: q._id })}
+                    >
+                      <Text style={styles.deleteText}>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+            </View>
+          ))}
+
+          {/* Stats */}
+          <SurveyStats surveyId={survey._id} />
+        </View>
+      )}
+      ListEmptyComponent={
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyText}>No surveys found.</Text>
+        </View>
+      }
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fafafa" },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  surveyBlock: { marginBottom: 24 },
-  surveyTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 12,
-    color: "#333",
-  },
+  container: { padding: 20, paddingBottom: 100, backgroundColor: "#f9f9f9" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+  pageTitle: { fontSize: 28, fontWeight: "bold", color: "#007AFF", marginBottom: 16 },
+
+  sectionBlock: { marginBottom: 24 },
+  sectionTitle: { fontSize: 20, fontWeight: "bold", color: "#007AFF", marginBottom: 12 },
+
   card: {
     backgroundColor: "#fff",
-    padding: 14,
-    marginBottom: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#eee",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 3,
+    elevation: 2,
   },
+
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 8,
     borderRadius: 8,
-    fontSize: 15,
+    padding: 12,
+    marginBottom: 12,
     backgroundColor: "#fff",
+    fontSize: 15,
   },
-  picker: { marginBottom: 8 },
+  picker: { marginBottom: 12 },
+
   info: { fontSize: 15, marginBottom: 6 },
   type: { fontSize: 14, color: "#666", marginBottom: 6 },
   bold: { fontWeight: "bold" },
-  rowButtons: { flexDirection: "row", justifyContent: "flex-end", marginTop: 8 },
-  editButton: {
-    backgroundColor: "#2196F3",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  editText: { color: "#fff", fontWeight: "600" },
-  deleteButton: {
-    backgroundColor: "#f44336",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  deleteText: { color: "#fff", fontWeight: "600" },
-  addButton: {
-    backgroundColor: "#6200ee",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 6,
-    marginTop: 6,
-  },
-  addText: { color: "#fff", fontWeight: "600", textAlign: "center" },
-  saveButton: {
-    backgroundColor: "#4CAF50",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  saveText: { color: "#fff", fontWeight: "600" },
-  cancelButton: {
-    backgroundColor: "#9E9E9E",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  cancelText: { color: "#fff", fontWeight: "600" },
-  empty: { textAlign: "center", fontSize: 16, color: "#777", marginTop: 40 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  statsBlock: {
-    marginTop: 12,
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: "#f0f0f0",
-  },
-  statsHeader: { fontWeight: "bold", marginBottom: 4 },
-  subHeader: { marginTop: 10, fontWeight: "600" },
-  userItem: { fontSize: 14, marginTop: 2 },
-  emptyList: { fontSize: 14, color: "#777", fontStyle: "italic" },
 
-  summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  summaryCard: {
+  rowButtons: { flexDirection: "row", justifyContent: "flex-end", marginTop: 8 },
+  editButton: { backgroundColor: "#2196F3", padding: 10, borderRadius: 8, marginRight: 8 },
+  editText: { color: "#fff", fontWeight: "600" },
+  deleteButton: { backgroundColor: "#f44336", padding: 10, borderRadius: 8 },
+  deleteText: { color: "#fff", fontWeight: "600" },
+
+  addButton: { backgroundColor: "#007AFF", padding: 12, borderRadius: 8 },
+  addText: { color: "#fff", fontWeight: "600", textAlign: "center" },
+
+  saveButton: { backgroundColor: "#4CAF50", padding: 10, borderRadius: 8, marginRight: 8 },
+  saveText: { color: "#fff", fontWeight: "600" },
+  cancelButton: { backgroundColor: "#9E9E9E", padding: 10, borderRadius: 8 },
+  cancelText: { color: "#fff", fontWeight: "600" },
+
+  // Survey stats
+  statsRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+  statCard: {
     flex: 1,
-    alignItems: "center",
-    paddingVertical: 12,
-    marginHorizontal: 4,
-    borderRadius: 8,
     backgroundColor: "#E3F2FD",
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 6,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 3,
+    elevation: 2,
   },
-  summaryNumber: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  summaryLabel: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  userRow: {
+  statLabel: { fontSize: 14, color: "#555" },
+  statValue: { fontSize: 20, fontWeight: "bold", color: "#007AFF" },
+
+  userCard: {
     backgroundColor: "#fff",
-    padding: 10,
-    borderRadius: 6,
-    marginTop: 6,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: "#eee",
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+    elevation: 1,
   },
-  userName: { fontWeight: "600", fontSize: 14, marginBottom: 2 },
+  userName: { fontWeight: "600", fontSize: 15, marginBottom: 2, color: "#333" },
   userDetails: { fontSize: 13, color: "#555" },
 
+  subHeader: { fontSize: 16, fontWeight: "600", marginTop: 12, marginBottom: 6 },
+  emptyCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+    elevation: 1,
+    alignItems: "center",
+  },
+  emptyText: { color: "#777", fontStyle: "italic", fontSize: 14, textAlign: "center" },
 });
-
