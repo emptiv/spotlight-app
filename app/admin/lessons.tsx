@@ -62,12 +62,14 @@ export default function AdminLessons() {
           placeholder="Lesson title"
           value={title}
           onChangeText={setTitle}
+          placeholderTextColor="#999"
         />
         <TextInput
           style={styles.input}
           placeholder="Lesson description"
           value={description}
           onChangeText={setDescription}
+          placeholderTextColor="#999"
         />
         <TextInput
           style={styles.input}
@@ -75,6 +77,7 @@ export default function AdminLessons() {
           value={chapter}
           onChangeText={setChapter}
           keyboardType="numeric"
+          placeholderTextColor="#999"
         />
         <TextInput
           style={styles.input}
@@ -82,6 +85,7 @@ export default function AdminLessons() {
           value={order}
           onChangeText={setOrder}
           keyboardType="numeric"
+          placeholderTextColor="#999"
         />
         <TouchableOpacity style={styles.addBtn} onPress={handleAdd}>
           <Text style={styles.addBtnText}>+ Add Lesson</Text>

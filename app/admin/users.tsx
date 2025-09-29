@@ -45,6 +45,7 @@ export default function AdminUsers() {
         placeholder="🔍 Search by email or name..."
         value={search}
         onChangeText={setSearch}
+        placeholderTextColor="#999"
       />
 
       {/* User List */}

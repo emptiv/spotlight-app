@@ -84,6 +84,7 @@ export default function UserInfoForm() {
             placeholder="Enter your name"
             value={name}
             onChangeText={setName}
+            placeholderTextColor="#999"
           />
 
           {/* Course/Strand (required) */}
@@ -93,6 +94,7 @@ export default function UserInfoForm() {
             placeholder="Enter your course or strand"
             value={course}
             onChangeText={setCourse}
+            placeholderTextColor="#999"
           />
 
           {/* Year (required, dropdown) */}

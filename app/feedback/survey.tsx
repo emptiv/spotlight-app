@@ -210,6 +210,7 @@ export default function FeedbackSurvey() {
                   placeholder="Type your response..."
                   value={responses[q.questionId]?.response || ""}
                   onChangeText={(t) => handleOpen(q.questionId, t)}
+                  placeholderTextColor="#999"
                   multiline
                 />
               )}

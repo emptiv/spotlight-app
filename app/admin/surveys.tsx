@@ -154,12 +154,14 @@ export default function SurveysScreen() {
               value={newEn}
               onChangeText={setNewEn}
               placeholder="New question (English)"
+              placeholderTextColor="#999"
             />
             <TextInput
               style={styles.input}
               value={newFil}
               onChangeText={setNewFil}
               placeholder="New question (Filipino)"
+              placeholderTextColor="#999"
             />
             <Picker
               selectedValue={newType}
@@ -187,12 +189,14 @@ export default function SurveysScreen() {
                     value={editTextEn}
                     onChangeText={setEditTextEn}
                     placeholder="Edit English text"
+                    placeholderTextColor="#999"
                   />
                   <TextInput
                     style={styles.input}
                     value={editTextFil}
                     onChangeText={setEditTextFil}
                     placeholder="Edit Filipino text"
+                    placeholderTextColor="#999"
                   />
                   <View style={styles.rowButtons}>
                     <TouchableOpacity

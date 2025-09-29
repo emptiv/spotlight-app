@@ -99,12 +99,14 @@ export default function AdminVocab() {
                 placeholder="Latin"
                 value={latin}
                 onChangeText={setLatin}
+                placeholderTextColor="#999"
               />
               <TextInput
                 style={styles.input}
                 placeholder="Baybayin"
                 value={baybayin}
                 onChangeText={setBaybayin}
+                placeholderTextColor="#999"
               />
               <TextInput
                 style={styles.input}
@@ -113,12 +115,14 @@ export default function AdminVocab() {
                 onChangeText={(val) =>
                   setDifficulty(val as "easy" | "medium" | "hard")
                 }
+                placeholderTextColor="#999"
               />
               <TextInput
                 style={styles.input}
                 placeholder="Type (word, phrase)"
                 value={type}
                 onChangeText={(val) => setType(val as "word" | "phrase")}
+                placeholderTextColor="#999"
               />
               <TouchableOpacity style={styles.addBtn} onPress={handleAdd}>
                 <Text style={styles.addBtnText}>Save</Text>
