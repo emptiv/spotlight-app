@@ -166,10 +166,12 @@ export default function SurveysScreen() {
             <Picker
               selectedValue={newType}
               onValueChange={(val) => setNewType(val)}
-              style={styles.picker}
+              style={[styles.picker, { color: "#333" }]}
+              dropdownIconColor="#007AFF"
+              mode="dropdown"
             >
-              <Picker.Item label="Likert Scale" value="likert" />
-              <Picker.Item label="Open-ended" value="open" />
+              <Picker.Item label="Likert Scale" value="likert" color="#333" />
+              <Picker.Item label="Open-ended" value="open" color="#333" />
             </Picker>
             <TouchableOpacity
               style={styles.addButton}

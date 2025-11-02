@@ -103,6 +103,8 @@ export default function UserInfoForm() {
             <Picker
               selectedValue={year}
               onValueChange={(value) => setYear(value)}
+              style={{ color: "#333" }}
+              dropdownIconColor={Colors.PRIMARY}
             >
               <Picker.Item label="Select year level..." value="" />
               <Picker.Item label="G11" value="G11" />

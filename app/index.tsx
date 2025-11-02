@@ -10,15 +10,15 @@ export default function Index() {
   if (!isLoaded) return null; // or splash screen
 
   if (isSignedIn) {
-    // ✅ If admin, go to admin dashboard
+    // If admin, go to admin dashboard
     if (user?.primaryEmailAddress?.emailAddress?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
       return <Redirect href="/admin" />;
     }
 
-    // ✅ Otherwise, go to main app
+    // Otherwise, go to main app
     return <Redirect href="/(tabs)" />;
   }
 
-  // 🚪 If not signed in, go to landing page
+  // If not signed in, go to landing page
   return <Redirect href="/(auth)/landing" />;
 }

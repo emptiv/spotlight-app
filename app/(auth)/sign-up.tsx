@@ -66,7 +66,7 @@ export default function SignUpScreen() {
       setError('Please fill in all fields.');
       return;
     }
-    setShowPrivacyModal(true); // 👈 show modal instead of Alert
+    setShowPrivacyModal(true);
   };
 
   const onVerifyPress = async () => {
@@ -314,7 +314,6 @@ const styles = StyleSheet.create({
   },
   linkRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
 
-  // Modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

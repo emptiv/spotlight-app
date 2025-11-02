@@ -45,11 +45,10 @@ export default function SignInScreen() {
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId });
 
-        // ✅ Use the typed-in email for admin check
         if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-          router.replace('../admin'); // go to admin dashboard
+          router.replace('../admin');
         } else {
-          router.replace('/(tabs)'); // go to normal user tabs
+          router.replace('/(tabs)');
         }
       } else {
         console.warn('Further steps required:', signInAttempt);
@@ -96,7 +95,6 @@ export default function SignInScreen() {
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
 
-        // ✅ Same admin check after password reset
         if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
           router.replace('../admin');
         } else {
